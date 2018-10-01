@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-from dataclasses import dataclass
 
 import numpy as np
 import fnmatch
@@ -14,7 +13,6 @@ from evaluation.load_annotations import load_annotations
 import evaluation.evaluation_funcs as evalf
 
 
-@dataclass
 class Result:
     pixel_precision: float
     pixel_accuracy: float
@@ -86,14 +84,13 @@ def traffic_sign_detection(directory, output_dir, pixel_method, window_method):
     [pixel_precision, pixel_accuracy, pixel_specificity, pixel_sensitivity] = evalf.performance_evaluation_pixel(
         pixel_tp, pixel_fp, pixel_fn, pixel_tn)
 
-    result = Result(
-        pixel_precision=pixel_precision,
-        pixel_accuracy=pixel_accuracy,
-        pixel_specificity=pixel_specificity,
-        pixel_sensitivity=pixel_sensitivity,
-        window_precision=window_precision,
-        window_accuracy=window_accuracy
-    )
+    result = Result()
+    result.pixel_precision = pixel_precision,
+    result.pixel_accuracy = pixel_accuracy,
+    result.pixel_specificity = pixel_specificity,
+    result.pixel_sensitivity = pixel_sensitivity,
+    result.window_precision = window_precision,
+    result.window_accuracy = window_accuracy
 
     return result
 
