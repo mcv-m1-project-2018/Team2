@@ -1,17 +1,11 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-"""
-Usage:
-  traffic_sign_detection.py <dirName> <outPath> <pixelMethod> [--windowMethod=<wm>] 
-  traffic_sign_detection.py -h | --help
-Options:
-  --windowMethod=<wm>        Window method       [default: 'None']
-"""
+from dataclasses import dataclass
 
-from docopt import docopt
 import numpy as np
 import fnmatch
 import os
+import argparse
 import sys
 import imageio
 from candidate_generation_pixel import candidate_generation_pixel
@@ -20,15 +14,25 @@ from evaluation.load_annotations import load_annotations
 import evaluation.evaluation_funcs as evalf
 
 
-def traffic_sign_detection(directory, output_dir, pixel_method, window_method):
-    pixelTP = 0
-    pixelFN = 0
-    pixelFP = 0
-    pixelTN = 0
+@dataclass
+class Result:
+    pixel_precision: float
+    pixel_accuracy: float
+    pixel_specificity: float
+    pixel_sensitivity: float
+    window_precision: float
+    window_accuracy: float
 
-    windowTP = 0
-    windowFN = 0
-    windowFP = 0
+
+def traffic_sign_detection(directory, output_dir, pixel_method, window_method):
+    pixel_tp = 0
+    pixel_fn = 0
+    pixel_fp = 0
+    pixel_tn = 0
+
+    window_tp = 0
+    window_fn = 0
+    window_fp = 0
 
     window_precision = 0
     window_accuracy = 0
@@ -53,48 +57,62 @@ def traffic_sign_detection(directory, output_dir, pixel_method, window_method):
         out_mask_name = '{}.png'.format(fd, base)
         imageio.imwrite(out_mask_name, np.uint8(np.round(pixel_candidates)))
 
-        if window_method != 'None':
-            window_candidates = candidate_generation_window(im, pixel_candidates, window_method)
-
             # Accumulate pixel performance of the current image #################
         pixel_annotation = imageio.imread('{}/mask/mask.{}.png'.format(directory, base)) > 0
 
-        [localPixelTP, localPixelFP, localPixelFN, localPixelTN] = evalf.performance_accumulation_pixel(
+        [local_pixel_tp, local_pixel_fp, local_pixel_fn, local_pixel_tn] = evalf.performance_accumulation_pixel(
             pixel_candidates, pixel_annotation)
-        pixelTP = pixelTP + localPixelTP
-        pixelFP = pixelFP + localPixelFP
-        pixelFN = pixelFN + localPixelFN
-        pixelTN = pixelTN + localPixelTN
-
-        [pixel_precision, pixel_accuracy, pixel_specificity, pixel_sensitivity] = evalf.performance_evaluation_pixel(
-            pixelTP, pixelFP, pixelFN, pixelTN)
+        pixel_tp += local_pixel_tp
+        pixel_fp += local_pixel_fp
+        pixel_fn += local_pixel_fn
+        pixel_tn += local_pixel_tn
 
         if window_method != 'None':
+            window_candidates = candidate_generation_window(im, pixel_candidates, window_method)
+
             # Accumulate object performance of the current image ################
             window_annotationss = load_annotations('{}/gt/gt.{}.txt'.format(directory, base))
             [localWindowTP, localWindowFN, localWindowFP] = evalf.performance_accumulation_window(window_candidates,
                                                                                                   window_annotationss)
-            windowTP = windowTP + localWindowTP
-            windowFN = windowFN + localWindowFN
-            windowFP = windowFP + localWindowFP
+            window_tp = window_tp + localWindowTP
+            window_fn = window_fn + localWindowFN
+            window_fp = window_fp + localWindowFP
 
             # Plot performance evaluation
-            [window_precision, window_sensitivity, window_accuracy] = evalf.performance_evaluation_window(windowTP,
-                                                                                                          windowFN,
-                                                                                                          windowFP)
+            [window_precision, window_sensitivity, window_accuracy] = evalf.performance_evaluation_window(window_tp,
+                                                                                                          window_fn,
+                                                                                                          window_fp)
 
-    return [pixel_precision, pixel_accuracy, pixel_specificity, pixel_sensitivity, window_precision, window_accuracy]
+    [pixel_precision, pixel_accuracy, pixel_specificity, pixel_sensitivity] = evalf.performance_evaluation_pixel(
+        pixel_tp, pixel_fp, pixel_fn, pixel_tn)
+
+    result = Result(
+        pixel_precision=pixel_precision,
+        pixel_accuracy=pixel_accuracy,
+        pixel_specificity=pixel_specificity,
+        pixel_sensitivity=pixel_sensitivity,
+        window_precision=window_precision,
+        window_accuracy=window_accuracy
+    )
+
+    return result
 
 
 if __name__ == '__main__':
     # read arguments
-    args = docopt(__doc__)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('dirName')
+    parser.add_argument('outPath')
+    parser.add_argument('pixel_method', choices=['color_segregation'])
+    parser.add_argument('--windowMethod')
 
-    images_dir = args['<dirName>']  # Directory with input images and annotations
+    args = parser.parse_args()
+
+    images_dir = args.dirName  # Directory with input images and annotations
     # For instance, '../../DataSetDelivered/test'
-    output_dir = args['<outPath>']  # Directory where to store output masks, etc. For instance '~/m1-results/week1/test'
+    output_dir = args.outPath  # Directory where to store output masks, etc. For instance '~/m1-results/week1/test'
 
-    pixel_precision, pixel_accuracy, pixel_specificity, pixel_sensitivity, window_precision, window_accuracy = traffic_sign_detection(
-        images_dir, output_dir, 'normrgb', 'example1')
+    result = traffic_sign_detection(images_dir, output_dir, 'normrgb', args.windowMethod)
 
-    print (pixel_precision, pixel_accuracy, pixel_specificity, pixel_sensitivity, window_precision, window_accuracy)
+    if result:
+        print(result)
