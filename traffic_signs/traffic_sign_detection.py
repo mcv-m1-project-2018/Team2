@@ -57,7 +57,7 @@ def traffic_sign_detection(directory, output_dir, pixel_method, window_method):
         out_mask_name = '{}.png'.format(fd, base)
         imageio.imwrite(out_mask_name, np.uint8(np.round(pixel_candidates)))
 
-            # Accumulate pixel performance of the current image #################
+        # Accumulate pixel performance of the current image #################
         pixel_annotation = imageio.imread('{}/mask/mask.{}.png'.format(directory, base)) > 0
 
         [local_pixel_tp, local_pixel_fp, local_pixel_fn, local_pixel_tn] = evalf.performance_accumulation_pixel(
