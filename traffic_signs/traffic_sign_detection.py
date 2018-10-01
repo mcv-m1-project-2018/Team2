@@ -36,6 +36,7 @@ def traffic_sign_detection(directory, output_dir, pixel_method, window_method):
     window_precision = 0
     window_accuracy = 0
 
+    # Use this class to load and manage states
     datasetManager = DatasetManager(directory)
     datasetManager.load_data()
 
@@ -89,11 +90,11 @@ def traffic_sign_detection(directory, output_dir, pixel_method, window_method):
         pixel_tp, pixel_fp, pixel_fn, pixel_tn)
 
     result = Result()
-    result.pixel_precision = pixel_precision,
-    result.pixel_accuracy = pixel_accuracy,
-    result.pixel_specificity = pixel_specificity,
-    result.pixel_sensitivity = pixel_sensitivity,
-    result.window_precision = window_precision,
+    result.pixel_precision = pixel_precision
+    result.pixel_accuracy = pixel_accuracy
+    result.pixel_specificity = pixel_specificity
+    result.pixel_sensitivity = pixel_sensitivity
+    result.window_precision = window_precision
     result.window_accuracy = window_accuracy
 
     return result

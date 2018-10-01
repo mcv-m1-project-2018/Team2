@@ -48,7 +48,9 @@ class DatasetManager:
         print('Loading data')
 
     def get_train_set(self):
-        print('TODO')
+        # TODO
+        pass
 
     def get_validation_set(self):
-        print('TODO')
+        # TODO
+        pass
