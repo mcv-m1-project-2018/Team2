@@ -11,6 +11,7 @@ from candidate_generation_pixel import candidate_generation_pixel
 from candidate_generation_window import candidate_generation_window
 from evaluation.load_annotations import load_annotations
 import evaluation.evaluation_funcs as evalf
+from datasets import DatasetManager
 
 
 class Result:
@@ -34,6 +35,9 @@ def traffic_sign_detection(directory, output_dir, pixel_method, window_method):
 
     window_precision = 0
     window_accuracy = 0
+
+    datasetManager = DatasetManager(directory)
+    datasetManager.load_data()
 
     # Load image names in the given directory
     file_names = sorted(fnmatch.filter(os.listdir(directory), '*.jpg'))

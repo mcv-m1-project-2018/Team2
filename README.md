@@ -1,5 +1,9 @@
-# mcv-m1-example-code
+# Team 02
+
+- Claudia Baca Perez
+- Quim Comas Martínez
+- Jorge López Fueyo
+- Alba María Herrera Palacio
 
 
-Introduction to Human and Computer Vision project example code
 
