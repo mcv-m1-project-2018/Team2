@@ -13,7 +13,7 @@ class Size:
         elif self.height < other.height and self.width < other.width:
             return other
         else:
-            NewSize = Size
+            NewSize = Size()
             NewSize.height = max(self.height,other.height)
             NewSize.width = max(self.width, other.width)
             return NewSize
@@ -24,7 +24,7 @@ class Size:
         elif self.height > other.height and self.width > other.width:
             return other
         else:
-            NewSize = Size
+            NewSize = Size()
             NewSize.height = min(self.height, other.height)
             NewSize.width = min(self.width, other.width)
             return NewSize
