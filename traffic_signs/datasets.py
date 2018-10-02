@@ -20,7 +20,6 @@ class Rectangle:
 
 
 class GroundTruth:
-    top_left: Tuple[float]
     rectangle: Rectangle
     type: str
 
@@ -39,14 +38,16 @@ class Data:
         self.mask_path = '{}/mask/mask.{}.png'.format(directory, name)
         with open('{}/gt/gt.{}.txt'.format(directory, name)) as f:
             for line in f.readlines():
-                parts = line.split(' ')
+                parts = line.strip().split(' ')
                 gt = GroundTruth()
-                gt.top_left = (parts[0], parts[1])
                 gt.type = parts[4]
                 gt.rectangle = Rectangle()
+                gt.rectangle.top_left = (float(parts[0]), float(parts[1]))
                 gt.rectangle.width = float(parts[3]) - float(parts[1]) + 1
                 gt.rectangle.height = float(parts[2]) - float(parts[0]) + 1
                 self.gt.append(gt)
+
+        print(len(self.gt))
 
     def get_img(self):
         return cv2.imread(self.img_path)
@@ -58,7 +59,7 @@ class Data:
 class DatasetManager:
     """We will use k-fold validation. More info at https://www.openml.org/a/estimation-procedures/1"""
 
-    data: List[Data]
+    data: List[Data] = []
     _dir: str
 
     def __init__(self, directory: str):
@@ -67,7 +68,7 @@ class DatasetManager:
     def load_data(self):
         file_names = sorted(fnmatch.filter(os.listdir(self._dir), '*.jpg'))
         for file_name in file_names:
-            self.data.append(Data(self._dir, file_name))
+            self.data.append(Data(self._dir, file_name.replace('.jpg', '')))
 
     def get_data_by_type(self):
         # More info about how this works: https://github.com/EntilZha/PyFunctional#transformations-and-actions-apis
