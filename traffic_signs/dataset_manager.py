@@ -28,12 +28,13 @@ class Data:
     """Stores the content of a data element."""
 
     name: str
-    gt: List[GroundTruth] = []
+    gt: List[GroundTruth]
     img_path: str
     mask_path: str
 
     def __init__(self, directory: str, name: str):
         self.name = name
+        self.gt = []
         self.img_path = '{}/{}'.format(directory, name)
         self.mask_path = '{}/mask/mask.{}.png'.format(directory, name)
         with open('{}/gt/gt.{}.txt'.format(directory, name)) as f:
@@ -47,22 +48,21 @@ class Data:
                 gt.rectangle.height = float(parts[2]) - float(parts[0]) + 1
                 self.gt.append(gt)
 
-        print(len(self.gt))
-
     def get_img(self):
         return cv2.imread(self.img_path)
 
     def get_mask_img(self):
-        return cv2.imread(self.mask_path)
+        return cv2.imread(self.mask_path, cv2.IMREAD_GRAYSCALE)
 
 
 class DatasetManager:
     """We will use k-fold validation. More info at https://www.openml.org/a/estimation-procedures/1"""
 
-    data: List[Data] = []
+    data: List[Data]
     _dir: str
 
     def __init__(self, directory: str):
+        self.data = []
         self._dir = directory
 
     def load_data(self):
@@ -75,7 +75,7 @@ class DatasetManager:
         types = seq(self.data).group_by(lambda sample: sample.gt[0].type).to_dict()
         return types
 
-    def get_sets(self):
+    def get_data_splits(self):
         """Get the validation and training sets of data from the original training dataset 30% to 70% from each class"""
         training = []
         verification = []
@@ -90,7 +90,7 @@ class DatasetManager:
 
         return training, verification
 
-    def get_sets_k_fold(self, k):
+    def get_data_k_fold(self, k):
         # TODO
         pass
 

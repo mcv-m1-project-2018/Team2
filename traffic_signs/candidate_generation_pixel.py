@@ -5,6 +5,10 @@ from skimage import color
 
 
 def color_segmentation(im):
+    """TODO:
+            - Aplicar los threshold de color (ejemplo por ahora) a cada pixel de la imagen
+            - Obtener la máscara (valores 0 o 1)
+            - Probar un par de thresholds 'a ojo'"""
     pass
 
 

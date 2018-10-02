@@ -11,7 +11,7 @@ from candidate_generation_pixel import candidate_generation_pixel
 from candidate_generation_window import candidate_generation_window
 from evaluation.load_annotations import load_annotations
 import evaluation.evaluation_funcs as evalf
-from datasets import DatasetManager
+from dataset_manager import DatasetManager
 
 
 class Result:

@@ -1,23 +1,21 @@
-from datasets import DatasetManager, Rectangle, GroundTruth
+from dataset_manager import DatasetManager, Rectangle, GroundTruth
 from typing import List
 import numpy as np
 import cv2
 
 
 def get_mask_area(gt: GroundTruth, mask):
-    gray_mask = cv2.cvtColor(mask, cv2.COLOR_RGB2GRAY)
-    gray_mask_cropped = gray_mask[
+    mask_cropped = mask[
                         int(gt.rectangle.top_left[0]):int(gt.rectangle.get_bottom_right()[0]) + 1,
                         int(gt.rectangle.top_left[1]):int(gt.rectangle.get_bottom_right()[1]) + 1
                         ]
-    _, img = cv2.threshold(gray_mask, 0, 255, cv2.THRESH_BINARY)
-
+    _, img = cv2.threshold(mask_cropped, 0, 255, cv2.THRESH_BINARY)
 
     whites = cv2.countNonZero(img)
     return whites
 
 
-def get_filling_factor(gt: GroundTruth, mask: str):
+def get_filling_factor(gt: GroundTruth, mask):
     # compute the area of bboxes
     bbox_area = gt.rectangle.get_area()
     mask_area = get_mask_area(gt, mask)
@@ -27,12 +25,18 @@ def get_filling_factor(gt: GroundTruth, mask: str):
 
 
 class SignTypeStats:
-    max_area: float = 0
-    min_area: float = np.inf
-    form_factor: List[float] = []
-    filling_ratio: List[float] = []
+    max_area: float
+    min_area: float
+    form_factor: List[float]
+    filling_ratio: List[float]
 
-    def add_sign(self, gt: GroundTruth, mask):
+    def __init__(self):
+        self.max_area = 0
+        self.min_area = np.inf
+        self.form_factor = []
+        self.filling_ratio = []
+
+    def add_sign(self, gt: GroundTruth, img, mask):
         self.max_area = max(self.max_area, gt.rectangle.get_area())
         self.min_area = min(self.min_area, gt.rectangle.get_area())
         self.form_factor.append(float(gt.rectangle.width / gt.rectangle.height))
@@ -52,17 +56,16 @@ if __name__ == '__main__':
     sign_type_stats = {}
 
     print('Starting')
-    i = 0
+    total = 0
     for sample in data:
-        print(str(i) + "/" + str(len(data)))
-        print(len(sample.gt))
-        i += 1
+        img = sample.get_img()
         mask = sample.get_mask_img()
         for gt in sample.gt:
             if gt.type not in sign_type_stats.keys():
                 sign_type_stats[gt.type] = SignTypeStats()
 
-            sign_type_stats[gt.type].add_sign(gt, mask)
+            sign_type_stats[gt.type].add_sign(gt, img, mask)
+            total += 1
 
-    for key, value in sign_type_stats:
-        print(key + ': ', value.get_avg())
+    for key, value in sign_type_stats.items():
+        print(key + ': ', value.get_avg(total) + (value.max_area, value.min_area))
