@@ -1,25 +1,26 @@
-from typing import List, Tuple
+from typing import Tuple, List
 import numpy as np
 import fnmatch
 import os
 import cv2
-from _ast import List
 import random
+from functional import seq
+
 
 class Size:
     height: float
     width: float
 
-    def max(self,other):
+    def max(self, other):
         if self.height > other.height and self.width > other.width:
             return self
         elif self.height < other.height and self.width < other.width:
             return other
         else:
-            NewSize = Size()
-            NewSize.height = max(self.height,other.height)
-            NewSize.width = max(self.width, other.width)
-            return NewSize
+            size = Size()
+            size.height = max(self.height, other.height)
+            size.width = max(self.width, other.width)
+            return size
 
     def min(self, other):
         if self.height < other.height and self.width < other.width:
@@ -27,15 +28,16 @@ class Size:
         elif self.height > other.height and self.width > other.width:
             return other
         else:
-            NewSize = Size
-            NewSize.height = min(self.height, other.height)
-            NewSize.width = min(self.width, other.width)
-            return NewSize
+            size = Size()
+            size.height = min(self.height, other.height)
+            size.width = min(self.width, other.width)
+            return size
 
-def get_mask_area(gt,mask):
-    self.mask1=cv2.imread(mask)
-    
-    return mask_area
+
+def get_mask_area(gt, mask_name):
+    # TODO
+    mask = cv2.imread(mask_name)
+    return 0
 
 
 def get_filling_factor(gt, mask):
@@ -47,9 +49,10 @@ def get_filling_factor(gt, mask):
     # return the filling ratio
     return mask_area/float(bbox_area)
 
+
 class SignalType:
-    max_size: Tuple[float]
-    min_size: Tuple[float]
+    max_size: Size
+    min_size: Size
     form_factor: List[float]
     filling_ratio: List[float]
     form_factor_avg: float
@@ -57,10 +60,10 @@ class SignalType:
     appearance_frequency: float
 
     def add_signal(self, gt , mask):
-        self.max_size = Size.max(gt.size)
-        self.min_size = Size.min(gt.size)
+        self.max_size = self.max_size.max(gt.size)
+        self.min_size = self.min_size.min(gt.size)
         self.form_factor.append(float(gt.size.width/gt.size.height))
-        self.filling_ratio.append(get_filling_factor(gt,mask))
+        self.filling_ratio.append(get_filling_factor(gt, mask))
 
     def get_avg(self,data_length):
         self.form_factor_avg = np.mean(self.form_factor)
@@ -68,12 +71,12 @@ class SignalType:
         self.appearance_frequency = len(self.form_factor)/data_length
 
 
-
 class GroundTruth:
     top_left: Tuple[float]
     bottom_right: Tuple[float]
     size: Size
     type: str
+
 
 class Data:
     """Stores the content of a data element."""
@@ -113,52 +116,28 @@ class DatasetManager:
         for file_name in file_names:
             self.data.append(Data(self._dir, file_name))
         print('Loading data')
-
     
-    def trainsplit(self):
-       Atype=List[Data]
-       Btype=List[Data]
-       Ctype=List[Data]
-       Dtype=List[Data]
-       Etype=List[Data]
-       Ftype=List[Data]
-       types= [] 
-       for sample in data:
-                if (sample.gt.type()=='A'):
-                    Atype.append(sample)
-                elif (sample.gt.type()=='B'):
-                    Btype.append(sample)
-                elif (sample.gt.type()=='C' ):
-                    Ctype.append(sample)  
-                elif (sample.gt.type()=='D'):
-                    Dtype.append(sample)
-                elif (sample.gt.type()=='E'):
-                    Etype.append(sample)
-                else:
-                    Ftype.append(sample)   
-       types.append(Atype)
-       types.append(Btype)
-       types.append(Ctype)
-       types.append(Dtype)
-       types.append(Etype)
-       types.append(Ftype)
-     
-       return types
-   
+    def get_data_by_type(self):
+        types = seq(self.data).group_by(lambda sample: sample.gt[0].type).to_dict()
+        return types
 
     def get_sets(self):
-        training=List[Data]
-        test=List[Data]
-        [types]=trainsplit()
-        for i in types:
-            random.shuffle(types[i][:])
-            for j in types[i]:
-                if j<= 0.7*len(types[i]):
-                    training.append(types[i][j])
+        """Get the validation and training sets of data from the original training dataset 30% to 70% from each class"""
+        training = []
+        verification = []
+        types = self.get_data_by_type()
+        for sign_type in ['A', 'B', 'C', 'D', 'E', 'F']:
+            random.shuffle(types[sign_type])
+            for j in types[sign_type]:
+                if j <= 0.7*len(types[sign_type]):
+                    training.append(types[sign_type][j])
                 else:
-                    test.append(types[i][j])
-                 
-        
-        "Get the validation and training sets of data from the original training dataset 30% to 70% from each class"
+                    verification.append(types[sign_type][j])
+
+        return training, verification
+
+    def get_sets_k_fold(self, k):
+        # TODO
         pass
+
 
