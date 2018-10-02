@@ -2,6 +2,9 @@ from typing import List, Tuple
 import numpy as np
 import fnmatch
 import os
+import cv2
+from _ast import List
+import random
 
 class Size:
     height: float
@@ -24,13 +27,14 @@ class Size:
         elif self.height > other.height and self.width > other.width:
             return other
         else:
-            NewSize = Size()
+            NewSize = Size
             NewSize.height = min(self.height, other.height)
             NewSize.width = min(self.width, other.width)
             return NewSize
 
 def get_mask_area(gt,mask):
-    # TODO
+    self.mask1=cv2.imread(mask)
+    
     return mask_area
 
 
@@ -110,8 +114,51 @@ class DatasetManager:
             self.data.append(Data(self._dir, file_name))
         print('Loading data')
 
+    
+    def trainsplit(self):
+       Atype=List[Data]
+       Btype=List[Data]
+       Ctype=List[Data]
+       Dtype=List[Data]
+       Etype=List[Data]
+       Ftype=List[Data]
+       types= [] 
+       for sample in data:
+                if (sample.gt.type()=='A'):
+                    Atype.append(sample)
+                elif (sample.gt.type()=='B'):
+                    Btype.append(sample)
+                elif (sample.gt.type()=='C' ):
+                    Ctype.append(sample)  
+                elif (sample.gt.type()=='D'):
+                    Dtype.append(sample)
+                elif (sample.gt.type()=='E'):
+                    Etype.append(sample)
+                else:
+                    Ftype.append(sample)   
+       types.append(Atype)
+       types.append(Btype)
+       types.append(Ctype)
+       types.append(Dtype)
+       types.append(Etype)
+       types.append(Ftype)
+     
+       return types
+   
+
     def get_sets(self):
-        # TODO
+        training=List[Data]
+        test=List[Data]
+        [types]=trainsplit()
+        for i in types:
+            random.shuffle(types[i][:])
+            for j in types[i]:
+                if j<= 0.7*len(types[i]):
+                    training.append(types[i][j])
+                else:
+                    test.append(types[i][j])
+                 
+        
         "Get the validation and training sets of data from the original training dataset 30% to 70% from each class"
         pass
 
