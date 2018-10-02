@@ -1,3 +1,4 @@
+import cv2
 import fnmatch
 import os
 import random
@@ -6,37 +7,21 @@ from typing import Tuple, List
 from functional import seq
 
 
-class Size:
-    height: float
+class Rectangle:
+    top_left: Tuple[float]
     width: float
+    height: float
 
-    def max(self, other):
-        if self.height > other.height and self.width > other.width:
-            return self
-        elif self.height < other.height and self.width < other.width:
-            return other
-        else:
-            size = Size()
-            size.height = max(self.height, other.height)
-            size.width = max(self.width, other.width)
-            return size
+    def get_bottom_right(self):
+        return self.top_left[0] + self.height, self.top_left[1] + self.width
 
-    def min(self, other):
-        if self.height < other.height and self.width < other.width:
-            return self
-        elif self.height > other.height and self.width > other.width:
-            return other
-        else:
-            size = Size()
-            size.height = min(self.height, other.height)
-            size.width = min(self.width, other.width)
-            return size
+    def get_area(self):
+        return self.width * self.height
 
 
 class GroundTruth:
     top_left: Tuple[float]
-    bottom_right: Tuple[float]
-    size: Size
+    rectangle: Rectangle
     type: str
 
 
@@ -45,23 +30,29 @@ class Data:
 
     name: str
     gt: List[GroundTruth] = []
-    img: str
-    mask: str
+    img_path: str
+    mask_path: str
 
     def __init__(self, directory: str, name: str):
         self.name = name
-        self.img = '{}/{}'.format(directory, name)
-        self.mask = '{}/mask/mask.{}.png'.format(directory, name)
+        self.img_path = '{}/{}'.format(directory, name)
+        self.mask_path = '{}/mask/mask.{}.png'.format(directory, name)
         with open('{}/gt/gt.{}.txt'.format(directory, name)) as f:
             for line in f.readlines():
                 parts = line.split(' ')
                 gt = GroundTruth()
                 gt.top_left = (parts[0], parts[1])
-                gt.bottom_right = (parts[2], parts[3])
                 gt.type = parts[4]
-                gt.size.width = float(parts[3]) - float(parts[1])
-                gt.size.height = float(parts[2]) - float(parts[0])
+                gt.rectangle = Rectangle()
+                gt.rectangle.width = float(parts[3]) - float(parts[1]) + 1
+                gt.rectangle.height = float(parts[2]) - float(parts[0]) + 1
                 self.gt.append(gt)
+
+    def get_img(self):
+        return cv2.imread(self.img_path)
+
+    def get_mask_img(self):
+        return cv2.imread(self.mask_path)
 
 
 class DatasetManager:
@@ -77,8 +68,7 @@ class DatasetManager:
         file_names = sorted(fnmatch.filter(os.listdir(self._dir), '*.jpg'))
         for file_name in file_names:
             self.data.append(Data(self._dir, file_name))
-        print('Loading data')
-    
+
     def get_data_by_type(self):
         # More info about how this works: https://github.com/EntilZha/PyFunctional#transformations-and-actions-apis
         types = seq(self.data).group_by(lambda sample: sample.gt[0].type).to_dict()
