@@ -80,6 +80,7 @@ class DatasetManager:
         print('Loading data')
     
     def get_data_by_type(self):
+        # More info about how this works: https://github.com/EntilZha/PyFunctional#transformations-and-actions-apis
         types = seq(self.data).group_by(lambda sample: sample.gt[0].type).to_dict()
         return types
 

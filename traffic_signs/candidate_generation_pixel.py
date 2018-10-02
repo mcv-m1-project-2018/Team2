@@ -4,6 +4,10 @@ import numpy as np
 from skimage import color
 
 
+def color_segmentation(im):
+    pass
+
+
 def candidate_generation_pixel_normrgb(im):
     # convert input image to the normRGB color space
 

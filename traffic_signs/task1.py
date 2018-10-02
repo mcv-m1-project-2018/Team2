@@ -14,7 +14,7 @@ def get_filling_factor(gt, mask):
 
     # compute the area of bboxes
     bbox_area = (gt.bottom_right[0] - gt.top_left[0] + 1) * (gt.bottom_right[1] - gt.top_left[1] + 1)
-    mask_area = get_mask_area(gt,mask)
+    mask_area = get_mask_area(gt, mask)
 
     # return the filling ratio
     return mask_area/float(bbox_area)
@@ -43,4 +43,16 @@ class SignType:
 
 if __name__ == '__main__':
     # TODO
+    dataManager = DatasetManager("directorio")
+    data = dataManager.data
+
+    sign_types = {}
+
+    for sample in data:
+        for gt in sample.gt:
+            if gt.type in sign_types.keys():
+                pass
+            else:
+                pass
+
     pass

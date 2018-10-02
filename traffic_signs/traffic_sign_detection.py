@@ -105,7 +105,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('dirName')
     parser.add_argument('outPath')
-    parser.add_argument('pixel_method', choices=['color_segregation'])
+    parser.add_argument('pixel_method', choices=['color_segmentation'])
     parser.add_argument('--windowMethod')
 
     args = parser.parse_args()
