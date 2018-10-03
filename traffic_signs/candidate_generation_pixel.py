@@ -2,14 +2,40 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 from skimage import color
+import cv2
 
 
 def color_segmentation(im):
-    """TODO:
-            - Aplicar los threshold de color (ejemplo por ahora) a cada pixel de la imagen
-            - Obtener la máscara (valores 0 o 1)
-            - Probar un par de thresholds 'a ojo'"""
-    pass
+    
+    rgb_im=cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
+
+    hsv_im=cv2.cvtColor(rgb_im, cv2.COLOR_RGB2HSV)
+    
+    
+    lower_red=np.array([80,150,50])
+
+    upper_red= np.array([180,255,255])
+    
+    lower_blue = np.array([110,50,50])
+    
+    upper_blue = np.array([130,255,255])
+    
+    
+    Red_mask = cv2.inRange(hsv_im, lower_red, upper_red)
+    
+    Blue_mask = cv2.inRange(hsv_im, lower_blue, upper_blue)
+
+    
+    
+    Final_mask= Red_mask+Blue_mask
+    
+    
+    result_seg = cv2.bitwise_and(rgb_im, rgb_im, mask=Final_mask)
+    
+   
+    
+    return Final_mask, result_seg 
+    
 
 
 def candidate_generation_pixel_normrgb(im):
