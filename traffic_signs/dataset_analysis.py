@@ -3,14 +3,17 @@ from typing import List
 import numpy as np
 from matplotlib import pyplot as plt
 import cv2
+from tabulate import tabulate
+from functional import seq
+
 
 def get_cropped(gt: GroundTruth, img):
-
     img_cropped = img[
-                   int(gt.rectangle.top_left[0]):int(gt.rectangle.get_bottom_right()[0]) + 1,
-                   int(gt.rectangle.top_left[1]):int(gt.rectangle.get_bottom_right()[1]) + 1
-                   ]
+                  int(gt.rectangle.top_left[0]):int(gt.rectangle.get_bottom_right()[0]) + 1,
+                  int(gt.rectangle.top_left[1]):int(gt.rectangle.get_bottom_right()[1]) + 1
+                  ]
     return img_cropped
+
 
 def get_mask_area(gt: GroundTruth, mask):
     mask_cropped = get_cropped(gt, mask)
@@ -18,6 +21,7 @@ def get_mask_area(gt: GroundTruth, mask):
 
     whites = cv2.countNonZero(img)
     return whites
+
 
 def get_histogram_RGB(img, mask):
     hist = []
@@ -29,12 +33,14 @@ def get_histogram_RGB(img, mask):
     plt.show()
     return hist
 
+
 def get_histogram_gray(img):
     hist = cv2.calcHist([img], [0], None, [256], [0, 256])
     plt.plot(hist)
     plt.xlim([0, 256])
     plt.show()
     return hist
+
 
 def get_filling_factor(gt: GroundTruth, mask):
     # compute the area of bboxes
@@ -43,7 +49,6 @@ def get_filling_factor(gt: GroundTruth, mask):
 
     # return the filling ratio
     return mask_area / bbox_area
-
 
 
 class SignTypeStats:
@@ -89,5 +94,9 @@ if __name__ == '__main__':
             sign_type_stats[gt.type].add_sign(gt, img, mask)
             total += 1
 
-    for key, value in sign_type_stats.items():
-        print(key + ': ', value.get_avg(total) + (value.max_area, value.min_area))
+    print(tabulate(seq(sign_type_stats.items())
+          .order_by(lambda kv: ord(kv[0]))
+          .map(lambda kv: list((kv[0],) + kv[1].get_avg(total) + (kv[1].max_area, kv[1].min_area)))
+          .map(lambda l: seq(l).map(str).to_list())
+          .reduce(lambda a, b: a + [b], []),
+          ["Sign Type", "Avg. form factor", "Avg. fill ratio", 'Percentage', 'Max area', 'Min area']))
