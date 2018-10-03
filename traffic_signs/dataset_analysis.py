@@ -1,19 +1,40 @@
 from dataset_manager import DatasetManager, Rectangle, GroundTruth
 from typing import List
 import numpy as np
+from matplotlib import pyplot as plt
 import cv2
 
+def get_cropped(gt: GroundTruth, img):
+
+    img_cropped = img[
+                   int(gt.rectangle.top_left[0]):int(gt.rectangle.get_bottom_right()[0]) + 1,
+                   int(gt.rectangle.top_left[1]):int(gt.rectangle.get_bottom_right()[1]) + 1
+                   ]
+    return img_cropped
 
 def get_mask_area(gt: GroundTruth, mask):
-    mask_cropped = mask[
-                        int(gt.rectangle.top_left[0]):int(gt.rectangle.get_bottom_right()[0]) + 1,
-                        int(gt.rectangle.top_left[1]):int(gt.rectangle.get_bottom_right()[1]) + 1
-                        ]
+    mask_cropped = get_cropped(gt, mask)
     _, img = cv2.threshold(mask_cropped, 0, 255, cv2.THRESH_BINARY)
 
     whites = cv2.countNonZero(img)
     return whites
 
+def get_histogram_RGB(img, mask):
+    hist = []
+    color = ('b', 'g', 'r')
+    for i, col in enumerate(color):
+        hist = hist.append.cv2.calcHist([img], [i], mask, [256], [0, 256])
+        plt.plot(hist, color=col)
+        plt.xlim([0, 256])
+    plt.show()
+    return hist
+
+def get_histogram_gray(img):
+    hist = cv2.calcHist([img], [0], None, [256], [0, 256])
+    plt.plot(hist)
+    plt.xlim([0, 256])
+    plt.show()
+    return hist
 
 def get_filling_factor(gt: GroundTruth, mask):
     # compute the area of bboxes
@@ -22,6 +43,7 @@ def get_filling_factor(gt: GroundTruth, mask):
 
     # return the filling ratio
     return mask_area / bbox_area
+
 
 
 class SignTypeStats:
