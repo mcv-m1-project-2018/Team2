@@ -63,7 +63,7 @@ def traffic_sign_detection(directory, output_dir, pixel_method, window_method):
             os.makedirs(fd)
 
         out_mask_name = '{}.png'.format(fd, base)
-        imageio.imwrite(out_mask_name, np.uint8(np.round(pixel_candidates)))
+        #imageio.imwrite(out_mask_name, np.uint8(np.round(pixel_candidates)))
 
         # Accumulate pixel performance of the current image #################
         pixel_annotation = imageio.imread('{}/mask/mask.{}.png'.format(directory, base)) > 0
