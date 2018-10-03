@@ -3,6 +3,8 @@ from typing import List
 import numpy as np
 from matplotlib import pyplot as plt
 import cv2
+from tabulate import tabulate
+from functional import seq
 
 
 def get_cropped(gt: GroundTruth, img):
@@ -101,10 +103,18 @@ if __name__ == '__main__':
             sign_type_stats[gt.type].add_sign(gt, img, mask)
             total += 1
 
+
     for key, value in sign_type_stats.items():
         color = ('b', 'g', 'r')
         for i, col in enumerate(color):
             plt.plot(value.histogram[i], color = col)
             plt.xlim([0, 256])
         plt.show()
-        print(key + ': ', value.get_avg(total) + (value.max_area, value.min_area))
+
+    print(tabulate(seq(sign_type_stats.items())
+          .order_by(lambda kv: ord(kv[0]))
+          .map(lambda kv: list((kv[0],) + kv[1].get_avg(total) + (kv[1].max_area, kv[1].min_area)))
+          .map(lambda l: seq(l).map(str).to_list())
+          .reduce(lambda a, b: a + [b], []),
+          ["Sign Type", "Avg. form factor", "Avg. fill ratio", 'Percentage', 'Max area', 'Min area']))
+
