@@ -59,7 +59,7 @@ class SignTypeStats:
     area: List[float]
     form_factor: List[float]
     filling_ratio: List[float]
-    histogram: List[int]
+    histogram: np.array
 
     def __init__(self):
         self.area = []
@@ -101,32 +101,35 @@ if __name__ == '__main__':
             sign_type_stats[gt.type].add_sign(gt, img, mask)
             total += 1
 
-    for sign_type, stat in sign_type_stats.items():
-        plt.subplot(121)
+    subplt = 231
+    for sign_type, stat in seq(sign_type_stats.items()).order_by(lambda kv: ord(kv[0])):
         color = ('b', 'g', 'r')
+        plt.subplot(subplt)
+        subplt += 1
+        plt.title(sign_type)
         for i, col in enumerate(color):
-            plt.plot(stat.histogram[i], color=col)
+            plt.plot(stat.histogram[:, :, i].ravel(), color=col)
             plt.xlim([0, 256])
 
-        plt.subplot(122)
+    plt.show()
 
-        fields = ['Area', 'Form factor', 'Filling ratio']
-        values = stat.get_avg(total)[0:3]
-        mins = np.array(seq(values).map(lambda v: v[0]).to_list())
-        maxes = np.array(seq(values).map(lambda v: v[1]).to_list())
-        means = np.array(seq(values).map(lambda v: v[2]).to_list())
-        stds = np.array(seq(values).map(lambda v: v[3]).to_list())
-        plt.errorbar(np.arange(len(mins)), means, stds, fmt='ok', lw=4)
-        plt.errorbar(np.arange(len(mins)), means, [means - mins, maxes - means],
-                     fmt='.k', ecolor='gray', lw=2)
-        plt.xlim(-1, 3)
+    stat_data = seq(sign_type_stats.items()) \
+        .order_by(lambda kv: ord(kv[0])) \
+        .map(lambda kv: (kv[0],) + kv[1].get_avg(total)) \
+        .reduce(lambda a, b: [a[0] + [b[0]], a[1] + [b[1]], a[2] + [b[2]], a[3] + [b[3]]], [[], [], [], []]) \
+        .to_list()
+    fields = ['Area', 'Form factor', 'Filling ratio']
+    for i, field in enumerate(fields):
+        plt.subplot(131 + i)
+        plt.title(field)
 
-        plt.show()
+        mins = np.array(seq(stat_data[i+1]).map(lambda v: v[0]).to_list())
+        maxes = np.array(seq(stat_data[i+1]).map(lambda v: v[1]).to_list())
+        means = np.array(seq(stat_data[i+1]).map(lambda v: v[2]).to_list())
+        stds = np.array(seq(stat_data[i+1]).map(lambda v: v[3]).to_list())
+        plt.xticks(np.arange(len(stat_data[0])), stat_data[0])
+        plt.errorbar(np.arange(len(mins)), means, yerr=stds, fmt='ok', lw=3, capsize=5)
+        plt.errorbar(np.arange(len(mins)), means, yerr=[means - mins, maxes - means],
+                     fmt='.k', ecolor='gray', lw=1, capsize=3)
 
-
-    """print(tabulate(seq(sign_type_stats.items())
-                   .order_by(lambda kv: ord(kv[0]))
-                   .map(lambda kv: list((kv[0],) + kv[1].get_avg(total) + (kv[1].max_area, kv[1].min_area)))
-                   .map(lambda l: seq(l).map(str).to_list())
-                   .reduce(lambda a, b: a + [b], []),
-                   ["Sign Type", "Avg. form factor", "Avg. fill ratio", 'Percentage', 'Max area', 'Min area']))"""
+    plt.show()
