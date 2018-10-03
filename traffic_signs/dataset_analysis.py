@@ -24,17 +24,16 @@ def get_mask_area(gt: GroundTruth, mask):
 
 
 def get_histogram_RGB(img, mask, prev_hist):
-
-    plt.subplot(121)
-    plt.imshow(cv2.cvtColor(get_cropped(gt,img), cv2.COLOR_BGR2RGB))
-    plt.subplot(122)
+    #  plt.subplot(121)
+    # plt.imshow(cv2.cvtColor(get_cropped(gt, img), cv2.COLOR_BGR2RGB))
+    # plt.subplot(122)
     color = ('b', 'g', 'r')
     for i, col in enumerate(color):
-        cv2.calcHist([img], [i], mask, [256], [0, 256], hist = prev_hist[:,:,i], accumulate = True )
-
-        plt.plot(prev_hist[:,:,i].ravel(), color=col)
-        plt.xlim([0, 256])
-    plt.show()
+        hist = cv2.calcHist([img], [i], mask, [256], [0, 256])
+        # plt.plot(hist.ravel(), color=col)
+        # plt.xlim([0, 256])
+        prev_hist[:, :, i] += hist
+    # plt.show()
     return
 
 
@@ -66,7 +65,7 @@ class SignTypeStats:
         self.area = []
         self.form_factor = []
         self.filling_ratio = []
-        self.histogram = np.zeros((256, 1, 3 ))
+        self.histogram = np.zeros((256, 1, 3))
 
     def add_sign(self, gt: GroundTruth, img, mask):
         self.area.append(gt.rectangle.get_area())
@@ -77,8 +76,9 @@ class SignTypeStats:
     def get_avg(self, data_length):
         return (max(self.area), min(self.area), np.mean(self.area), np.std(self.area)), \
                (max(self.form_factor), min(self.form_factor), np.mean(self.form_factor), np.std(self.form_factor)), \
-               (max(self.filling_ratio), min(self.filling_ratio), np.mean(self.filling_ratio), np.std(self.filling_ratio)), \
-                len(self.form_factor) / data_length
+               (max(self.filling_ratio), min(self.filling_ratio), np.mean(self.filling_ratio),
+                np.std(self.filling_ratio)), \
+               len(self.form_factor) / data_length
 
 
 if __name__ == '__main__':
@@ -93,7 +93,7 @@ if __name__ == '__main__':
     for sample in data:
         img = sample.get_img()
         mask = sample.get_mask_img()
-        #get_histogram_gray(img)
+        # get_histogram_gray(img)
         for gt in sample.gt:
             if gt.type not in sign_type_stats.keys():
                 sign_type_stats[gt.type] = SignTypeStats()
@@ -101,18 +101,32 @@ if __name__ == '__main__':
             sign_type_stats[gt.type].add_sign(gt, img, mask)
             total += 1
 
-
-    for key, value in sign_type_stats.items():
+    for sign_type, stat in sign_type_stats.items():
+        plt.subplot(121)
         color = ('b', 'g', 'r')
         for i, col in enumerate(color):
-            plt.plot(value.histogram[i], color = col)
+            plt.plot(stat.histogram[i], color=col)
             plt.xlim([0, 256])
+
+        plt.subplot(122)
+
+        fields = ['Area', 'Form factor', 'Filling ratio']
+        values = stat.get_avg(total)[0:3]
+        mins = np.array(seq(values).map(lambda v: v[0]).to_list())
+        maxes = np.array(seq(values).map(lambda v: v[1]).to_list())
+        means = np.array(seq(values).map(lambda v: v[2]).to_list())
+        stds = np.array(seq(values).map(lambda v: v[3]).to_list())
+        plt.errorbar(np.arange(len(mins)), means, stds, fmt='ok', lw=4)
+        plt.errorbar(np.arange(len(mins)), means, [means - mins, maxes - means],
+                     fmt='.k', ecolor='gray', lw=2)
+        plt.xlim(-1, 3)
+
         plt.show()
 
-    print(tabulate(seq(sign_type_stats.items())
-          .order_by(lambda kv: ord(kv[0]))
-          .map(lambda kv: list((kv[0],) + kv[1].get_avg(total) + (kv[1].max_area, kv[1].min_area)))
-          .map(lambda l: seq(l).map(str).to_list())
-          .reduce(lambda a, b: a + [b], []),
-          ["Sign Type", "Avg. form factor", "Avg. fill ratio", 'Percentage', 'Max area', 'Min area']))
 
+    """print(tabulate(seq(sign_type_stats.items())
+                   .order_by(lambda kv: ord(kv[0]))
+                   .map(lambda kv: list((kv[0],) + kv[1].get_avg(total) + (kv[1].max_area, kv[1].min_area)))
+                   .map(lambda l: seq(l).map(str).to_list())
+                   .reduce(lambda a, b: a + [b], []),
+                   ["Sign Type", "Avg. form factor", "Avg. fill ratio", 'Percentage', 'Max area', 'Min area']))"""
