@@ -58,30 +58,28 @@ def get_filling_factor(gt: GroundTruth, mask):
 
 
 class SignTypeStats:
-    max_area: float
-    min_area: float
+    area: List[float]
     form_factor: List[float]
     filling_ratio: List[float]
     histogram: List[int]
 
     def __init__(self):
-        self.max_area = 0
-        self.min_area = np.inf
+        self.area = []
         self.form_factor = []
         self.filling_ratio = []
         self.histogram = np.zeros((3, 256))
 
     def add_sign(self, gt: GroundTruth, img, mask):
-        self.max_area = max(self.max_area, gt.rectangle.get_area())
-        self.min_area = min(self.min_area, gt.rectangle.get_area())
+        self.area.append(gt.rectangle.get_area())
         self.form_factor.append(float(gt.rectangle.width / gt.rectangle.height))
         self.filling_ratio.append(get_filling_factor(gt, mask))
         self.histogram = self.histogram + get_histogram_RGB(img, mask)
 
     def get_avg(self, data_length):
-        return np.mean(self.form_factor), \
-               np.mean(self.filling_ratio), \
-               len(self.form_factor) / data_length
+        return (max(self.area), min(self.area), np.mean(self.area), np.std(self.area)), \
+               (max(self.form_factor), min(self.form_factor), np.mean(self.form_factor), np.std(self.form_factor)), \
+               (max(self.filling_ratio), min(self.filling_ratio), np.mean(self.filling_ratio), np.std(self.filling_ratio)), \
+                len(self.form_factor) / data_length
 
 
 if __name__ == '__main__':
