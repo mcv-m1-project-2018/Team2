@@ -35,7 +35,7 @@ class Data:
     def __init__(self, directory: str, name: str):
         self.name = name
         self.gt = []
-        self.img_path = '{}/{}'.format(directory, name)
+        self.img_path = '{}/{}.jpg'.format(directory, name)
         self.mask_path = '{}/mask/mask.{}.png'.format(directory, name)
         with open('{}/gt/gt.{}.txt'.format(directory, name)) as f:
             for line in f.readlines():
@@ -49,7 +49,7 @@ class Data:
                 self.gt.append(gt)
 
     def get_img(self):
-        return cv2.imread(self.img_path)
+        return cv2.imread(self.img_path, cv2.IMREAD_COLOR)
 
     def get_mask_img(self):
         return cv2.imread(self.mask_path, cv2.IMREAD_GRAYSCALE)
