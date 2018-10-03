@@ -23,24 +23,23 @@ def get_mask_area(gt: GroundTruth, mask):
     return whites
 
 
-def get_histogram_RGB(img, mask):
-    hist = np.zeros((3, 256))
-    #  plt.subplot(121)
-    #  plt.imshow(cv2.cvtColor(get_cropped(gt,img), cv2.COLOR_BGR2RGB))
-    #  plt.subplot(122)
+def get_histogram_RGB(img, mask, prev_hist):
+
+    plt.subplot(121)
+    plt.imshow(cv2.cvtColor(get_cropped(gt,img), cv2.COLOR_BGR2RGB))
+    plt.subplot(122)
     color = ('b', 'g', 'r')
     for i, col in enumerate(color):
-        hist[i] = cv2.calcHist([img], [i], mask, [256], [0, 256])[:, 0]
+        cv2.calcHist([img], [i], mask, [256], [0, 256], hist = prev_hist[:,:,i], accumulate = True )
 
-    #   plt.plot(hist[i], color=col)
-    #   plt.xlim([0, 256])
-
-    # plt.show()
-    return hist
+        plt.plot(prev_hist[:,:,i].ravel(), color=col)
+        plt.xlim([0, 256])
+    plt.show()
+    return
 
 
 def get_histogram_gray(img):
-    # TODO
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     hist = cv2.calcHist([img], [0], None, [256], [0, 256])
     plt.plot(hist)
     plt.xlim([0, 256])
@@ -67,13 +66,13 @@ class SignTypeStats:
         self.area = []
         self.form_factor = []
         self.filling_ratio = []
-        self.histogram = np.zeros((3, 256))
+        self.histogram = np.zeros((256, 1, 3 ))
 
     def add_sign(self, gt: GroundTruth, img, mask):
         self.area.append(gt.rectangle.get_area())
         self.form_factor.append(float(gt.rectangle.width / gt.rectangle.height))
         self.filling_ratio.append(get_filling_factor(gt, mask))
-        self.histogram = self.histogram + get_histogram_RGB(img, mask)
+        get_histogram_RGB(img, mask, self.histogram)
 
     def get_avg(self, data_length):
         return (max(self.area), min(self.area), np.mean(self.area), np.std(self.area)), \
@@ -94,6 +93,7 @@ if __name__ == '__main__':
     for sample in data:
         img = sample.get_img()
         mask = sample.get_mask_img()
+        #get_histogram_gray(img)
         for gt in sample.gt:
             if gt.type not in sign_type_stats.keys():
                 sign_type_stats[gt.type] = SignTypeStats()
