@@ -6,7 +6,12 @@ import fnmatch
 import os
 import argparse
 import sys
+import pickle
+
+import numpy as np
 import imageio
+from docopt import docopt
+
 from candidate_generation_pixel import candidate_generation_pixel
 from candidate_generation_window import candidate_generation_window
 from evaluation.load_annotations import load_annotations
@@ -71,15 +76,17 @@ def traffic_sign_detection(directory, output_dir, pixel_method, window_method):
         pixel_tn += local_pixel_tn
 
         if window_method != 'None':
-            window_candidates = candidate_generation_window(im, pixel_candidates, window_method)
+            window_candidates = candidate_generation_window(im, pixel_candidates, window_method) 
 
-            # Accumulate object performance of the current image ################
-            window_annotationss = load_annotations('{}/gt/gt.{}.txt'.format(directory, base))
-            [localWindowTP, localWindowFN, localWindowFP] = evalf.performance_accumulation_window(window_candidates,
-                                                                                                  window_annotationss)
-            window_tp = window_tp + localWindowTP
-            window_fn = window_fn + localWindowFN
-            window_fp = window_fp + localWindowFP
+            out_list_name = '{}/{}.pkl'.format(fd, base)
+            
+            with open(out_list_name, "wb") as fp:   #Pickling
+                pickle.dump(window_candidates, fp)
+            [localWindowTP, localWindowFN, localWindowFP] = evalf.performance_accumulation_window(window_candidates, window_annotationss)
+
+            windowTP = windowTP + localWindowTP
+            windowFN = windowFN + localWindowFN
+            windowFP = windowFP + localWindowFP
 
             # Plot performance evaluation
             [window_precision, window_sensitivity, window_accuracy] = evalf.performance_evaluation_window(window_tp,
