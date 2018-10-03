@@ -45,6 +45,21 @@ def get_histogram_gray(img):
     plt.show()
     return hist
 
+def get_histogram_equalization(img, adaptive):
+    img_yuv = cv2.cvtColor(img, cv2.COLOR_BGR2YUV)
+
+    # equalize the histogram of the Y channel
+
+    if adaptive is False:
+        img_yuv[:, :, 0] = cv2.equalizeHist(img_yuv[:, :, 0])
+
+        return cv2.cvtColor(img_yuv, cv2.COLOR_YUV2BGR)
+    else:
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        img_yuv[:, :, 0] = clahe.apply(img_yuv)
+
+        return  cv2.cvtColor(img_yuv, cv2.COLOR_YUV2BGR)
+
 
 def get_filling_factor(gt: GroundTruth, mask):
     # compute the area of bboxes
@@ -93,7 +108,14 @@ if __name__ == '__main__':
     for sample in data:
         img = sample.get_img()
         mask = sample.get_mask_img()
-        # get_histogram_gray(img)
+
+        plt.subplot(121)
+        plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+        plt.subplot(122)
+        plt.imshow(cv2.cvtColor(get_histogram_equalization(img,True), cv2.COLOR_BGR2RGB))
+        plt.show()
+        #get_histogram_gray(img)
+
         for gt in sample.gt:
             if gt.type not in sign_type_stats.keys():
                 sign_type_stats[gt.type] = SignTypeStats()
