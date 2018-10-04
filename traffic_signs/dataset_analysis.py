@@ -27,36 +27,39 @@ def get_mask_area(gt: GroundTruth, mask):
     return whites
 
 
-def get_histogram_RGB(img: np.array, gt: GroundTruth, mask: np.array, prev_hist: np.array):
+def get_histogram_rgb(img: np.array, gt: GroundTruth, mask: np.array):
     #  plt.subplot(121)
     # plt.imshow(cv2.cvtColor(get_cropped(gt, img), cv2.COLOR_BGR2RGB))
     # plt.subplot(122)
     img = get_cropped(gt, img)
     mask = get_cropped(gt, mask)
     color = ('b', 'g', 'r')
+    hists = []
     for i, col in enumerate(color):
-        hist = cv2.calcHist([img], [i], mask, [256], [0, 256])
+        hists.append(cv2.calcHist([img], [i], mask, [256], [0, 256]))
         # plt.plot(hist.ravel(), color=col)
         # plt.xlim([0, 256])
-        prev_hist[:, :, i] += hist
     # plt.show()
-    return
+    return hists
 
-def get_histogram_HSV(img: np.array, gt: GroundTruth, mask: np.array, prev_hist: np.array):
-    #  plt.subplot(121)
+
+def get_histogram_hsv(img: np.array, gt: GroundTruth, mask: np.array):
+    # plt.figure()
+    # plt.subplot(121)
     # plt.imshow(cv2.cvtColor(get_cropped(gt, img), cv2.COLOR_BGR2RGB))
     # plt.subplot(122)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     img = get_cropped(gt, img)
     mask = get_cropped(gt, mask)
     color = ('b', 'g', 'r')
+    hists = []
     for i, col in enumerate(color):
-        hist = cv2.calcHist([img], [i], mask, [256], [0, 256])
-        # plt.plot(hist.ravel(), color=col)
+        hists.append(cv2.calcHist([img], [i], mask, [256], [0, 256]))
+        # plt.plot(hists[i].ravel(), color=col)
         # plt.xlim([0, 256])
-        prev_hist[:, :, i] += hist
     # plt.show()
-    return
+    return hists
+
 
 """def get_histogram_gray(img):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -92,7 +95,9 @@ class SignTypeStats:
         self.area.append(gt.rectangle.get_area())
         self.form_factor.append(float(gt.rectangle.width / gt.rectangle.height))
         self.filling_ratio.append(get_filling_factor(gt, mask))
-        get_histogram_HSV(img, gt, mask, self.histogram)
+        hists = get_histogram_hsv(img, gt, mask)
+        for i in range(3):
+            self.histogram[:, :, i] += hists[i]
 
     def get_avg(self, data_length):
         return (max(self.area), min(self.area), np.mean(self.area), np.std(self.area)), \
@@ -102,14 +107,14 @@ class SignTypeStats:
                len(self.form_factor) / data_length
 
 
-if __name__ == '__main__':
+def main():
+    global total
     dataManager = DatasetManager("../datasets/train")
+    print('Loading data...')
     dataManager.load_data()
     data = dataManager.data
-
     sign_type_stats = {}
-
-    print('Starting')
+    print('Running...')
     total = 0
     for sample in data:
         img = sample.get_img()
@@ -134,7 +139,6 @@ if __name__ == '__main__':
 
             sign_type_stats[gt.type].add_sign(gt, img, mask)
             total += 1
-
     plt.figure()
     subplt = 231
     for sign_type, stat in seq(sign_type_stats.items()).order_by(lambda kv: ord(kv[0])):
@@ -145,7 +149,6 @@ if __name__ == '__main__':
         for i, col in enumerate(color):
             plt.plot(stat.histogram[:, :, i].ravel(), color=col)
             plt.xlim([0, 256])
-
     stat_data = seq(sign_type_stats.items()) \
         .order_by(lambda kv: ord(kv[0])) \
         .map(lambda kv: (kv[0],) + kv[1].get_avg(total)) \
@@ -157,13 +160,16 @@ if __name__ == '__main__':
         plt.subplot(131 + i)
         plt.title(field)
 
-        mins = np.array(seq(stat_data[i+1]).map(lambda v: v[0]).to_list())
-        maxes = np.array(seq(stat_data[i+1]).map(lambda v: v[1]).to_list())
-        means = np.array(seq(stat_data[i+1]).map(lambda v: v[2]).to_list())
-        stds = np.array(seq(stat_data[i+1]).map(lambda v: v[3]).to_list())
+        mins = np.array(seq(stat_data[i + 1]).map(lambda v: v[0]).to_list())
+        maxes = np.array(seq(stat_data[i + 1]).map(lambda v: v[1]).to_list())
+        means = np.array(seq(stat_data[i + 1]).map(lambda v: v[2]).to_list())
+        stds = np.array(seq(stat_data[i + 1]).map(lambda v: v[3]).to_list())
         plt.xticks(np.arange(len(stat_data[0])), stat_data[0])
         plt.errorbar(np.arange(len(mins)), means, yerr=stds, fmt='ok', lw=3, capsize=5)
         plt.errorbar(np.arange(len(mins)), means, yerr=[means - mins, maxes - means],
                      fmt='.k', ecolor='gray', lw=1, capsize=3)
-
     plt.show()
+
+
+if __name__ == '__main__':
+    main()

@@ -1,11 +1,22 @@
+from typing import List
+
 import numpy as np
 from methods.operations import fill_holes, discard_geometry, segregation, histogram_equalization
+from model import Data
 
 
-def get_mask(im: np.array):
-    im = histogram_equalization(im, True)
-    mask, im = segregation(im, 'hsv')
-    mask = fill_holes(mask)
-    mask = discard_geometry(mask)
+class Method3:
 
-    return mask
+    def train(self, data: List[Data]):
+        discard_geometry.train(data)
+
+    def get_mask(self, im: np.array):
+        im = histogram_equalization(im, True)
+        mask, im = segregation(im, 'hsv')
+        mask = fill_holes(mask)
+        mask = discard_geometry(mask)
+
+        return mask
+
+
+instance = Method3()

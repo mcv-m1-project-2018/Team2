@@ -12,6 +12,7 @@ import evaluation.evaluation_funcs as evalf
 from candidate_generation_pixel import candidate_generation_pixel
 from candidate_generation_window import candidate_generation_window
 from dataset_manager import DatasetManager
+from methods import method1, method2, method3, method4
 from model import Result
 
 
@@ -32,7 +33,24 @@ def traffic_sign_detection(directory, output_dir, pixel_method, window_method):
     datasetManager = DatasetManager(directory)
     datasetManager.load_data()
 
-    # Load image names in the given directory
+    methods = {
+        'method1': method1,
+        'method2': method2,
+        'method3': method3,
+        'method4': method4
+    }
+    method = methods.get(pixel_method, lambda: 'Invalid method')
+    method.train(datasetManager.data)
+
+    for dat in datasetManager.data:
+        im = dat.get_img()
+
+        mask = method.get_mask(im)
+        mask_solution = dat.get_mask_img()
+
+        # TODO evaluate
+
+    """# Load image names in the given directory
     file_names = sorted(fnmatch.filter(os.listdir(directory), '*.jpg'))
 
     for name in file_names:
@@ -82,7 +100,7 @@ def traffic_sign_detection(directory, output_dir, pixel_method, window_method):
                                                                                                           window_fp)
 
     [pixel_precision, pixel_accuracy, pixel_specificity, pixel_sensitivity] = evalf.performance_evaluation_pixel(
-        pixel_tp, pixel_fp, pixel_fn, pixel_tn)
+        pixel_tp, pixel_fp, pixel_fn, pixel_tn)"""
 
     return Result(
         pixel_precision=pixel_precision,
@@ -99,7 +117,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('dirName')
     parser.add_argument('outPath')
-    parser.add_argument('pixel_method', choices=['color_segmentation'])
+    parser.add_argument('pixel_method', choices=['method1', 'method2', 'method3', 'method4'])
     parser.add_argument('--windowMethod')
 
     args = parser.parse_args()
