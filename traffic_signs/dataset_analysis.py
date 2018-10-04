@@ -37,13 +37,13 @@ def get_histogram_RGB(img, mask, prev_hist):
     return
 
 
-def get_histogram_gray(img):
+"""def get_histogram_gray(img):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     hist = cv2.calcHist([img], [0], None, [256], [0, 256])
     plt.plot(hist)
     plt.xlim([0, 256])
     plt.show()
-    return hist
+    return hist """
 
 def get_histogram_equalization(img, adaptive):
     img_yuv = cv2.cvtColor(img, cv2.COLOR_BGR2YUV)
@@ -56,7 +56,7 @@ def get_histogram_equalization(img, adaptive):
         return cv2.cvtColor(img_yuv, cv2.COLOR_YUV2BGR)
     else:
         clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-        img_yuv[:, :, 0] = clahe.apply(img_yuv)
+        img_yuv[:, :, 0] = clahe.apply(img_yuv[:, :, 0])
 
         return  cv2.cvtColor(img_yuv, cv2.COLOR_YUV2BGR)
 
@@ -109,12 +109,19 @@ if __name__ == '__main__':
         img = sample.get_img()
         mask = sample.get_mask_img()
 
-        plt.subplot(121)
+
+        plt.subplot(131)
+        plt.title('Original')
         plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-        plt.subplot(122)
-        plt.imshow(cv2.cvtColor(get_histogram_equalization(img,True), cv2.COLOR_BGR2RGB))
+        plt.subplot(132)
+        plt.title('Hist eq')
+        plt.imshow(cv2.cvtColor(get_histogram_equalization(img, False), cv2.COLOR_BGR2RGB))
+        plt.subplot(133)
+        plt.title('Adaptive hist eq')
+        plt.imshow(cv2.cvtColor(get_histogram_equalization(img, True), cv2.COLOR_BGR2RGB))
         plt.show()
-        #get_histogram_gray(img)
+        
+
 
         for gt in sample.gt:
             if gt.type not in sign_type_stats.keys():
