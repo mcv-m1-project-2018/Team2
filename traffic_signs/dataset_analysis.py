@@ -8,6 +8,8 @@ from functional import seq
 from model import GroundTruth
 from methods.operations import histogram_equalization
 
+plt.rcParams.update({'font.size': 16})
+
 
 def get_cropped(gt: GroundTruth, img):
     img_cropped = img[
@@ -25,10 +27,12 @@ def get_mask_area(gt: GroundTruth, mask):
     return whites
 
 
-def get_histogram_RGB(img: np.array, mask: np.array, prev_hist: np.array):
+def get_histogram_RGB(img: np.array, gt: GroundTruth, mask: np.array, prev_hist: np.array):
     #  plt.subplot(121)
     # plt.imshow(cv2.cvtColor(get_cropped(gt, img), cv2.COLOR_BGR2RGB))
     # plt.subplot(122)
+    img = get_cropped(gt, img)
+    mask = get_cropped(gt, mask)
     color = ('b', 'g', 'r')
     for i, col in enumerate(color):
         hist = cv2.calcHist([img], [i], mask, [256], [0, 256])
@@ -38,6 +42,21 @@ def get_histogram_RGB(img: np.array, mask: np.array, prev_hist: np.array):
     # plt.show()
     return
 
+def get_histogram_HSV(img: np.array, gt: GroundTruth, mask: np.array, prev_hist: np.array):
+    #  plt.subplot(121)
+    # plt.imshow(cv2.cvtColor(get_cropped(gt, img), cv2.COLOR_BGR2RGB))
+    # plt.subplot(122)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    img = get_cropped(gt, img)
+    mask = get_cropped(gt, mask)
+    color = ('b', 'g', 'r')
+    for i, col in enumerate(color):
+        hist = cv2.calcHist([img], [i], mask, [256], [0, 256])
+        # plt.plot(hist.ravel(), color=col)
+        # plt.xlim([0, 256])
+        prev_hist[:, :, i] += hist
+    # plt.show()
+    return
 
 """def get_histogram_gray(img):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -73,7 +92,7 @@ class SignTypeStats:
         self.area.append(gt.rectangle.get_area())
         self.form_factor.append(float(gt.rectangle.width / gt.rectangle.height))
         self.filling_ratio.append(get_filling_factor(gt, mask))
-        get_histogram_RGB(img, mask, self.histogram)
+        get_histogram_HSV(img, gt, mask, self.histogram)
 
     def get_avg(self, data_length):
         return (max(self.area), min(self.area), np.mean(self.area), np.std(self.area)), \
@@ -96,7 +115,7 @@ if __name__ == '__main__':
         img = sample.get_img()
         mask = sample.get_mask_img()
 
-        if total < 10:
+        if total < 5:
             plt.figure()
             plt.title('Histogram equalization')
             plt.subplot(131)
@@ -119,7 +138,6 @@ if __name__ == '__main__':
     plt.figure()
     subplt = 231
     for sign_type, stat in seq(sign_type_stats.items()).order_by(lambda kv: ord(kv[0])):
-        plt.title('Histograms by sign type')
         color = ('b', 'g', 'r')
         plt.subplot(subplt)
         subplt += 1
