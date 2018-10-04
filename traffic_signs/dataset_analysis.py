@@ -23,7 +23,7 @@ def get_mask_area(gt: GroundTruth, mask):
     return whites
 
 
-def get_histogram_RGB(img, mask, prev_hist):
+def get_histogram_RGB(img: np.array, mask: np.array, prev_hist: np.array):
     #  plt.subplot(121)
     # plt.imshow(cv2.cvtColor(get_cropped(gt, img), cv2.COLOR_BGR2RGB))
     # plt.subplot(122)
@@ -45,12 +45,13 @@ def get_histogram_RGB(img, mask, prev_hist):
     plt.show()
     return hist """
 
-def get_histogram_equalization(img, adaptive):
+
+def get_histogram_equalization(img: np.array, adaptive: bool):
     img_yuv = cv2.cvtColor(img, cv2.COLOR_BGR2YUV)
 
     # equalize the histogram of the Y channel
 
-    if adaptive is False:
+    if not adaptive:
         img_yuv[:, :, 0] = cv2.equalizeHist(img_yuv[:, :, 0])
 
         return cv2.cvtColor(img_yuv, cv2.COLOR_YUV2BGR)
@@ -61,7 +62,7 @@ def get_histogram_equalization(img, adaptive):
         return  cv2.cvtColor(img_yuv, cv2.COLOR_YUV2BGR)
 
 
-def get_filling_factor(gt: GroundTruth, mask):
+def get_filling_factor(gt: GroundTruth, mask: np.array):
     # compute the area of bboxes
     bbox_area = gt.rectangle.get_area()
     mask_area = get_mask_area(gt, mask)
@@ -82,7 +83,7 @@ class SignTypeStats:
         self.filling_ratio = []
         self.histogram = np.zeros((256, 1, 3))
 
-    def add_sign(self, gt: GroundTruth, img, mask):
+    def add_sign(self, gt: GroundTruth, img: np.array, mask: np.array):
         self.area.append(gt.rectangle.get_area())
         self.form_factor.append(float(gt.rectangle.width / gt.rectangle.height))
         self.filling_ratio.append(get_filling_factor(gt, mask))

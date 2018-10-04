@@ -1,12 +1,10 @@
 """Calculate the mask using pixel segmentation and then filling the gaps"""
 import cv2
-from methods import pixel
+from methods.operations import segregation
 import numpy as np
 
 
-def get_mask(im: np.array, color_space):
-    mask, im_cropped = pixel.get_mask(im,color_space)
-
+def get_mask(mask: np.array):
     im_floodfill = mask.copy()
 
     # Mask used to flood filling.
@@ -25,8 +23,9 @@ def get_mask(im: np.array, color_space):
 
 if __name__ == '__main__':
     im = cv2.imread('../../datasets/train/00.000948.jpg')
-    mask = get_mask(im,color_space)
+    mask_hsv = segregation.get_mask(im, 'hsv')
+    mask_hsv = get_mask(mask_hsv)
     cv2.imshow('image', im)
-    cv2.imshow('mask', mask)
+    cv2.imshow('mask', mask_hsv)
     cv2.waitKey(0)
     cv2.destroyAllWindows()

@@ -3,23 +3,24 @@ import cv2
 import numpy as np
 
 
-def get_mask(im: np.array, color_space):
+def get_mask(im: np.array, color_space: str):
     switcher = {
-        'rgb': get_mask_rgb,
-        'hsv': get_mask_hsv
-       
+        'rgb': _get_mask_rgb,
+        'hsv': _get_mask_hsv,
+        'yuv': _get_mask_yuv
     }
     # Get the function from switcher dictionary
     func = switcher.get(color_space, lambda: "Invalid color space")
 
     # Execute the function
-    final_mask,result_seg = func(im)
+    final_mask, result_seg = func(im)
 
     return final_mask, result_seg
 
-def get_mask_hsv(im):
+
+def _get_mask_hsv(im):
     rgb_im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
-    
+
     hsv_im = cv2.cvtColor(rgb_im, cv2.COLOR_RGB2HSV)
 
     lower_red = np.array([80, 150, 50])
@@ -29,53 +30,43 @@ def get_mask_hsv(im):
 
     red_mask = cv2.inRange(hsv_im, lower_red, upper_red)
     blue_mask = cv2.inRange(hsv_im, lower_blue, upper_blue)
-
     final_mask = red_mask + blue_mask
 
     result_seg = cv2.bitwise_and(rgb_im, rgb_im, mask=final_mask)
-    
+
     return final_mask, result_seg
 
-def get_mask_rgb(im):
-    
-    rgb_im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
-    
-    upper_red=np.array([255, 56, 50])
-    lower_red=np.array([155, 15, 15])
-    upper_blue=np.array([0, 80, 255])
-    lower_blue=np.array([0, 20, 100])
-    
-    
-    red_mask = cv2.inRange(rgb_im, lower_red, upper_red)
-    
-    blue_mask= cv2.inRange(rgb_im, lower_blue, upper_blue)
-    
-    final_mask=red_mask + blue_mask
-    
-    result_seg=cv2.bitwise_and(rgb_im,rgb_im, mask=final_mask)
-    
-    return final_mask, result_sseg
 
-def get_mask_yuv(im):
+def _get_mask_rgb(im):
+    rgb_im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
+
+    upper_red = np.array([255, 56, 50])
+    lower_red = np.array([155, 15, 15])
+    upper_blue = np.array([0, 80, 255])
+    lower_blue = np.array([0, 20, 100])
+
+    red_mask = cv2.inRange(rgb_im, lower_red, upper_red)
+    blue_mask = cv2.inRange(rgb_im, lower_blue, upper_blue)
+    final_mask = red_mask + blue_mask
+
+    result_seg = cv2.bitwise_and(rgb_im, rgb_im, mask=final_mask)
+
+    return final_mask, result_seg
+
+
+def _get_mask_yuv(im):
     rgb_im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
     yuv_im = cv2.cvtColor(im, cv2.COLOR_BGR2YUV)
-    
-    upper_red=np.array([])
-    lower_red=np.array([])
-    upper_blue=np.array([])
-    lower_blue=np.array([])
-    
-    
+
+    upper_red = np.array([])
+    lower_red = np.array([])
+    upper_blue = np.array([])
+    lower_blue = np.array([])
+
     red_mask = cv2.inRange(yuv_im, lower_red, upper_red)
-    
-    blue_mask= cv2.inRange(yuv_im, lower_blue, upper_blue)
-    
-    final_mask=red_mask + blue_mask
-    
-    result_seg=cv2.bitwise_and(rgb_im,rgb_im, mask=final_mask)
+    blue_mask = cv2.inRange(yuv_im, lower_blue, upper_blue)
+    final_mask = red_mask + blue_mask
 
-    
-    
-    return final_mask, result_sseg
+    result_seg = cv2.bitwise_and(rgb_im, rgb_im, mask=final_mask)
 
-
+    return final_mask, result_seg

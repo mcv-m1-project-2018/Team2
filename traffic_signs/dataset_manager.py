@@ -1,58 +1,11 @@
-import cv2
 import fnmatch
 import os
 import random
-from typing import Tuple, List
+from typing import List
 
 from functional import seq
 
-
-class Rectangle:
-    top_left: Tuple[float]
-    width: float
-    height: float
-
-    def get_bottom_right(self):
-        return self.top_left[0] + self.height, self.top_left[1] + self.width
-
-    def get_area(self):
-        return self.width * self.height
-
-
-class GroundTruth:
-    rectangle: Rectangle
-    type: str
-
-
-class Data:
-    """Stores the content of a data element."""
-
-    name: str
-    gt: List[GroundTruth]
-    img_path: str
-    mask_path: str
-
-    def __init__(self, directory: str, name: str):
-        self.name = name
-        self.gt = []
-        self.img_path = '{}/{}.jpg'.format(directory, name)
-        self.mask_path = '{}/mask/mask.{}.png'.format(directory, name)
-        with open('{}/gt/gt.{}.txt'.format(directory, name)) as f:
-            for line in f.readlines():
-                parts = line.strip().split(' ')
-                gt = GroundTruth()
-                gt.type = parts[4]
-                gt.rectangle = Rectangle()
-                gt.rectangle.top_left = (float(parts[0]), float(parts[1]))
-                gt.rectangle.width = float(parts[3]) - float(parts[1]) + 1
-                gt.rectangle.height = float(parts[2]) - float(parts[0]) + 1
-                self.gt.append(gt)
-
-    def get_img(self):
-        return cv2.imread(self.img_path, cv2.IMREAD_COLOR)
-
-    def get_mask_img(self):
-        return cv2.imread(self.mask_path, cv2.IMREAD_GRAYSCALE)
+from model import Data
 
 
 class DatasetManager:
