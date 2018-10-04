@@ -4,8 +4,8 @@ from methods import pixel
 import numpy as np
 
 
-def get_mask(im: np.array):
-    mask, im_cropped = pixel.get_mask(im)
+def get_mask(im: np.array, color_space):
+    mask, im_cropped = pixel.get_mask(im,color_space)
 
     im_floodfill = mask.copy()
 
@@ -25,7 +25,7 @@ def get_mask(im: np.array):
 
 if __name__ == '__main__':
     im = cv2.imread('../../datasets/train/00.000948.jpg')
-    mask = get_mask(im)
+    mask = get_mask(im,color_space)
     cv2.imshow('image', im)
     cv2.imshow('mask', mask)
     cv2.waitKey(0)
