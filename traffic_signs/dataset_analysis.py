@@ -1,10 +1,12 @@
-from dataset_manager import DatasetManager, Rectangle, GroundTruth
+from dataset_manager import DatasetManager
 from typing import List
 import numpy as np
 from matplotlib import pyplot as plt
 import cv2
-from tabulate import tabulate
 from functional import seq
+
+from model import GroundTruth
+from methods.operations import histogram_equalization
 
 
 def get_cropped(gt: GroundTruth, img):
@@ -44,22 +46,6 @@ def get_histogram_RGB(img: np.array, mask: np.array, prev_hist: np.array):
     plt.xlim([0, 256])
     plt.show()
     return hist """
-
-
-def get_histogram_equalization(img: np.array, adaptive: bool):
-    img_yuv = cv2.cvtColor(img, cv2.COLOR_BGR2YUV)
-
-    # equalize the histogram of the Y channel
-
-    if not adaptive:
-        img_yuv[:, :, 0] = cv2.equalizeHist(img_yuv[:, :, 0])
-
-        return cv2.cvtColor(img_yuv, cv2.COLOR_YUV2BGR)
-    else:
-        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-        img_yuv[:, :, 0] = clahe.apply(img_yuv[:, :, 0])
-
-        return  cv2.cvtColor(img_yuv, cv2.COLOR_YUV2BGR)
 
 
 def get_filling_factor(gt: GroundTruth, mask: np.array):
@@ -118,10 +104,10 @@ if __name__ == '__main__':
             plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
             plt.subplot(132)
             plt.title('Hist eq')
-            plt.imshow(cv2.cvtColor(get_histogram_equalization(img, False), cv2.COLOR_BGR2RGB))
+            plt.imshow(cv2.cvtColor(histogram_equalization(img, False), cv2.COLOR_BGR2RGB))
             plt.subplot(133)
             plt.title('Adaptive hist eq')
-            plt.imshow(cv2.cvtColor(get_histogram_equalization(img, True), cv2.COLOR_BGR2RGB))
+            plt.imshow(cv2.cvtColor(histogram_equalization(img, True), cv2.COLOR_BGR2RGB))
 
         for gt in sample.gt:
             if gt.type not in sign_type_stats.keys():

@@ -5,6 +5,7 @@ import numpy as np
 
 
 def get_mask(mask: np.array):
+    """TODO"""
     im_contours, contours = cv2.findContours(mask, cv2.RETR_FLOODFILL, cv2.CONTOURS_MATCH_I1)
 
     for contour in contours:

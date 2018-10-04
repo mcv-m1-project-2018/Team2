@@ -16,14 +16,14 @@
 
 ### Method 3
 
-- White balance using histogram equalization in the whole image.
+- White balance using histogram equalization.
 - Color segregation using HSV colorspace.
 - Fill holes.
 - Remove noise using geometry.
 
 ### Method 4
 
-- White balance using histogram equalization with a sliding window.
+- White balance using adaptive histogram equalization.
 - Color segregation using HSV colorspace.
 - Fill holes.
 - Remove noise using geometry.
