@@ -109,19 +109,18 @@ if __name__ == '__main__':
         img = sample.get_img()
         mask = sample.get_mask_img()
 
-
-        plt.subplot(131)
-        plt.title('Original')
-        plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-        plt.subplot(132)
-        plt.title('Hist eq')
-        plt.imshow(cv2.cvtColor(get_histogram_equalization(img, False), cv2.COLOR_BGR2RGB))
-        plt.subplot(133)
-        plt.title('Adaptive hist eq')
-        plt.imshow(cv2.cvtColor(get_histogram_equalization(img, True), cv2.COLOR_BGR2RGB))
-        plt.show()
-        
-
+        if total < 10:
+            plt.figure()
+            plt.title('Histogram equalization')
+            plt.subplot(131)
+            plt.title('Original')
+            plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+            plt.subplot(132)
+            plt.title('Hist eq')
+            plt.imshow(cv2.cvtColor(get_histogram_equalization(img, False), cv2.COLOR_BGR2RGB))
+            plt.subplot(133)
+            plt.title('Adaptive hist eq')
+            plt.imshow(cv2.cvtColor(get_histogram_equalization(img, True), cv2.COLOR_BGR2RGB))
 
         for gt in sample.gt:
             if gt.type not in sign_type_stats.keys():
@@ -130,8 +129,10 @@ if __name__ == '__main__':
             sign_type_stats[gt.type].add_sign(gt, img, mask)
             total += 1
 
+    plt.figure()
     subplt = 231
     for sign_type, stat in seq(sign_type_stats.items()).order_by(lambda kv: ord(kv[0])):
+        plt.title('Histograms by sign type')
         color = ('b', 'g', 'r')
         plt.subplot(subplt)
         subplt += 1
@@ -140,14 +141,13 @@ if __name__ == '__main__':
             plt.plot(stat.histogram[:, :, i].ravel(), color=col)
             plt.xlim([0, 256])
 
-    plt.show()
-
     stat_data = seq(sign_type_stats.items()) \
         .order_by(lambda kv: ord(kv[0])) \
         .map(lambda kv: (kv[0],) + kv[1].get_avg(total)) \
         .reduce(lambda a, b: [a[0] + [b[0]], a[1] + [b[1]], a[2] + [b[2]], a[3] + [b[3]]], [[], [], [], []]) \
         .to_list()
     fields = ['Area', 'Form factor', 'Filling ratio']
+    plt.figure()
     for i, field in enumerate(fields):
         plt.subplot(131 + i)
         plt.title(field)

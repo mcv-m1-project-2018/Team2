@@ -1,11 +1,11 @@
 """Calculate the mask using pixel segmentation and then filling the gaps"""
 import cv2
-from pixel import get_mask as get_mask_pixel
+from methods import pixel
 import numpy as np
 
 
 def get_mask(im: np.array):
-    mask, im_cropped = get_mask_pixel(im)
+    mask, im_cropped = pixel.get_mask(im)
 
     im_floodfill = mask.copy()
 
