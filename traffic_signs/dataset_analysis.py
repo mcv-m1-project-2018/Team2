@@ -2,33 +2,13 @@ from dataset_manager import DatasetManager
 from typing import List
 import numpy as np
 from matplotlib import pyplot as plt
+plt.rcParams.update({'font.size': 16})
 import cv2
 from functional import seq
 
 from model import GroundTruth
 #from methods.operations import histogram_equalization
-from utils import get_cropped, get_filling_factor
-plt.rcParams.update({'font.size': 16})
-
-
-
-def get_histogram (img: np.array, gt: GroundTruth, mask: np.array, HVS):
-    #  plt.subplot(121)
-    # plt.imshow(cv2.cvtColor(get_cropped(gt, img), cv2.COLOR_BGR2RGB))
-    # plt.subplot(122)
-    if HVS is True:
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    img = get_cropped(gt.rectangle, img)
-    mask = get_cropped(gt.rectangle, mask)
-    color = ('b', 'g', 'r')
-    hists = []
-    for i, col in enumerate(color):
-        hists.append(cv2.calcHist([img], [i], mask, [256], [0, 256]))
-        # plt.plot(hist.ravel(), color=col)
-        # plt.xlim([0, 256])
-    # plt.show()
-    return hists
-
+from utils import get_filling_factor, get_histogram, print_all_histograms
 
 
 class SignTypeStats:
@@ -61,32 +41,14 @@ class SignTypeStats:
                len(self.form_factor) / data_length
 
 
-def main():
-    global total
-    dataManager = DatasetManager("../datasets/train")
-    print('Loading data...')
-    dataManager.load_data()
-    data = dataManager.data
+def get_signs_stats (data):
+
     sign_type_stats = {}
-    print('Running...')
     total = 0
     for sample in data:
         img = sample.get_img()
         mask = sample.get_mask_img()
-        """""
-        if total < 5:
-            plt.figure()
-            plt.title('Histogram equalization')
-            plt.subplot(131)
-            plt.title('Original')
-            plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-            plt.subplot(132)
-            plt.title('Hist eq')
-            plt.imshow(cv2.cvtColor(histogram_equalization(img, False), cv2.COLOR_BGR2RGB))
-            plt.subplot(133)
-            plt.title('Adaptive hist eq')
-            plt.imshow(cv2.cvtColor(histogram_equalization(img, True), cv2.COLOR_BGR2RGB))
-            """""
+
         for gt in sample.gt:
             if gt.type not in sign_type_stats.keys():
                 sign_type_stats[gt.type] = SignTypeStats()
@@ -94,32 +56,19 @@ def main():
             sign_type_stats[gt.type].add_sign(gt, img, mask)
             total += 1
 
+    return sign_type_stats, total
 
-    for x in range (2):
-        subplt = 231
-        plt.figure()
-        for sign_type, stat in seq(sign_type_stats.items()).order_by(lambda kv: ord(kv[0])):
-            #plt.title('Histograms by sign type')
-            color = ('b', 'g', 'r')
-            ax = plt.subplot(subplt)
-            subplt += 1
-            plt.title(sign_type)
 
-            for i, col in enumerate(color):
-                plt.plot(stat.histogram[:, x, i].ravel(), color=col)
-                plt.xlim([0, 256])
 
-        if x == 0:
+def main():
 
-            ax.plot(stat.histogram[:, x, 2], '--r', label='Red')
-            ax.plot(stat.histogram[:, x, 1], '--g', label='Green')
-            ax.plot(stat.histogram[:, x, 0], '--b', label='Blue')
-        else:
-            ax.plot(stat.histogram[:, x, 2], '--r', label='H')
-            ax.plot(stat.histogram[:, x, 1], '--g', label='S')
-            ax.plot(stat.histogram[:, x, 0], '--b', label='V')
+    dataManager = DatasetManager("../datasets/train")
+    print('Loading data...')
+    dataManager.load_data()
+    data = dataManager.data
+    sign_type_stats, total = get_signs_stats(data)
 
-        ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.07), shadow=True, ncol=3)
+    print_all_histograms(sign_type_stats)
 
     stat_data = seq(sign_type_stats.items()) \
         .order_by(lambda kv: ord(kv[0])) \
