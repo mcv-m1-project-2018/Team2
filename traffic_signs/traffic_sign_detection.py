@@ -1,31 +1,19 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-import numpy as np
+import argparse
 import fnmatch
 import os
-import argparse
-import sys
 import pickle
 
-import numpy as np
 import imageio
-from docopt import docopt
 
+import evaluation.evaluation_funcs as evalf
 from candidate_generation_pixel import candidate_generation_pixel
 from candidate_generation_window import candidate_generation_window
-from evaluation.load_annotations import load_annotations
-import evaluation.evaluation_funcs as evalf
 from dataset_manager import DatasetManager
-
-
-class Result:
-    pixel_precision: float
-    pixel_accuracy: float
-    pixel_specificity: float
-    pixel_sensitivity: float
-    window_precision: float
-    window_accuracy: float
+from methods import method1, method2, method3, method4
+from model import Result
 
 
 def traffic_sign_detection(directory, output_dir, pixel_method, window_method):
@@ -45,7 +33,24 @@ def traffic_sign_detection(directory, output_dir, pixel_method, window_method):
     datasetManager = DatasetManager(directory)
     datasetManager.load_data()
 
-    # Load image names in the given directory
+    methods = {
+        'method1': method1,
+        'method2': method2,
+        'method3': method3,
+        'method4': method4
+    }
+    method = methods.get(pixel_method, lambda: 'Invalid method')
+    method.train(datasetManager.data)
+
+    for dat in datasetManager.data:
+        im = dat.get_img()
+
+        mask = method.get_mask(im)
+        mask_solution = dat.get_mask_img()
+
+        # TODO evaluate
+
+    """# Load image names in the given directory
     file_names = sorted(fnmatch.filter(os.listdir(directory), '*.jpg'))
 
     for name in file_names:
@@ -63,7 +68,7 @@ def traffic_sign_detection(directory, output_dir, pixel_method, window_method):
             os.makedirs(fd)
 
         out_mask_name = '{}.png'.format(fd, base)
-        #imageio.imwrite(out_mask_name, np.uint8(np.round(pixel_candidates)))
+        # imageio.imwrite(out_mask_name, np.uint8(np.round(pixel_candidates)))
 
         # Accumulate pixel performance of the current image #################
         pixel_annotation = imageio.imread('{}/mask/mask.{}.png'.format(directory, base)) > 0
@@ -76,13 +81,14 @@ def traffic_sign_detection(directory, output_dir, pixel_method, window_method):
         pixel_tn += local_pixel_tn
 
         if window_method != 'None':
-            window_candidates = candidate_generation_window(im, pixel_candidates, window_method) 
+            window_candidates = candidate_generation_window(im, pixel_candidates, window_method)
 
             out_list_name = '{}/{}.pkl'.format(fd, base)
-            
-            with open(out_list_name, "wb") as fp:   #Pickling
+
+            with open(out_list_name, "wb") as fp:  # Pickling
                 pickle.dump(window_candidates, fp)
-            [localWindowTP, localWindowFN, localWindowFP] = evalf.performance_accumulation_window(window_candidates, window_annotationss)
+            [localWindowTP, localWindowFN, localWindowFP] = evalf.performance_accumulation_window(window_candidates,
+                                                                                                  window_annotationss)
 
             windowTP = windowTP + localWindowTP
             windowFN = windowFN + localWindowFN
@@ -94,17 +100,16 @@ def traffic_sign_detection(directory, output_dir, pixel_method, window_method):
                                                                                                           window_fp)
 
     [pixel_precision, pixel_accuracy, pixel_specificity, pixel_sensitivity] = evalf.performance_evaluation_pixel(
-        pixel_tp, pixel_fp, pixel_fn, pixel_tn)
+        pixel_tp, pixel_fp, pixel_fn, pixel_tn)"""
 
-    result = Result()
-    result.pixel_precision = pixel_precision
-    result.pixel_accuracy = pixel_accuracy
-    result.pixel_specificity = pixel_specificity
-    result.pixel_sensitivity = pixel_sensitivity
-    result.window_precision = window_precision
-    result.window_accuracy = window_accuracy
-
-    return result
+    return Result(
+        pixel_precision=pixel_precision,
+        pixel_accuracy=pixel_accuracy,
+        pixel_specificity=pixel_specificity,
+        pixel_sensitivity=pixel_sensitivity,
+        window_precision=window_precision,
+        window_accuracy=window_accuracy
+    )
 
 
 if __name__ == '__main__':
@@ -112,7 +117,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('dirName')
     parser.add_argument('outPath')
-    parser.add_argument('pixel_method', choices=['color_segmentation'])
+    parser.add_argument('pixel_method', choices=['method1', 'method2', 'method3', 'method4'])
     parser.add_argument('--windowMethod')
 
     args = parser.parse_args()

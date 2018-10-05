@@ -2,8 +2,8 @@
 
 - Claudia Baca Perez
 - Quim Comas Martínez
-- Jorge López Fueyo
 - Alba María Herrera Palacio
+- Jorge López Fueyo
 
 
 
