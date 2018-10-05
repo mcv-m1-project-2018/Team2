@@ -101,14 +101,25 @@ def main():
         for sign_type, stat in seq(sign_type_stats.items()).order_by(lambda kv: ord(kv[0])):
             #plt.title('Histograms by sign type')
             color = ('b', 'g', 'r')
-            plt.subplot(subplt)
+            ax = plt.subplot(subplt)
             subplt += 1
             plt.title(sign_type)
+
             for i, col in enumerate(color):
                 plt.plot(stat.histogram[:, x, i].ravel(), color=col)
                 plt.xlim([0, 256])
 
+        if x == 0:
 
+            ax.plot(stat.histogram[:, x, 2], '--r', label='Red')
+            ax.plot(stat.histogram[:, x, 1], '--g', label='Green')
+            ax.plot(stat.histogram[:, x, 0], '--b', label='Blue')
+        else:
+            ax.plot(stat.histogram[:, x, 2], '--r', label='H')
+            ax.plot(stat.histogram[:, x, 1], '--g', label='S')
+            ax.plot(stat.histogram[:, x, 0], '--b', label='V')
+
+        ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.07), shadow=True, ncol=3)
 
     stat_data = seq(sign_type_stats.items()) \
         .order_by(lambda kv: ord(kv[0])) \
