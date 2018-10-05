@@ -27,11 +27,15 @@ def _get_mask_hsv(im):
     upper_red = np.array([180, 255, 255])
     lower_blue = np.array([110, 50, 50])
     upper_blue = np.array([130, 255, 255])
-
+    #lower_white=np.array([0, 0, 225])
+    #upper_white=np.array([145, 60, 255])
+    
     red_mask = cv2.inRange(hsv_im, lower_red, upper_red)
     blue_mask = cv2.inRange(hsv_im, lower_blue, upper_blue)
-    final_mask = red_mask + blue_mask
-
+    #white_mask= cv2.inRange(hsv_im, lower_white, upper_white)
+    final_mask = red_mask + blue_mask 
+    #white_mask
+    
     result_seg = cv2.bitwise_and(rgb_im, rgb_im, mask=final_mask)
 
     return final_mask, result_seg
@@ -40,14 +44,17 @@ def _get_mask_hsv(im):
 def _get_mask_rgb(im):
     rgb_im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
 
-    upper_red = np.array([255, 56, 50])
-    lower_red = np.array([155, 15, 15])
     upper_blue = np.array([0, 80, 255])
     lower_blue = np.array([0, 20, 100])
-
+    lower2_red=np.array([0,150,50])
+    upper2_red=np.array([15,255,225])
+    lower_red=np.array([170,160,50])
+    upper_red=np.array([180,255,255])
+    
     red_mask = cv2.inRange(rgb_im, lower_red, upper_red)
     blue_mask = cv2.inRange(rgb_im, lower_blue, upper_blue)
-    final_mask = red_mask + blue_mask
+    red2_mask=cv2.inRange(rgb_im, lower2_red, upper2_red)
+    final_mask = red_mask + blue_mask + red2_mask
 
     result_seg = cv2.bitwise_and(rgb_im, rgb_im, mask=final_mask)
 
