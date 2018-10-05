@@ -109,7 +109,7 @@ if __name__ == '__main__':
         img = sample.get_img()
         mask = sample.get_mask_img()
 
-        if total < 10:
+        if total < 5:
             plt.figure()
             plt.title('Histogram equalization')
             plt.subplot(131)
@@ -132,7 +132,7 @@ if __name__ == '__main__':
     plt.figure()
     subplt = 231
     for sign_type, stat in seq(sign_type_stats.items()).order_by(lambda kv: ord(kv[0])):
-        plt.title('Histograms by sign type')
+        #plt.title('Histograms by sign type')
         color = ('b', 'g', 'r')
         plt.subplot(subplt)
         subplt += 1
