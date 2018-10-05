@@ -5,6 +5,19 @@ import numpy as np
 
 
 def get_mask(mask: np.array):
+    """ 
+    get_mask(mask)
+    
+    Function to improve the resulting mask by a floodfill algorithm provided by cv2
+    
+    Parameters   Value
+   ----------------------
+    'mask'         Binary image with the detections obtained by the image segmentation 
+    
+    returns the improved mask 
+     
+    """
+    
     im_floodfill = mask.copy()
 
     # Mask used to flood filling.
