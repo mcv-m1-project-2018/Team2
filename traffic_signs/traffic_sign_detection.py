@@ -8,10 +8,12 @@ import evaluation.evaluation_funcs as evalf
 from dataset_manager import DatasetManager
 from methods import method1, method2, method3, method4
 from model import Result
+from data_analysis import data_analysis
 import matplotlib.pyplot as plt
 
 
-def traffic_sign_detection(directory, output_dir, pixel_method, window_method):
+def traffic_sign_detection(directory, output_dir, pixel_method, window_method, analysis = False):
+
     pixel_tp = 0
     pixel_fn = 0
     pixel_fp = 0
@@ -37,7 +39,8 @@ def traffic_sign_detection(directory, output_dir, pixel_method, window_method):
     method = methods.get(pixel_method, lambda: 'Invalid method')
 
     train, verify = datasetManager.get_data_splits()
-
+    if analysis is True:
+        data_analysis(train)
     method.train(train)
 
     for dat in verify:

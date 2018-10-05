@@ -59,13 +59,13 @@ def get_signs_stats (data):
     return sign_type_stats, total
 
 
+def split_analysis(data):
 
-def main():
+    sign_type_stats, total = get_signs_stats(data)
+    print_all_histograms(sign_type_stats)
 
-    dataManager = DatasetManager("../datasets/train")
-    print('Loading data...')
-    dataManager.load_data()
-    data = dataManager.data
+def data_analysis(data):
+
     sign_type_stats, total = get_signs_stats(data)
 
     print_all_histograms(sign_type_stats)
@@ -93,4 +93,10 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    # Analysis
+
+    dataManager = DatasetManager("../datasets/train")
+    print('Loading data...')
+    dataManager.load_data()
+    data = dataManager.data
+    data_analysis(data)
