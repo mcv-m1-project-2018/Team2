@@ -1,22 +1,27 @@
 import cv2
 import numpy as np
 
-
 from model import GroundTruth, Rectangle
+from matplotlib import pyplot as plt
 
 
-def get_filling_factor(rectangle: Rectangle, mask: np.array):
+def get_filling_factor(rectangle: Rectangle, mask: np.array, p=False):
     # compute the area of bboxes
     bbox_area = rectangle.get_area()
-    mask_area = get_mask_area(rectangle, mask)
+    whites = count_whites(rectangle, mask, p)
 
     # return the filling ratio
-    return mask_area / bbox_area
+    return whites / bbox_area
 
 
-def get_mask_area(rectangle: Rectangle, mask):
+def count_whites(rectangle: Rectangle, mask, p=False):
     mask_cropped = get_cropped(rectangle, mask)
     _, img = cv2.threshold(mask_cropped, 0, 255, cv2.THRESH_BINARY)
+
+    if p:
+        plt.figure()
+        plt.imshow(img, 'gray')
+        plt.show()
 
     whites = cv2.countNonZero(img)
     return whites
