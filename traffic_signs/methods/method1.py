@@ -15,7 +15,7 @@ class Method1:
         mask = fill_holes(mask)
         mask = discard_geometry.get_mask(mask)
 
-        return mask
+        return mask, im
 
 
 instance = Method1()

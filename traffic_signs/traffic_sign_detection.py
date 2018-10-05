@@ -40,7 +40,7 @@ def traffic_sign_detection(directory, output_dir, pixel_method, window_method):
     for dat in datasetManager.data:
         im = dat.get_img()
 
-        mask = method.get_mask(im)
+        mask, im = method.get_mask(im)
         mask_solution = dat.get_mask_img()
 
         [local_pixel_tp, local_pixel_fp, local_pixel_fn, local_pixel_tn] = evalf.performance_accumulation_pixel(
