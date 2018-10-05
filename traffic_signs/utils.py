@@ -1,6 +1,6 @@
 import cv2
+import numpy as np
 
-from dask.tests.test_base import np
 
 from model import GroundTruth, Rectangle
 

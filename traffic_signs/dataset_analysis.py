@@ -6,33 +6,20 @@ import cv2
 from functional import seq
 
 from model import GroundTruth
-from methods.operations import histogram_equalization
-
+#from methods.operations import histogram_equalization
+from utils import get_cropped, get_filling_factor
 plt.rcParams.update({'font.size': 16})
 
 
-def get_cropped(gt: GroundTruth, img):
-    img_cropped = img[
-                  int(gt.rectangle.top_left[0]):int(gt.rectangle.get_bottom_right()[0]) + 1,
-                  int(gt.rectangle.top_left[1]):int(gt.rectangle.get_bottom_right()[1]) + 1
-                  ]
-    return img_cropped
 
-
-def get_mask_area(gt: GroundTruth, mask):
-    mask_cropped = get_cropped(gt, mask)
-    _, img = cv2.threshold(mask_cropped, 0, 255, cv2.THRESH_BINARY)
-
-    whites = cv2.countNonZero(img)
-    return whites
-
-
-def get_histogram_rgb(img: np.array, gt: GroundTruth, mask: np.array):
+def get_histogram (img: np.array, gt: GroundTruth, mask: np.array, HVS):
     #  plt.subplot(121)
     # plt.imshow(cv2.cvtColor(get_cropped(gt, img), cv2.COLOR_BGR2RGB))
     # plt.subplot(122)
-    img = get_cropped(gt, img)
-    mask = get_cropped(gt, mask)
+    if HVS is True:
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    img = get_cropped(gt.rectangle, img)
+    mask = get_cropped(gt.rectangle, mask)
     color = ('b', 'g', 'r')
     hists = []
     for i, col in enumerate(color):
@@ -42,41 +29,6 @@ def get_histogram_rgb(img: np.array, gt: GroundTruth, mask: np.array):
     # plt.show()
     return hists
 
-
-def get_histogram_hsv(img: np.array, gt: GroundTruth, mask: np.array):
-    # plt.figure()
-    # plt.subplot(121)
-    # plt.imshow(cv2.cvtColor(get_cropped(gt, img), cv2.COLOR_BGR2RGB))
-    # plt.subplot(122)
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    img = get_cropped(gt, img)
-    mask = get_cropped(gt, mask)
-    color = ('b', 'g', 'r')
-    hists = []
-    for i, col in enumerate(color):
-        hists.append(cv2.calcHist([img], [i], mask, [256], [0, 256]))
-        # plt.plot(hists[i].ravel(), color=col)
-        # plt.xlim([0, 256])
-    # plt.show()
-    return hists
-
-
-"""def get_histogram_gray(img):
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    hist = cv2.calcHist([img], [0], None, [256], [0, 256])
-    plt.plot(hist)
-    plt.xlim([0, 256])
-    plt.show()
-    return hist """
-
-
-def get_filling_factor(gt: GroundTruth, mask: np.array):
-    # compute the area of bboxes
-    bbox_area = gt.rectangle.get_area()
-    mask_area = get_mask_area(gt, mask)
-
-    # return the filling ratio
-    return mask_area / bbox_area
 
 
 class SignTypeStats:
@@ -89,15 +41,17 @@ class SignTypeStats:
         self.area = []
         self.form_factor = []
         self.filling_ratio = []
-        self.histogram = np.zeros((256, 1, 3))
+        self.histogram = np.zeros((256, 2, 3))
 
     def add_sign(self, gt: GroundTruth, img: np.array, mask: np.array):
         self.area.append(gt.rectangle.get_area())
         self.form_factor.append(float(gt.rectangle.width / gt.rectangle.height))
-        self.filling_ratio.append(get_filling_factor(gt, mask))
-        hists = get_histogram_hsv(img, gt, mask)
+        self.filling_ratio.append(get_filling_factor(gt.rectangle, mask))
+        hists_rgb = get_histogram(img, gt, mask, False)
+        hists_hsv = get_histogram (img, gt, mask, True)
         for i in range(3):
-            self.histogram[:, :, i] += hists[i]
+            self.histogram[:, 0, i] += hists_rgb[i][:,0]
+            self.histogram[:, 1, i] += hists_hsv[i][:,0]
 
     def get_avg(self, data_length):
         return (max(self.area), min(self.area), np.mean(self.area), np.std(self.area)), \
@@ -119,7 +73,7 @@ def main():
     for sample in data:
         img = sample.get_img()
         mask = sample.get_mask_img()
-
+        """""
         if total < 5:
             plt.figure()
             plt.title('Histogram equalization')
@@ -132,25 +86,30 @@ def main():
             plt.subplot(133)
             plt.title('Adaptive hist eq')
             plt.imshow(cv2.cvtColor(histogram_equalization(img, True), cv2.COLOR_BGR2RGB))
-
+            """""
         for gt in sample.gt:
             if gt.type not in sign_type_stats.keys():
                 sign_type_stats[gt.type] = SignTypeStats()
 
             sign_type_stats[gt.type].add_sign(gt, img, mask)
             total += 1
-    plt.figure()
-    subplt = 231
-    for sign_type, stat in seq(sign_type_stats.items()).order_by(lambda kv: ord(kv[0])):
 
-        #plt.title('Histograms by sign type')
-        color = ('b', 'g', 'r')
-        plt.subplot(subplt)
-        subplt += 1
-        plt.title(sign_type)
-        for i, col in enumerate(color):
-            plt.plot(stat.histogram[:, :, i].ravel(), color=col)
-            plt.xlim([0, 256])
+
+    for x in range (2):
+        subplt = 231
+        plt.figure()
+        for sign_type, stat in seq(sign_type_stats.items()).order_by(lambda kv: ord(kv[0])):
+            #plt.title('Histograms by sign type')
+            color = ('b', 'g', 'r')
+            plt.subplot(subplt)
+            subplt += 1
+            plt.title(sign_type)
+            for i, col in enumerate(color):
+                plt.plot(stat.histogram[:, x, i].ravel(), color=col)
+                plt.xlim([0, 256])
+
+
+
     stat_data = seq(sign_type_stats.items()) \
         .order_by(lambda kv: ord(kv[0])) \
         .map(lambda kv: (kv[0],) + kv[1].get_avg(total)) \
