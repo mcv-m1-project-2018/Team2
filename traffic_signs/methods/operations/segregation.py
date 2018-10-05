@@ -23,19 +23,22 @@ def _get_mask_hsv(im):
 
     hsv_im = cv2.cvtColor(rgb_im, cv2.COLOR_RGB2HSV)
 
-    lower_red = np.array([80, 150, 50])
-    upper_red = np.array([180, 255, 255])
-    lower_blue = np.array([110, 50, 50])
-    upper_blue = np.array([130, 255, 255])
-    #lower_white=np.array([0, 0, 225])
-    #upper_white=np.array([145, 60, 255])
-    
-    red_mask = cv2.inRange(hsv_im, lower_red, upper_red)
+    lower_red_red = np.array([0, 150, 50])
+    upper_red_begin = np.array([20, 255, 255])
+    lower_red_end = np.array([160, 150, 50])
+    upper_red_end = np.array([180, 255, 255])
+    lower_blue = np.array([100, 150, 50])
+    upper_blue = np.array([140, 255, 255])
+    # lower_white=np.array([0, 0, 225])
+    # upper_white=np.array([145, 60, 255])
+
+    red_mask_begin = cv2.inRange(hsv_im, lower_red_red, upper_red_begin)
+    red_mask_end = cv2.inRange(hsv_im, lower_red_end, upper_red_end)
     blue_mask = cv2.inRange(hsv_im, lower_blue, upper_blue)
-    #white_mask= cv2.inRange(hsv_im, lower_white, upper_white)
-    final_mask = red_mask + blue_mask 
-    #white_mask
-    
+    # white_mask= cv2.inRange(hsv_im, lower_white, upper_white)
+    final_mask = red_mask_begin + red_mask_end + blue_mask
+    # white_mask
+
     result_seg = cv2.bitwise_and(rgb_im, rgb_im, mask=final_mask)
 
     return final_mask, result_seg
@@ -46,14 +49,14 @@ def _get_mask_rgb(im):
 
     upper_blue = np.array([0, 80, 255])
     lower_blue = np.array([0, 20, 100])
-    lower2_red=np.array([0,150,50])
-    upper2_red=np.array([15,255,225])
-    lower_red=np.array([170,160,50])
-    upper_red=np.array([180,255,255])
-    
+    lower2_red = np.array([0, 150, 50])
+    upper2_red = np.array([15, 255, 225])
+    lower_red = np.array([170, 160, 50])
+    upper_red = np.array([180, 255, 255])
+
     red_mask = cv2.inRange(rgb_im, lower_red, upper_red)
     blue_mask = cv2.inRange(rgb_im, lower_blue, upper_blue)
-    red2_mask=cv2.inRange(rgb_im, lower2_red, upper2_red)
+    red2_mask = cv2.inRange(rgb_im, lower2_red, upper2_red)
     final_mask = red_mask + blue_mask + red2_mask
 
     result_seg = cv2.bitwise_and(rgb_im, rgb_im, mask=final_mask)

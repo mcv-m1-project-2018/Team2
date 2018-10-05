@@ -3,7 +3,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 from dataset_manager import DatasetManager
-from methods.method2 import instance as method2
+from methods import method3
 
 dataManager = DatasetManager("../datasets/train")
 print('Loading data...')
@@ -12,12 +12,12 @@ data = dataManager.data
 sign_type_stats = {}
 print('Running...')
 total = 0
-method2.train(data)
+method3.train(data)
 
 for sample in data:
     img = sample.get_img()
     mask = sample.get_mask_img()
-    (result_mask, result) = method2.get_mask(img)
+    (result_mask, result) = method3.get_mask(img)
 
     plt.subplot(2, 2, 1)
     plt.imshow(mask, cmap="gray")

@@ -16,6 +16,6 @@ def mask_blurring(mask: np.array):
     Returns the blurred mask 
     """
 
-    mask_blurred = cv2.GaussianBlur(mask, (5, 5), 0)
+    mask_blurred = cv2.GaussianBlur(mask, (3, 3), 0)
 
     return mask_blurred

@@ -20,7 +20,6 @@ def get_image(img: np.array, adaptive: bool):
     Returns the image with the equalized Y histogram 
     
     """
-       
     img_yuv = cv2.cvtColor(img, cv2.COLOR_BGR2YUV)
 
 

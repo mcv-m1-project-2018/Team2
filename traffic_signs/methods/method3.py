@@ -15,9 +15,9 @@ class Method3:
         mask, im = segregation(im, 'hsv')
         mask = blur(mask)
         mask = fill_holes(mask)
-        mask = discard_geometry(mask)
+        mask = discard_geometry.get_mask(mask)
 
-        return mask
+        return mask, im
 
 
 instance = Method3()

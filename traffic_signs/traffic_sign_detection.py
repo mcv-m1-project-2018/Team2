@@ -2,18 +2,13 @@
 # -*- coding: utf-8 -*-
 
 import argparse
-import fnmatch
-import os
-import pickle
-
-import imageio
+from pprint import pprint
 
 import evaluation.evaluation_funcs as evalf
-from candidate_generation_pixel import candidate_generation_pixel
-from candidate_generation_window import candidate_generation_window
 from dataset_manager import DatasetManager
 from methods import method1, method2, method3, method4
 from model import Result
+import matplotlib.pyplot as plt
 
 
 def traffic_sign_detection(directory, output_dir, pixel_method, window_method):
@@ -48,7 +43,26 @@ def traffic_sign_detection(directory, output_dir, pixel_method, window_method):
         mask = method.get_mask(im)
         mask_solution = dat.get_mask_img()
 
+        [local_pixel_tp, local_pixel_fp, local_pixel_fn, local_pixel_tn] = evalf.performance_accumulation_pixel(
+            mask, mask_solution)
+        pixel_tp += local_pixel_tp
+        pixel_fp += local_pixel_fp
+        pixel_fn += local_pixel_fn
+        pixel_tn += local_pixel_tn
+
         # TODO evaluate
+
+    [pixel_precision, pixel_accuracy, pixel_specificity, pixel_sensitivity] = evalf.performance_evaluation_pixel(
+        pixel_tp, pixel_fp, pixel_fn, pixel_tn)
+
+    return Result(
+        pixel_precision=pixel_precision,
+        pixel_accuracy=pixel_accuracy,
+        pixel_specificity=pixel_specificity,
+        pixel_sensitivity=pixel_sensitivity,
+        window_precision=window_precision,
+        window_accuracy=window_accuracy
+    )
 
     """# Load image names in the given directory
     file_names = sorted(fnmatch.filter(os.listdir(directory), '*.jpg'))
@@ -102,14 +116,14 @@ def traffic_sign_detection(directory, output_dir, pixel_method, window_method):
     [pixel_precision, pixel_accuracy, pixel_specificity, pixel_sensitivity] = evalf.performance_evaluation_pixel(
         pixel_tp, pixel_fp, pixel_fn, pixel_tn)"""
 
-    return Result(
+    """return Result(
         pixel_precision=pixel_precision,
         pixel_accuracy=pixel_accuracy,
         pixel_specificity=pixel_specificity,
         pixel_sensitivity=pixel_sensitivity,
         window_precision=window_precision,
         window_accuracy=window_accuracy
-    )
+    )"""
 
 
 if __name__ == '__main__':
@@ -126,7 +140,8 @@ if __name__ == '__main__':
     # For instance, '../../DataSetDelivered/test'
     output_dir = args.outPath  # Directory where to store output masks, etc. For instance '~/m1-results/week1/test'
 
-    result = traffic_sign_detection(images_dir, output_dir, 'normrgb', args.windowMethod)
+    result = traffic_sign_detection(images_dir, output_dir, 'method3', args.windowMethod)
 
     if result:
-        print(result)
+        print('Precision:', result.pixel_precision)
+        print('Recall:', result.pixel_sensitivity)
