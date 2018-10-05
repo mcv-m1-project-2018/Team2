@@ -12,7 +12,7 @@ from utils import get_filling_factor
 
 
 class DiscardGeometry:
-    PADDING_FACTOR = 0.8
+    PADDING_FACTOR = 1
 
     def __init__(self):
         self.min_area = np.inf

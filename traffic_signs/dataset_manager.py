@@ -35,7 +35,7 @@ class DatasetManager:
         types = self.get_data_by_type()
         for sign_type in ['A', 'B', 'C', 'D', 'E', 'F']:
             random.shuffle(types[sign_type])
-            for j in types[sign_type]:
+            for j in range(len(types[sign_type])):
                 if j <= 0.7*len(types[sign_type]):
                     training.append(types[sign_type][j])
                 else:

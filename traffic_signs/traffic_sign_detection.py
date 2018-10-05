@@ -35,9 +35,12 @@ def traffic_sign_detection(directory, output_dir, pixel_method, window_method):
         'method4': method4
     }
     method = methods.get(pixel_method, lambda: 'Invalid method')
-    method.train(datasetManager.data)
 
-    for dat in datasetManager.data:
+    train, verify = datasetManager.get_data_splits()
+
+    method.train(train)
+
+    for dat in verify:
         im = dat.get_img()
 
         mask, im = method.get_mask(im)
