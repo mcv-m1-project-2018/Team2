@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+
 from model import GroundTruth, Rectangle
 from matplotlib import pyplot as plt
 
