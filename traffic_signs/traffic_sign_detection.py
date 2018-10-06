@@ -2,152 +2,90 @@
 # -*- coding: utf-8 -*-
 
 import argparse
-from pprint import pprint
+import fnmatch
+import os
+
+import cv2
 
 import evaluation.evaluation_funcs as evalf
+from data_analysis import data_analysis
 from dataset_manager import DatasetManager
 from methods import method1, method2, method3, method4
 from model import Result
-from data_analysis import data_analysis
-import matplotlib.pyplot as plt
 
 
-def traffic_sign_detection(directory, output_dir, pixel_method, window_method, analysis = False):
-
-    pixel_tp = 0
-    pixel_fn = 0
-    pixel_fp = 0
-    pixel_tn = 0
-
-    window_tp = 0
-    window_fn = 0
-    window_fp = 0
-
-    window_precision = 0
-    window_accuracy = 0
+def train_mode(input_dir: str, pixel_method, window_method: str, analysis=False):
+    tp = 0
+    fn = 0
+    fp = 0
+    tn = 0
 
     # Use this class to load and manage states
-    datasetManager = DatasetManager(directory)
-    datasetManager.load_data()
+    dataset_manager = DatasetManager(input_dir)
+    dataset_manager.load_data()
 
+    train, verify = dataset_manager.get_data_splits()
+    if analysis is True:
+        data_analysis(train)
+
+    pixel_method.train(train)
+
+    for dat in verify:
+        im = dat.get_img()
+
+        mask, im = pixel_method.get_mask(im)
+        mask_solution = dat.get_mask_img()
+
+        [local_tp, local_fp, local_fn, local_tn] = evalf.performance_accumulation_pixel(
+            mask, mask_solution)
+        tp += local_tp
+        fp += local_fp
+        fn += local_fn
+        tn += local_tn
+
+    return Result(
+        tp=tp,
+        fp=fp,
+        fn=fn,
+        tn=tn
+    )
+
+
+def test_mode(input_dir: str, output_dir: str, pixel_method, window_method: str):
+    file_names = sorted(fnmatch.filter(os.listdir(input_dir), '*.jpg'))
+    for name in file_names:
+        img_path = '{}/{}.jpg'.format(input_dir, name)
+        im = cv2.imread(img_path)
+        mask, im = pixel_method.get_mask(im)
+        cv2.imwrite('{}/{}.jpg'.format(output_dir, name), mask)
+
+
+def main():
+    # read arguments
+    parser = argparse.ArgumentParser(description='Detect traffic signs in images using non ML methods')
+    parser.add_argument('input', help="Input directory")
+    parser.add_argument('pixel_method', choices=['method1', 'method2', 'method3', 'method4'], help='Method to use')
+    parser.add_argument('--output', help='Output directory, if using test dataset to generate masks')
+    parser.add_argument('--window-method', help='Window method, if needed')
+    parser.add_argument('--analysis', action='store_true',
+                        help='Whether to perform an analysis of the train split before evaluation')
+    args = parser.parse_args()
     methods = {
         'method1': method1,
         'method2': method2,
         'method3': method3,
         'method4': method4
     }
-    method = methods.get(pixel_method, lambda: 'Invalid method')
-
-    train, verify = datasetManager.get_data_splits()
-    if analysis is True:
-        data_analysis(train)
-    method.train(train)
-
-    for dat in verify:
-        im = dat.get_img()
-
-        mask, im = method.get_mask(im)
-        mask_solution = dat.get_mask_img()
-
-        [local_pixel_tp, local_pixel_fp, local_pixel_fn, local_pixel_tn] = evalf.performance_accumulation_pixel(
-            mask, mask_solution)
-        pixel_tp += local_pixel_tp
-        pixel_fp += local_pixel_fp
-        pixel_fn += local_pixel_fn
-        pixel_tn += local_pixel_tn
-
-        # TODO evaluate
-
-    [pixel_precision, pixel_accuracy, pixel_specificity, pixel_sensitivity] = evalf.performance_evaluation_pixel(
-        pixel_tp, pixel_fp, pixel_fn, pixel_tn)
-
-    return Result(
-        pixel_precision=pixel_precision,
-        pixel_accuracy=pixel_accuracy,
-        pixel_specificity=pixel_specificity,
-        pixel_sensitivity=pixel_sensitivity,
-        window_precision=window_precision,
-        window_accuracy=window_accuracy
-    )
-
-    """# Load image names in the given directory
-    file_names = sorted(fnmatch.filter(os.listdir(directory), '*.jpg'))
-
-    for name in file_names:
-        base, extension = os.path.splitext(name)
-
-        # Read file
-        im = imageio.imread('{}/{}'.format(directory, name))
-        print('{}/{}'.format(directory, name))
-
-        # Candidate Generation (pixel) ######################################
-        pixel_candidates = candidate_generation_pixel(im, pixel_method)
-
-        fd = '{}/{}_{}'.format(output_dir, pixel_method, window_method)
-        if not os.path.exists(fd):
-            os.makedirs(fd)
-
-        out_mask_name = '{}.png'.format(fd, base)
-        # imageio.imwrite(out_mask_name, np.uint8(np.round(pixel_candidates)))
-
-        # Accumulate pixel performance of the current image #################
-        pixel_annotation = imageio.imread('{}/mask/mask.{}.png'.format(directory, base)) > 0
-
-        [local_pixel_tp, local_pixel_fp, local_pixel_fn, local_pixel_tn] = evalf.performance_accumulation_pixel(
-            pixel_candidates, pixel_annotation)
-        pixel_tp += local_pixel_tp
-        pixel_fp += local_pixel_fp
-        pixel_fn += local_pixel_fn
-        pixel_tn += local_pixel_tn
-
-        if window_method != 'None':
-            window_candidates = candidate_generation_window(im, pixel_candidates, window_method)
-
-            out_list_name = '{}/{}.pkl'.format(fd, base)
-
-            with open(out_list_name, "wb") as fp:  # Pickling
-                pickle.dump(window_candidates, fp)
-            [localWindowTP, localWindowFN, localWindowFP] = evalf.performance_accumulation_window(window_candidates,
-                                                                                                  window_annotationss)
-
-            windowTP = windowTP + localWindowTP
-            windowFN = windowFN + localWindowFN
-            windowFP = windowFP + localWindowFP
-
-            # Plot performance evaluation
-            [window_precision, window_sensitivity, window_accuracy] = evalf.performance_evaluation_window(window_tp,
-                                                                                                          window_fn,
-                                                                                                          window_fp)
-
-    [pixel_precision, pixel_accuracy, pixel_specificity, pixel_sensitivity] = evalf.performance_evaluation_pixel(
-        pixel_tp, pixel_fp, pixel_fn, pixel_tn)"""
-
-    """return Result(
-        pixel_precision=pixel_precision,
-        pixel_accuracy=pixel_accuracy,
-        pixel_specificity=pixel_specificity,
-        pixel_sensitivity=pixel_sensitivity,
-        window_precision=window_precision,
-        window_accuracy=window_accuracy
-    )"""
+    method = methods.get(args.pixel_metdho, lambda: 'Invalid method')
+    result = None
+    if args.output:
+        test_mode(args.input, args.output, method, args.window_method)
+    else:
+        result = train_mode(args.input, method, args.window_method)
+    if result:
+        print('Precision:', result.get_precision())
+        print('Recall:', result.get_recall())
 
 
 if __name__ == '__main__':
-    # read arguments
-    parser = argparse.ArgumentParser()
-    parser.add_argument('dirName')
-    parser.add_argument('outPath')
-    parser.add_argument('pixel_method', choices=['method1', 'method2', 'method3', 'method4'])
-    parser.add_argument('--windowMethod')
-
-    args = parser.parse_args()
-
-    images_dir = args.dirName  # Directory with input images and annotations
-    # For instance, '../../DataSetDelivered/test'
-    output_dir = args.outPath  # Directory where to store output masks, etc. For instance '~/m1-results/week1/test'
-
-    result = traffic_sign_detection(images_dir, output_dir, 'method3', args.windowMethod)
-
-    if result:
-        print('Precision:', result.pixel_precision)
-        print('Recall:', result.pixel_sensitivity)
+    main()

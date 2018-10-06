@@ -59,8 +59,3 @@ class DatasetManager:
                     verification.append(types[sign_type][j])
 
         return training, verification
-
-    #def get_data_k_fold(self, k):
-       # TODO
-      #  pass
-

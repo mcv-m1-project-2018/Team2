@@ -2,10 +2,10 @@ import cv2
 import numpy as np
 from matplotlib import pyplot as plt
 
-from dataset_manager import DatasetManager
+from dataset_manager import TestDatasetManager
 from methods import method3
 
-dataManager = DatasetManager("../datasets/train")
+dataManager = TestDatasetManager("../datasets/train")
 print('Loading data...')
 dataManager.load_data()
 data = dataManager.data
