@@ -9,7 +9,23 @@ from model import Data
 
 
 class DatasetManager:
-    """We will use k-fold validation. More info at https://www.openml.org/a/estimation-procedures/1"""
+
+    """
+    Class DatasetManager
+
+    In this class we load the training dataset and we split the dataset in
+    two parts: Training (70%) and Verification/validation (30%)
+    to create and test our methods
+
+    - load_data(): to store the training dataset in Data
+
+    - get_data_by_type(): group the dataset according the signal type
+
+    - get_data_splits():Get the validation and training sets of data from
+
+      the original training dataset 30% to 70% from each class
+
+    """
 
     data: List[Data]
     _dir: str
@@ -19,6 +35,7 @@ class DatasetManager:
         self._dir = directory
 
     def load_data(self):
+
         file_names = sorted(fnmatch.filter(os.listdir(self._dir), '*.jpg'))
         for file_name in file_names:
             self.data.append(Data(self._dir, file_name.replace('.jpg', '')))
@@ -29,7 +46,7 @@ class DatasetManager:
         return types
 
     def get_data_splits(self):
-        """Get the validation and training sets of data from the original training dataset 30% to 70% from each class"""
+
         training = []
         verification = []
         types = self.get_data_by_type()
@@ -43,7 +60,7 @@ class DatasetManager:
 
         return training, verification
 
-    def get_data_k_fold(self, k):
-        # TODO
-        pass
+    #def get_data_k_fold(self, k):
+       # TODO
+      #  pass
 
