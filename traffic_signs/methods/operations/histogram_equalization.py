@@ -29,7 +29,7 @@ def get_image(img: np.array, adaptive: bool):
         return cv2.cvtColor(img_yuv, cv2.COLOR_YUV2BGR)
     else:
         # Adaptive equalization
-        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(3, 3))
         img_yuv[:, :, 0] = clahe.apply(img_yuv[:, :, 0])
 
         return cv2.cvtColor(img_yuv, cv2.COLOR_YUV2BGR)
