@@ -1,5 +1,3 @@
-"""Calculate the mask using pixel segmentation, filling the gaps and finally check if the geometry of
-the areas is valid"""
 from typing import List
 
 import cv2
@@ -12,7 +10,8 @@ from utils import get_filling_factor
 
 
 class DiscardGeometry:
-    PADDING_FACTOR = 1
+    """Improves the mask by discarding invalid geometric shapes, such as those with too little area or those
+    which are not "square" enough'"""
 
     def __init__(self):
         self.min_area = np.inf
@@ -20,6 +19,14 @@ class DiscardGeometry:
         self.max_fill_factor = 0
 
     def train(self, data: List[Data]):
+        """
+        train(data)
+        Performs a training of the operation.
+
+        Parameters    Value
+        ----------------------
+        data          The training dataset
+        """
         self.min_area, self.min_fill_factor, self.max_fill_factor = seq(data) \
             .flat_map(lambda d: seq(d.gt).map(lambda gt: (d.get_mask_img(), gt.rectangle)).to_list()) \
             .map(lambda l: (l[1].get_area(), get_filling_factor(l[1], l[0]))) \
@@ -45,9 +52,9 @@ class DiscardGeometry:
 
             ff = get_filling_factor(rectangle, mask)
             # cv2.rectangle(mask, tuple(min_point.astype(int)), tuple(max_point.astype(int)), 255, thickness=1)
-            if (rectangle.get_area() < self.min_area * self.PADDING_FACTOR or
-                    ff < self.min_fill_factor * self.PADDING_FACTOR or
-                    ff > self.max_fill_factor / self.PADDING_FACTOR):
+            if (rectangle.get_area() < self.min_area or
+                    ff < self.min_fill_factor or
+                    ff > self.max_fill_factor):
                 cv2.rectangle(mask, (min_point[1], min_point[0]), (max_point[1], max_point[0]), 0, thickness=cv2.FILLED)
 
         return mask

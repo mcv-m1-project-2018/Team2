@@ -1,7 +1,7 @@
 from typing import List
 
 import numpy as np
-from methods.operations import fill_holes, discard_geometry, segregation
+from methods.operations import fill_holes, discard_geometry, segregation, blur
 from model import Data
 
 
@@ -41,6 +41,9 @@ class Method1:
         """
         #Color segmentation in RGB
         mask, im = segregation(im, 'rgb')
+
+        # Mask Blurring
+        mask = blur(mask)
         
         #We apply a FLoodfill algorithm to the computed mask
         mask = fill_holes(mask)

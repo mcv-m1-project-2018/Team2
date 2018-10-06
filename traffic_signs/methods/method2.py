@@ -1,7 +1,7 @@
 from typing import List
 
 import numpy as np
-from methods.operations import fill_holes, discard_geometry, segregation, histogram_equalization, blurring
+from methods.operations import fill_holes, discard_geometry, segregation, blur
 from model import Data
 
 
@@ -14,6 +14,7 @@ class Method2:
     is done in HSV.
 
     """
+
     def train(self, data: List[Data]):
         """
         train(data)
@@ -39,17 +40,17 @@ class Method2:
     
         Returns the mask, binary image with the detections.
         """
-        
-        #Color segmentation in RGB        
+
+        # Color segmentation in RGB
         mask = segregation(im, 'hsv')
-        
-        #We apply a FLoodfill algorithm to the computed mask        
+
+        # We apply a FLoodfill algorithm to the computed mask
         mask = fill_holes(mask)
-        
-        #Blurring the mask
-        mask=blurring(mask)
-        
-        #Compute the final mask
+
+        # Blurring the mask
+        mask = blur(mask)
+
+        # Compute the final mask
         mask = discard_geometry.get_mask(mask)
 
         return mask, im

@@ -14,6 +14,7 @@ class Method3:
     is done in HSV to an image with the Y-histogram equalised.  
 
     """
+
     def train(self, data: List[Data]):
         """
         train(data)
@@ -39,19 +40,19 @@ class Method3:
     
         Returns the mask, binary image with the detections.
         """
-        #Equalization of the Y channel of the image 
+        # Equalization of the Y channel of the image
         im = histogram_equalization(im, False)
-        
-        #Color segmentation in HSV
+
+        # Color segmentation in HSV
         mask, im = segregation(im, 'hsv')
-        
-        #Mask Blurring
+
+        # Mask Blurring
         mask = blur(mask)
-        
-        #We apply a FLoodfill algorithm to the computed mask
+
+        # We apply a FLoodfill algorithm to the computed mask
         mask = fill_holes(mask)
-        
-        #Compute the final mask
+
+        # Compute the final mask
         mask = discard_geometry(mask)
 
         return mask, im

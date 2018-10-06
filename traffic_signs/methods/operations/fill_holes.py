@@ -8,16 +8,16 @@ def get_mask(mask: np.array):
     """ 
     get_mask(mask)
     
-    Function to improve the resulting mask by a floodfill algorithm provided by cv2
+    Fills the holes of closed areas.
     
     Parameters   Value
    ----------------------
-    'mask'         Binary image with the detections obtained by the image segmentation 
+    'mask'       Binary image with the detections obtained by the image segmentation
     
     returns the improved mask 
      
     """
-    
+
     im_floodfill = mask.copy()
 
     # Mask used to flood filling.
@@ -36,7 +36,7 @@ def get_mask(mask: np.array):
 
 if __name__ == '__main__':
     im = cv2.imread('../../datasets/train/00.000948.jpg')
-    mask_hsv = segregation.get_mask(im, 'hsv')
+    mask_hsv = segregation(im, 'hsv')
     mask_hsv = get_mask(mask_hsv)
     cv2.imshow('image', im)
     cv2.imshow('mask', mask_hsv)

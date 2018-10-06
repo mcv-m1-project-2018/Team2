@@ -6,11 +6,11 @@ def mask_blurring(mask: np.array):
     """
     mask_blurring(mask)
     
-    Function to blurr the resulting masks
+    Function to blur the resulting masks
     
-    Parameters   Value
+    Parameters    Value
    ----------------------
-    'mask'        Computed mask: Binary image with the signals detections obtained by the image segmentation 
+    'mask'        Binary image with the signals detections obtained by the image segmentation
     
     
     Returns the blurred mask 
