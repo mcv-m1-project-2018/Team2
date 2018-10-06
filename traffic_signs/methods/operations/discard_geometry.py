@@ -15,7 +15,7 @@ class DiscardGeometry:
 
     def __init__(self):
         self.min_area = np.inf
-        self.min_fill_factor = np.inf
+        self.min_form_factor = np.inf
         self.max_fill_factor = 0
 
     def train(self, data: List[Data]):
@@ -27,7 +27,7 @@ class DiscardGeometry:
         ----------------------
         data          The training dataset
         """
-        self.min_area, self.min_fill_factor, self.max_fill_factor = seq(data) \
+        self.min_area, self.min_form_factor, self.max_fill_factor = seq(data) \
             .flat_map(lambda d: seq(d.gt).map(lambda gt: (d.get_mask_img(), gt.rectangle)).to_list()) \
             .map(lambda l: (l[1].get_area(), get_filling_factor(l[1], l[0]))) \
             .reduce(lambda accum, l: (min(accum[0], l[0]), min(accum[1], l[1]), max(accum[2], l[1])),
@@ -51,9 +51,8 @@ class DiscardGeometry:
             rectangle.width = int(max_point[1] - min_point[1])
 
             ff = get_filling_factor(rectangle, mask)
-            # cv2.rectangle(mask, tuple(min_point.astype(int)), tuple(max_point.astype(int)), 255, thickness=1)
             if (rectangle.get_area() < self.min_area or
-                    ff < self.min_fill_factor or
+                    ff < self.min_form_factor or
                     ff > self.max_fill_factor):
                 cv2.rectangle(mask, (min_point[1], min_point[0]), (max_point[1], max_point[0]), 0, thickness=cv2.FILLED)
 

@@ -4,9 +4,11 @@ import numpy as np
 from model import GroundTruth, Rectangle
 from matplotlib import pyplot as plt
 from functional import seq
+
 plt.rcParams.update({'font.size': 16})
 
-def get_histogram (img: np.array, gt: GroundTruth, mask: np.array, HVS):
+
+def get_histogram(img: np.array, gt: GroundTruth, mask: np.array, HVS):
     #  plt.subplot(121)
     # plt.imshow(cv2.cvtColor(get_cropped(gt, img), cv2.COLOR_BGR2RGB))
     # plt.subplot(122)
@@ -23,13 +25,13 @@ def get_histogram (img: np.array, gt: GroundTruth, mask: np.array, HVS):
     # plt.show()
     return hists
 
-def print_all_histograms(sign_type_stats):
 
-    for x in range (2):
+def print_all_histograms(sign_type_stats):
+    for x in range(2):
         subplt = 231
         plt.figure()
         for sign_type, stat in seq(sign_type_stats.items()).order_by(lambda kv: ord(kv[0])):
-            #plt.title('Histograms by sign type')
+            # plt.title('Histograms by sign type')
             color = ('b', 'g', 'r')
             ax = plt.subplot(subplt)
             subplt += 1
@@ -50,7 +52,6 @@ def print_all_histograms(sign_type_stats):
             ax.plot(stat.histogram[:, x, 0], '--b', label='V')
 
         ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.07), shadow=True, ncol=3)
-
 
 
 def get_filling_factor(rectangle: Rectangle, mask: np.array):
@@ -76,5 +77,3 @@ def get_cropped(rectangle: Rectangle, img):
                   int(rectangle.top_left[1]):int(rectangle.get_bottom_right()[1]) + 1
                   ]
     return img_cropped
-
-

@@ -49,11 +49,11 @@ class Method4:
         # Mask Blurring
         mask = blur(mask)
 
-        # We apply a FLoodfill algorithm to the computed mask
+        # Hole filling
         mask = fill_holes(mask)
 
         # Compute the final mask
-        mask = discard_geometry(mask)
+        mask = discard_geometry.get_mask(mask)
 
         return mask, im
 

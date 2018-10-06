@@ -3,6 +3,7 @@ from typing import List
 import numpy as np
 from methods.operations import fill_holes, discard_geometry, segregation, blur
 from model import Data
+import matplotlib.pyplot as plt
 
 
 class Method2:
@@ -42,13 +43,13 @@ class Method2:
         """
 
         # Color segmentation in RGB
-        mask = segregation(im, 'hsv')
-
-        # We apply a FLoodfill algorithm to the computed mask
-        mask = fill_holes(mask)
+        mask, im = segregation(im, 'hsv')
 
         # Blurring the mask
         mask = blur(mask)
+
+        # Hole filling
+        mask = fill_holes(mask)
 
         # Compute the final mask
         mask = discard_geometry.get_mask(mask)

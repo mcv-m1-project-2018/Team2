@@ -2,12 +2,13 @@ from dataset_manager import DatasetManager
 from typing import List
 import numpy as np
 from matplotlib import pyplot as plt
+
 plt.rcParams.update({'font.size': 16})
 import cv2
 from functional import seq
 
 from model import GroundTruth
-#from methods.operations import histogram_equalization
+# from methods.operations import histogram_equalization
 from utils import get_filling_factor, get_histogram, print_all_histograms
 
 
@@ -28,10 +29,10 @@ class SignTypeStats:
         self.form_factor.append(float(gt.rectangle.width / gt.rectangle.height))
         self.filling_ratio.append(get_filling_factor(gt.rectangle, mask))
         hists_rgb = get_histogram(img, gt, mask, False)
-        hists_hsv = get_histogram (img, gt, mask, True)
+        hists_hsv = get_histogram(img, gt, mask, True)
         for i in range(3):
-            self.histogram[:, 0, i] += hists_rgb[i][:,0]
-            self.histogram[:, 1, i] += hists_hsv[i][:,0]
+            self.histogram[:, 0, i] += hists_rgb[i][:, 0]
+            self.histogram[:, 1, i] += hists_hsv[i][:, 0]
 
     def get_avg(self, data_length):
         return (max(self.area), min(self.area), np.mean(self.area), np.std(self.area)), \
@@ -41,8 +42,7 @@ class SignTypeStats:
                len(self.form_factor) / data_length
 
 
-def get_signs_stats (data):
-
+def get_signs_stats(data):
     sign_type_stats = {}
     total = 0
     for sample in data:
@@ -60,12 +60,11 @@ def get_signs_stats (data):
 
 
 def split_analysis(data):
-
     sign_type_stats, total = get_signs_stats(data)
     print_all_histograms(sign_type_stats)
 
-def data_analysis(data):
 
+def data_analysis(data):
     sign_type_stats, total = get_signs_stats(data)
 
     print_all_histograms(sign_type_stats)

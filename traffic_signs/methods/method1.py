@@ -14,6 +14,7 @@ class Method1:
     is done in RGB.
 
     """
+
     def train(self, data: List[Data]):
         """
         train(data)
@@ -39,16 +40,16 @@ class Method1:
     
         Returns the mask, binary image with the detections.
         """
-        #Color segmentation in RGB
+        # Color segmentation in RGB
         mask, im = segregation(im, 'rgb')
+
+        # Hole filling
+        mask = fill_holes(mask)
 
         # Mask Blurring
         mask = blur(mask)
-        
-        #We apply a FLoodfill algorithm to the computed mask
-        mask = fill_holes(mask)
-        
-        #Compute the final mask
+
+        # Compute the final mask
         mask = discard_geometry.get_mask(mask)
 
         return mask, im

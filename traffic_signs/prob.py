@@ -2,30 +2,24 @@ import cv2
 import numpy as np
 from matplotlib import pyplot as plt
 
-from dataset_manager import TestDatasetManager
-from methods import method3
+from dataset_manager import DatasetManager
+from methods import method1, method2, method3, method4
 
-dataManager = TestDatasetManager("../datasets/train")
+dataManager = DatasetManager("../datasets/train")
 print('Loading data...')
 dataManager.load_data()
 data = dataManager.data
 sign_type_stats = {}
 print('Running...')
 total = 0
+method1.train(data)
+method2.train(data)
 method3.train(data)
+method4.train(data)
 
 for sample in data:
     img = sample.get_img()
-    mask = sample.get_mask_img()
-    (result_mask, result) = method3.get_mask(img)
-
-    plt.subplot(2, 2, 1)
-    plt.imshow(mask, cmap="gray")
-    plt.subplot(2, 2, 2)
-    plt.imshow(result_mask, cmap="gray")
-    plt.subplot(2, 2, 3)
-    plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-    plt.subplot(2, 2, 4)
-    plt.imshow(result)
-
-    plt.show()
+    mask_1, im1 = method1.get_mask(img)
+    mask_2, im2 = method2.get_mask(img, True)
+    mask_3, im3 = method3.get_mask(img)
+    mask_4, im4 = method4.get_mask(img)
