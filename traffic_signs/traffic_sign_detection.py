@@ -88,10 +88,10 @@ def train_mode(input_dir: str, pixel_methods, window_method: str, analysis=False
 def test_mode(input_dir: str, output_dir: str, pixel_method, window_method: str):
     file_names = sorted(fnmatch.filter(os.listdir(input_dir), '*.jpg'))
     for name in file_names:
-        img_path = '{}/{}.jpg'.format(input_dir, name)
+        img_path = '{}/{}'.format(input_dir, name)
         im = cv2.imread(img_path)
         mask, im = pixel_method.get_mask(im)
-        cv2.imwrite('{}/{}.jpg'.format(output_dir, name), mask)
+        cv2.imwrite('{}/{}'.format(output_dir, name), mask)
 
 
 def main():
@@ -113,18 +113,21 @@ def main():
         'method3': method3,
         'method4': method4
     }
-    methods = seq(methods).map(lambda x: method_refs.get(x, lambda: 'Invalid method')).to_list()
+    methods = seq(methods).map(lambda x: method_refs.get(x, None)).to_list()
+    if not all(methods):
+        raise Exception('Invalid method')
     results = None
     if args.output and len(methods) == 1:
         test_mode(args.input, args.output, methods[0], args.window_method)
     else:
         results = train_mode(args.input, methods, args.window_method, threads=args.threads)
 
-    print(tabulate(seq(results)
-                   .map(lambda result: [result.get_precision(), result.get_accuracy(), result.get_recall(),
-                                        result.get_specificity(), result.tp, result.fp, result.fn, result.time])
-                   .reduce(lambda accum, r: accum + [r], []),
-                   headers=['Precision', 'Accuracy', 'Recall', 'F1', 'TP', 'FP', 'FN', 'Time']))
+    if results:
+        print(tabulate(seq(results)
+                       .map(lambda result: [result.get_precision(), result.get_accuracy(), result.get_recall(),
+                                            result.get_specificity(), result.tp, result.fp, result.fn, result.time])
+                       .reduce(lambda accum, r: accum + [r], []),
+                       headers=['Precision', 'Accuracy', 'Recall', 'F1', 'TP', 'FP', 'FN', 'Time']))
 
 
 if __name__ == '__main__':
