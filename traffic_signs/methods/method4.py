@@ -9,9 +9,9 @@ class Method4:
     """
     Class Method4 
     
-    In this class we implement the first detection method of the signals in the
-    dataset image. In particular, in this first method the color segmentation
-    is done in RGB.
+    In this class we implement the fourth detection method of the signals in the
+    dataset image. In particular, in this fourth method the color segmentation
+    is done in HSV to an image with the Y-histogram adaptive equalised.
 
     """
     def train(self, data: List[Data]):
@@ -30,7 +30,7 @@ class Method4:
         """
         get_mask(im)
     
-        Function to compute the mask of an certain image in this case is done 
+        Function to compute the mask of an certain image,in this case is done 
         in HSV system to an image with Y-histogram adaptive equalised
     
         Parameters   Value
@@ -41,6 +41,7 @@ class Method4:
         """
         #Adaptive-equalization of the Y channel of the image
         im = histogram_equalization(im, True)
+        
         #Color segmentation in HSV
         mask, im = segregation(im, 'hsv')
         
@@ -50,7 +51,7 @@ class Method4:
         #Compute the final mask
         mask = discard_geometry(mask)
 
-        return mask
+        return mask, im
 
 
-instance = Method3()
+instance = Method4()

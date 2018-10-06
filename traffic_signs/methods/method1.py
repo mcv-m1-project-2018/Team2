@@ -14,9 +14,7 @@ class Method1:
     is done in RGB.
 
     """
-    
     def train(self, data: List[Data]):
-        
         """
         train(data)
     
@@ -26,14 +24,13 @@ class Method1:
        ----------------------
         'data'          All the Data elements
         """
-    
         discard_geometry.train(data)
 
     def get_mask(self, im: np.array):
         """
         get_mask(im)
     
-        Function to compute the mask of an certain image in this case is done 
+        Function to compute the mask of an certain image,in this case is done 
         in RGB system
     
         Parameters   Value
@@ -43,7 +40,7 @@ class Method1:
         Returns the mask, binary image with the detections.
         """
         #Color segmentation in RGB
-        mask = segregation(im, 'rgb')
+        mask, im = segregation(im, 'rgb')
         
         #We apply a FLoodfill algorithm to the computed mask
         mask = fill_holes(mask)
@@ -51,7 +48,7 @@ class Method1:
         #Compute the final mask
         mask = discard_geometry.get_mask(mask)
 
-        return mask
+        return mask, im
 
 
 instance = Method1()

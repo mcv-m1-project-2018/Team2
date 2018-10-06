@@ -1,8 +1,9 @@
 from typing import List
 
 import numpy as np
-from methods.operations import fill_holes, discard_geometry, segregation, histogram_equalization, blurring
+from methods.operations import fill_holes, discard_geometry, segregation, histogram_equalization, blur
 from model import Data
+
 
 class Method3:
     """
@@ -13,7 +14,6 @@ class Method3:
     is done in HSV to an image with the Y-histogram equalised.  
 
     """
-    
     def train(self, data: List[Data]):
         """
         train(data)
@@ -30,7 +30,7 @@ class Method3:
         """
         get_mask(im)
     
-        Function to compute the mask of an certain image in this case is done 
+        Function to compute the mask of an certain image,in this case is done 
         in HSV system to an image with Y-histogram equalised
     
         Parameters   Value
@@ -45,13 +45,16 @@ class Method3:
         #Color segmentation in HSV
         mask, im = segregation(im, 'hsv')
         
+        #Mask Blurring
+        mask = blur(mask)
+        
         #We apply a FLoodfill algorithm to the computed mask
         mask = fill_holes(mask)
         
         #Compute the final mask
         mask = discard_geometry(mask)
 
-        return mask
+        return mask, im
 
 
 instance = Method3()
