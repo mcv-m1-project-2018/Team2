@@ -17,7 +17,7 @@ from model import Result
 from functional import seq
 from joblib import Parallel, delayed
 
-K_FOLD = 10
+EXECUTIONS = 12
 
 
 def validate(analysis, dataset_manager, pixel_methods):
@@ -51,11 +51,11 @@ def validate(analysis, dataset_manager, pixel_methods):
         time += timer() - start
 
         results.append(Result(
-            tp=tp / K_FOLD,
-            fp=fp / K_FOLD,
-            fn=fn / K_FOLD,
-            tn=tn / K_FOLD,
-            time=(time / len(verify)) / K_FOLD
+            tp=tp / EXECUTIONS,
+            fp=fp / EXECUTIONS,
+            fn=fn / EXECUTIONS,
+            tn=tn / EXECUTIONS,
+            time=(time / len(verify)) / EXECUTIONS
         ))
     return results
 
@@ -75,11 +75,11 @@ def train_mode(input_dir: str, pixel_methods, window_method: str, analysis=False
     dataset_manager.load_data()
 
     results = Parallel(n_jobs=threads)(
-        delayed(lambda x: validate(analysis, dataset_manager, pixel_methods))(i) for i in range(K_FOLD))
+        delayed(lambda x: validate(analysis, dataset_manager, pixel_methods))(i) for i in range(EXECUTIONS))
 
     results = seq(results) \
         .reduce(lambda a, b: seq(a).zip(b).map(lambda l: combine_results(l[0], l[1])).to_list(),
-                [Result() for i in range(K_FOLD)]) \
+                [Result() for i in range(EXECUTIONS)]) \
         .to_list()
 
     return results
@@ -88,10 +88,10 @@ def train_mode(input_dir: str, pixel_methods, window_method: str, analysis=False
 def test_mode(input_dir: str, output_dir: str, pixel_method, window_method: str):
     file_names = sorted(fnmatch.filter(os.listdir(input_dir), '*.jpg'))
     for name in file_names:
-        img_path = '{}/{}.jpg'.format(input_dir, name)
+        img_path = '{}/{}'.format(input_dir, name)
         im = cv2.imread(img_path)
         mask, im = pixel_method.get_mask(im)
-        cv2.imwrite('{}/{}.jpg'.format(output_dir, name), mask)
+        cv2.imwrite('{}/{}'.format(output_dir, name), mask)
 
 
 def main():
@@ -113,18 +113,21 @@ def main():
         'method3': method3,
         'method4': method4
     }
-    methods = seq(methods).map(lambda x: method_refs.get(x, lambda: 'Invalid method')).to_list()
+    methods = seq(methods).map(lambda x: method_refs.get(x, None)).to_list()
+    if not all(methods):
+        raise Exception('Invalid method')
     results = None
     if args.output and len(methods) == 1:
         test_mode(args.input, args.output, methods[0], args.window_method)
     else:
-        results = train_mode(args.input, methods, args.window_method, threads=args.threads)
+        results = train_mode(args.input, methods, args.window_method, threads=int(args.threads))
 
-    print(tabulate(seq(results)
-                   .map(lambda result: [result.get_precision(), result.get_accuracy(), result.get_recall(),
-                                        result.get_specificity(), result.tp, result.fp, result.fn, result.time])
-                   .reduce(lambda accum, r: accum + [r], []),
-                   headers=['Precision', 'Accuracy', 'Recall', 'F1', 'TP', 'FP', 'FN', 'Time']))
+    if results:
+        print(tabulate(seq(results)
+                       .map(lambda result: [result.get_precision(), result.get_accuracy(), result.get_recall(),
+                                            result.get_specificity(), result.tp, result.fp, result.fn, result.time])
+                       .reduce(lambda accum, r: accum + [r], []),
+                       headers=['Precision', 'Accuracy', 'Recall', 'F1', 'TP', 'FP', 'FN', 'Time']))
 
 
 if __name__ == '__main__':

@@ -54,7 +54,7 @@ def print_all_histograms(sign_type_stats):
         ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.07), shadow=True, ncol=3)
 
 
-def get_filling_factor(rectangle: Rectangle, mask: np.array):
+def get_filling_ratio(rectangle: Rectangle, mask: np.array):
     # compute the area of bboxes
     bbox_area = rectangle.get_area()
     whites = count_whites(rectangle, mask)
