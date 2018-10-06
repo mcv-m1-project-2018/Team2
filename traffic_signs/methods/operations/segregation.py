@@ -47,9 +47,7 @@ def _get_mask_hsv(im):
     and result_seg,an image with the detections done by the color segmentation(overlap between
     the provided image and the computed mask)
     """
-    rgb_im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
-
-    hsv_im = cv2.cvtColor(rgb_im, cv2.COLOR_RGB2HSV)
+    hsv_im = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
 
     lower_red_red = np.array([0, 150, 50])
     upper_red_begin = np.array([20, 255, 255])
@@ -67,14 +65,14 @@ def _get_mask_hsv(im):
     final_mask = red_mask_begin + red_mask_end + blue_mask
     # white_mask
 
-    result_seg = cv2.bitwise_and(rgb_im, rgb_im, mask=final_mask)
+    result_seg = cv2.bitwise_and(im, im, mask=final_mask)
 
     return final_mask, result_seg
 
 
 def _get_mask_rgb(im):
     """
-    get_mask_hsv(im,colorspace)
+    get_mask_hsv(im, colorspace)
 
     Function to compute the color segmentation in RGB system
 

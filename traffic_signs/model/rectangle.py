@@ -22,5 +22,8 @@ class Rectangle:
     def get_area(self):
         return self.width * self.height
 
+    def get_form_factor(self):
+        return self.width / self.height
+
     def __str__(self):
         return str(self.top_left) + ', ' + str(self.width) + 'x' + str(self.height)

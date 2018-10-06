@@ -9,7 +9,7 @@ from functional import seq
 
 from model import GroundTruth
 # from methods.operations import histogram_equalization
-from utils import get_filling_factor, get_histogram, print_all_histograms
+from utils import get_filling_ratio, get_histogram, print_all_histograms
 
 
 class SignTypeStats:
@@ -27,7 +27,7 @@ class SignTypeStats:
     def add_sign(self, gt: GroundTruth, img: np.array, mask: np.array):
         self.area.append(gt.rectangle.get_area())
         self.form_factor.append(float(gt.rectangle.width / gt.rectangle.height))
-        self.filling_ratio.append(get_filling_factor(gt.rectangle, mask))
+        self.filling_ratio.append(get_filling_ratio(gt.rectangle, mask))
         hists_rgb = get_histogram(img, gt, mask, False)
         hists_hsv = get_histogram(img, gt, mask, True)
         for i in range(3):
