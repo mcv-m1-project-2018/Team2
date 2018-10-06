@@ -1,4 +1,9 @@
 class Result:
+
+    """
+    We define and initialize the different variables for the evaluation
+    of the results
+    """
     pixel_precision: float
     pixel_accuracy: float
     pixel_specificity: float

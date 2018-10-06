@@ -5,7 +5,24 @@ from model import GroundTruth, Rectangle
 
 
 class Data:
-    """Stores the content of a data element."""
+    """
+    In this class we store in a list the content of a data element of our dataset:
+
+    - Images
+    - masks
+    - Groundtruths
+
+    In the case of Groundtruth we read the txt file to store the information:
+
+    - Top left of groundtruth rectangle
+
+    - Then with this point he find the width and height of the groundtruth
+
+    - And we store the type of signals (A,B,C,D,E,F)
+
+    Finally we read images and masks with the functions get_img and get_mask.
+
+    """
 
     name: str
     gt: List[GroundTruth]
