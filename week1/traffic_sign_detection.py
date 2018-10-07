@@ -111,7 +111,7 @@ def main():
     parser.add_argument('--output', help='Output directory, if using test dataset to generate masks.')
     parser.add_argument('--window-method', help='Window method to use.')
     parser.add_argument('--analysis', action='store_true',
-                        help='Whether to perform an analysis of the train split before evaluation.')
+                        help='Whether to perform an analysis of the train split before evaluation. Train mode only.')
     parser.add_argument('--threads', type=int, help='Number of threads to use. Train mode only.', default=4)
     parser.add_argument('--executions', type=int, help='Number of executions of each method. Train mode only.')
     args = parser.parse_args()
