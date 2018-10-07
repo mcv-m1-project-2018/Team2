@@ -25,7 +25,7 @@ optional arguments:
   --window-method WINDOW_METHOD
                         Window method to use.
   --analysis            Whether to perform an analysis of the train split
-                        before evaluation.
+                        before evaluation. Train mode only.
   --threads THREADS     Number of threads to use. Train mode only.
   --executions EXECUTIONS
                         Number of executions of each method. Train mode only.
@@ -37,12 +37,14 @@ optional arguments:
 ### Method 1
 
 - Color segregation using RGB colorspace.
+- Blur
 - Fill holes.
 - Remove noise using geometry.
 
 ### Method 2
 
 - Color segregation using HSV colorspace.
+- Blur
 - Fill holes.
 - Remove noise using geometry.
 
@@ -50,6 +52,7 @@ optional arguments:
 
 - White balance using histogram equalization.
 - Color segregation using HSV colorspace.
+- Blur
 - Fill holes.
 - Remove noise using geometry.
 
@@ -57,5 +60,6 @@ optional arguments:
 
 - White balance using adaptive histogram equalization.
 - Color segregation using HSV colorspace.
+- Blur
 - Fill holes.
 - Remove noise using geometry.
