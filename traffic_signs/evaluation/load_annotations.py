@@ -5,7 +5,7 @@ def load_annotations(annot_file):
     # tly, tlx, bry,brx, code
 
     annotations = []
-    signs = []
+    signs       = [] 
 
     for line in open(annot_file).read().splitlines():
 
@@ -14,5 +14,5 @@ def load_annotations(annot_file):
         for ii in range(4):
             annot_values[ii] = float(annot_values[ii])
         annotations.append(annot_values)
-
+        
     return annotations
