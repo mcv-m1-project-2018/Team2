@@ -5,6 +5,7 @@ from methods.operations import fill_holes, discard_geometry, segregation, morpho
 from model import Data
 from matplotlib import pyplot as plt
 
+
 class Method1:
     """
     Class Method1 
@@ -44,7 +45,7 @@ class Method1:
         mask, im = segregation(im, 'rgb')
         # Hole filling
         mask = fill_holes(mask)
-        
+
         # Mask Blurring
         mask = morpho(mask)
 

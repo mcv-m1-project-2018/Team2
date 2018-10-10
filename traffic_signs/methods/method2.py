@@ -1,7 +1,7 @@
 from typing import List
 
 import numpy as np
-from methods.operations import fill_holes, discard_geometry, segregation,morpho
+from methods.operations import fill_holes, discard_geometry, segregation, morpho
 from model import Data
 import matplotlib.pyplot as plt
 

@@ -1,7 +1,7 @@
 from typing import List
 
 import numpy as np
-from methods.operations import fill_holes, discard_geometry, segregation, histogram_equalization,morpho
+from methods.operations import fill_holes, discard_geometry, segregation, histogram_equalization, morpho
 from model import Data
 
 
