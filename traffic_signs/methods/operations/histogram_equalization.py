@@ -5,7 +5,7 @@ import numpy as np
 
 def get_image(img: np.array, adaptive: bool):
     """ 
-    get_image(img, adaptive)
+    get_image(img, ladaptive)
     
     Function to modify the dataset images by equalizing the histogram of the Y channel,the equalization 
     can be adaptive or not.

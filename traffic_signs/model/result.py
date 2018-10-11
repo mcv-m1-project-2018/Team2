@@ -28,3 +28,6 @@ class Result:
 
     def get_recall(self):
         return float(self.tp) / float(self.tp + self.fn)
+
+    def get_f1(self):
+        return (2 * self.get_precision() * self.get_recall()) / (self.get_precision() + self.get_recall())

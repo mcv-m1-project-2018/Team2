@@ -1,8 +1,9 @@
 from typing import List
 
 import numpy as np
-from methods.operations import fill_holes, discard_geometry, segregation, blur
+from methods.operations import fill_holes, discard_geometry, segregation, morpho
 from model import Data
+from matplotlib import pyplot as plt
 
 
 class Method1:
@@ -42,12 +43,11 @@ class Method1:
         """
         # Color segmentation in RGB
         mask, im = segregation(im, 'rgb')
-
         # Hole filling
         mask = fill_holes(mask)
 
         # Mask Blurring
-        mask = blur(mask)
+        mask = morpho(mask)
 
         # Compute the final mask
         mask = discard_geometry.get_mask(mask)

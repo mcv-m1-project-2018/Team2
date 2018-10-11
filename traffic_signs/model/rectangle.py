@@ -2,10 +2,6 @@ from typing import Tuple
 
 
 class Rectangle:
-    top_left: Tuple[float]
-    width: float
-    height: float
-
     """
     In the class rectangle we define a rectangle through the top left point, width and height
     
@@ -15,6 +11,15 @@ class Rectangle:
     Finally we compute the area of a rectangle in the function get_area 
     
     """
+
+    top_left: Tuple[float]
+    width: float
+    height: float
+
+    def __init__(self, top_left=(0, 0), width=0, height=0):
+        self.top_left = top_left
+        self.width = width
+        self.height = height
 
     def get_bottom_right(self):
         return self.top_left[0] + self.height, self.top_left[1] + self.width

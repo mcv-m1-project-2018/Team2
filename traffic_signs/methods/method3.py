@@ -1,7 +1,7 @@
 from typing import List
 
 import numpy as np
-from methods.operations import fill_holes, discard_geometry, segregation, histogram_equalization, blur
+from methods.operations import fill_holes, discard_geometry, segregation, histogram_equalization,morpho
 from model import Data
 
 
@@ -47,7 +47,7 @@ class Method3:
         mask, im = segregation(im, 'hsv')
 
         # Mask Blurring
-        mask = blur(mask)
+        mask = morpho(mask)
 
         # Hole filling
         mask = fill_holes(mask)

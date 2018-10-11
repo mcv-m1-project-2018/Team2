@@ -2,7 +2,7 @@ import cv2
 from typing import List
 
 from model import GroundTruth, Rectangle
-
+import numpy as np
 
 class Data:
     """
@@ -28,12 +28,16 @@ class Data:
     gt: List[GroundTruth]
     img_path: str
     mask_path: str
+    img: np.array
+    mask_img: np.array
 
     def __init__(self, directory: str, name: str):
         self.name = name
         self.gt = []
         self.img_path = '{}/{}.jpg'.format(directory, name)
         self.mask_path = '{}/mask/mask.{}.png'.format(directory, name)
+        self.img = None
+        self.mask_img = None
         with open('{}/gt/gt.{}.txt'.format(directory, name)) as f:
             for line in f.readlines():
                 parts = line.strip().split(' ')
@@ -46,7 +50,11 @@ class Data:
                 self.gt.append(gt)
 
     def get_img(self):
-        return cv2.imread(self.img_path, cv2.IMREAD_COLOR)
+        if self.img is None:
+            self.img = cv2.imread(self.img_path, cv2.IMREAD_COLOR)
+        return self.img
 
     def get_mask_img(self):
-        return cv2.imread(self.mask_path, cv2.IMREAD_GRAYSCALE)
+        if self.mask_img is None:
+            self.mask_img = cv2.imread(self.mask_path, cv2.IMREAD_GRAYSCALE)
+        return self.mask_img

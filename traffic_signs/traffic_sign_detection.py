@@ -4,11 +4,12 @@
 import argparse
 import fnmatch
 import os
+from concurrent.futures.process import ProcessPoolExecutor
+from concurrent.futures.thread import ThreadPoolExecutor
 from timeit import default_timer as timer
 
 import cv2
 from functional import seq
-from joblib import Parallel, delayed
 from tabulate import tabulate
 
 import evaluation.evaluation_funcs as evalf
@@ -33,12 +34,14 @@ def validate(analysis, dataset_manager, pixel_methods):
 
         pixel_method.train(train)
 
-        start = timer()
         for dat in verify:
             im = dat.get_img()
 
             mask, im = pixel_method.get_mask(im)
+
+            start = timer()
             mask_solution = dat.get_mask_img()
+            time += timer() - start
 
             [local_tp, local_fp, local_fn, local_tn] = evalf.performance_accumulation_pixel(
                 mask, mask_solution)
@@ -46,8 +49,6 @@ def validate(analysis, dataset_manager, pixel_methods):
             fp += local_fp
             fn += local_fn
             tn += local_tn
-
-        time += timer() - start
 
         results.append(Result(
             tp=tp,
@@ -73,12 +74,15 @@ def train_mode(train_dir: str, pixel_methods, window_method: str, analysis=False
     # Use this class to load and manage states
     dataset_manager = DatasetManager(train_dir)
 
+    time = timer()
     # Perform the executions in parallel
-    results = Parallel(n_jobs=threads)(
-        delayed(lambda x: validate(analysis, dataset_manager, pixel_methods))(i) for i in range(executions))
+    with ProcessPoolExecutor(max_workers=threads) as executor:
+        results = [executor.submit(validate, analysis, dataset_manager, pixel_methods)
+                   for _ in range(executions)]
 
     # Average the results of each execution
     results = seq(results) \
+        .map(lambda fut: fut.result()) \
         .reduce(lambda a, b: seq(a).zip(b).map(lambda l: combine_results(l[0], l[1], executions)).to_list(),
                 [Result() for _i in range(executions)]) \
         .to_list()
@@ -113,7 +117,8 @@ def main():
     parser.add_argument('--analysis', action='store_true',
                         help='Whether to perform an analysis of the train split before evaluation. Train mode only.')
     parser.add_argument('--threads', type=int, help='Number of threads to use. Train mode only.', default=4)
-    parser.add_argument('--executions', type=int, help='Number of executions of each method. Train mode only.')
+    parser.add_argument('--executions', type=int, help='Number of executions of each method. Train mode only.',
+                        default=10)
     args = parser.parse_args()
 
     methods = args.pixel_methods.split(';')
@@ -135,7 +140,7 @@ def main():
     if results:
         print(tabulate(seq(results)
                        .map(lambda result: [result.get_precision(), result.get_accuracy(), result.get_recall(),
-                                            result.get_specificity(), result.tp, result.fp, result.fn, result.time])
+                                            result.get_f1(), result.tp, result.fp, result.fn, result.time])
                        .reduce(lambda accum, r: accum + [r], []),
                        headers=['Precision', 'Accuracy', 'Recall', 'F1', 'TP', 'FP', 'FN', 'Time']))
 
