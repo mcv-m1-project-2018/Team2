@@ -20,8 +20,7 @@ def get_mask(im: np.array, color_space: str):
 
     switcher = {
         'rgb': _get_mask_rgb,
-        'hsv': _get_mask_hsv,
-        'yuv': _get_mask_yuv
+        'hsv': _get_mask_hsv
     }
     # Get the function from switcher dictionary
     func = switcher.get(color_space, lambda: "Invalid color space")
@@ -98,24 +97,6 @@ def _get_mask_rgb(im):
     blue_mask = cv2.inRange(rgb_im, lower_blue, upper_blue)
     red2_mask = cv2.inRange(rgb_im, lower2_red, upper2_red)
     final_mask = red_mask + blue_mask + red2_mask
-
-    result_seg = cv2.bitwise_and(rgb_im, rgb_im, mask=final_mask)
-
-    return final_mask, result_seg
-
-
-def _get_mask_yuv(im):
-    rgb_im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
-    yuv_im = cv2.cvtColor(im, cv2.COLOR_BGR2YUV)
-
-    upper_red = np.array([])
-    lower_red = np.array([])
-    upper_blue = np.array([])
-    lower_blue = np.array([])
-
-    red_mask = cv2.inRange(yuv_im, lower_red, upper_red)
-    blue_mask = cv2.inRange(yuv_im, lower_blue, upper_blue)
-    final_mask = red_mask + blue_mask
 
     result_seg = cv2.bitwise_and(rgb_im, rgb_im, mask=final_mask)
 
