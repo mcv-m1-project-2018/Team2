@@ -17,8 +17,7 @@ def get_image(img: np.array, adaptive: bool):
     'adaptive'   Boolean which indicates whether the equalization should be adaptive or not
     
     
-    Returns the image with the equalized Y histogram 
-    
+    Returns the image with the equalized Y histogram
     """
     img_yuv = cv2.cvtColor(img, cv2.COLOR_BGR2YUV)
 
