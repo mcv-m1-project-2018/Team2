@@ -6,9 +6,8 @@ from model import Data
 from matplotlib import pyplot as plt
 
 
-class Method1:
+class SegmentationRGB:
     """
-    Class Method1 
     
     In this class we implement the first detection method of the signals in the
     dataset images. In particular, in this first method the color segmentation
@@ -55,4 +54,4 @@ class Method1:
         return mask, im
 
 
-instance = Method1()
+instance = SegmentationRGB()

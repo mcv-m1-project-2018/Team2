@@ -5,7 +5,6 @@ import argparse
 import fnmatch
 import os
 from concurrent.futures.process import ProcessPoolExecutor
-from concurrent.futures.thread import ThreadPoolExecutor
 from timeit import default_timer as timer
 
 import cv2
@@ -14,9 +13,10 @@ from tabulate import tabulate
 
 import evaluation.evaluation_funcs as evalf
 from data_analysis import data_analysis
-from dataset_manager import DatasetManager
+from model import DatasetManager
 from methods import method1, method2, method3, method4
 from model import Result
+
 
 
 def validate(analysis, dataset_manager, pixel_methods):

@@ -7,7 +7,7 @@ from model import Data
 
 class Method4:
     """
-    Class Method4 
+
     
     In this class we implement the fourth detection method of the signals in the
     dataset image. In particular, in this fourth method the color segmentation

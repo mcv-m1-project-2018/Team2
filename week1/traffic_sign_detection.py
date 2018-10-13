@@ -13,7 +13,7 @@ from tabulate import tabulate
 
 import evaluation.evaluation_funcs as evalf
 from data_analysis import data_analysis
-from dataset_manager import DatasetManager
+from model.dataset_manager import DatasetManager
 from methods import method1, method2, method3, method4
 from model import Result
 

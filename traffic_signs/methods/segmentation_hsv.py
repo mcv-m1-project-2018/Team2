@@ -6,9 +6,8 @@ from model import Data
 import matplotlib.pyplot as plt
 
 
-class Method2:
+class SegmentationHSV:
     """
-    Class Method2 
     
     In this class we implement the first detection method of the signals in the
     dataset images. In particular, in this first method the color segmentation
@@ -42,7 +41,7 @@ class Method2:
         Returns the mask, binary image with the detections.
         """
 
-        # Color segmentation in RGB
+        # Color segmentation in HSV
         mask, im = segregation(im, 'hsv')
 
         # Blurring the mask
@@ -57,4 +56,4 @@ class Method2:
         return mask, im
 
 
-instance = Method2()
+instance = SegmentationHSV()

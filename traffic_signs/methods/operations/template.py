@@ -1,5 +1,0 @@
-# TODO
-
-
-class Templating:
-    pass

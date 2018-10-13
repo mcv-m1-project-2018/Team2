@@ -1,10 +1,9 @@
-from dataset_manager import DatasetManager
+from model import DatasetManager
 from typing import List
 import numpy as np
 from matplotlib import pyplot as plt
 
 plt.rcParams.update({'font.size': 16})
-import cv2
 from functional import seq
 
 from model import GroundTruth

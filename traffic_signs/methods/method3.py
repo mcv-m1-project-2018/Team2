@@ -7,7 +7,7 @@ from model import Data
 
 class Method3:
     """
-    Class Method3 
+
     
     In this class we implement the third detection method of the signals in the
     dataset images. In particular, in this third method the color segmentation
