@@ -41,7 +41,7 @@ class MorphologicalOperators:
         Returns the mask, binary image with the detections.
         """
 
-        # Mask Blurring
+        # Mask morpho
         mask = morpho(mask)
 
         # Hole filling
