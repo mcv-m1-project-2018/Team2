@@ -5,7 +5,7 @@ import cv2
 from model import Rectangle
 import numpy as np
 
-SIDE = 200
+SIDE = 201
 INTERMEDIATE_STEPS = 10
 STEP_FACTOR = 0.2
 SHRINK_MULTIPLIER = .9
