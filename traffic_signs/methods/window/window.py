@@ -1,3 +1,5 @@
+from typing import List
+
 import cv2
 
 from model import Rectangle
@@ -11,42 +13,37 @@ SHRINK_MULTIPLIER = .9
 THRESHOLD = 0.5
 
 
-class Window:
+def get_mask(mask: np.array) -> (np.array, List[Rectangle]):
+    window = Rectangle(
+        top_left=(0, 0),
+        width=SIDE + 1,
+        height=SIDE + 1
+    )
+    move_step = SIDE * STEP_FACTOR
 
-    def __init__(self):
-        pass
+    regions = []
+    m = mask
+    for _ in range(INTERMEDIATE_STEPS):
+        width, height = m.shape
 
-    def get_mask(self, mask: np.array):
-        window = Rectangle(
-            top_left=(0, 0),
-            width=SIDE + 1,
-            height=SIDE + 1
-        )
-        move_step = SIDE * STEP_FACTOR
+        x = 0
+        while x + SIDE < width:
+            y = 0
+            while y + SIDE < height:
+                window.top_left = (y, x)
 
-        regions = []
-        m = mask
-        for _ in range(INTERMEDIATE_STEPS):
-            width, height = m.shape
+                count = 0
+                for i in range(y, y + SIDE + 1):
+                    for j in range(x, x + SIDE + 1):
+                        if mask[i, j] > 0:
+                            count += 1
 
-            x = 0
-            while x + SIDE < width:
-                y = 0
-                while y + SIDE < height:
-                    window.top_left = (y, x)
+                if count / window.get_area() > THRESHOLD:
+                    regions.append(window.clone())
 
-                    count = 0
-                    for i in range(y, y + SIDE + 1):
-                        for j in range(x, x + SIDE + 1):
-                            if mask[i, j] > 0:
-                                count += 1
+                y += move_step
+            x += move_step
 
-                    if count / window.get_area() > THRESHOLD:
-                        regions.append(window.clone())
+        m = cv2.resize(m, 0, fx=SHRINK_MULTIPLIER, fy=SHRINK_MULTIPLIER)
 
-                    y += move_step
-                x += move_step
-
-            m = cv2.resize(m, 0, fx=SHRINK_MULTIPLIER, fy=SHRINK_MULTIPLIER)
-
-        return mask, regions
+    return mask, regions

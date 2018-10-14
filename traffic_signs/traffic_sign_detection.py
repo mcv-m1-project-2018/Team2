@@ -18,7 +18,6 @@ from methods import method1, method2, method3, method4
 from model import Result
 
 
-
 def validate(analysis, dataset_manager, pixel_methods):
     """In each job, the methods are executed with the same dataset split and their results are put in an array."""
     results = []
@@ -105,7 +104,8 @@ def test_mode(train_dir: str, test_dir: str, output_dir: str, pixel_method, wind
         cv2.imwrite('{}/mask.{}.png'.format(output_dir, name), mask)
         with open('{}/gt.{}.txt'.format(output_dir, name), 'a+') as text_file:
             for rect in region:
-                text_file.write(rect.to_csv)
+                text_file.write(rect.to_csv())
+
 
 def main():
     # read arguments
@@ -137,7 +137,8 @@ def main():
     if args.output and len(methods) == 1:
         test_mode(args.train_path, args.test, args.output, methods[0], args.window_method)
     else:
-        results = train_mode(args.train_path, methods, args.window_method, threads=args.threads, executions=args.executions)
+        results = train_mode(args.train_path, methods, args.window_method, threads=args.threads,
+                             executions=args.executions)
 
     if results:
         print(tabulate(seq(results)

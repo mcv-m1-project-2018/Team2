@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Optional
 
 
 class Rectangle:
@@ -12,7 +12,7 @@ class Rectangle:
     
     """
 
-    top_left: Tuple[float]
+    top_left: (float, float)
     width: float
     height: float
 
@@ -21,13 +21,13 @@ class Rectangle:
         self.width = width
         self.height = height
 
-    def get_bottom_right(self):
+    def get_bottom_right(self) -> (float, float):
         return self.top_left[0] + self.height, self.top_left[1] + self.width
 
-    def get_area(self):
+    def get_area(self) -> float:
         return self.width * self.height
 
-    def get_form_factor(self):
+    def get_form_factor(self) -> float:
         return self.width / self.height
 
     def clone(self) -> 'Rectangle':
@@ -37,6 +37,10 @@ class Rectangle:
         rec.height = self.height
 
         return rec
+
+    def contains_point(self, point: (float, float)) -> bool:
+        return (self.top_left[0] <= point[0] <= self.get_bottom_right()[0] and
+                self.top_left[1] <= point[1] <= self.get_bottom_right()[1])
 
     def union(self, other: 'Rectangle') -> 'Rectangle':
         rec = Rectangle()
@@ -49,13 +53,24 @@ class Rectangle:
 
         return rec
 
-    def intersection(self, other):
-        pass
+    def intersection(self, other: 'Rectangle') -> Optional['Rectangle']:
+        rec = Rectangle()
+        if self.contains_point(other.top_left):
+            rec.top_left = other.top_left
+            rec.height = (other.top_left[0] - self.get_bottom_right()[0]) + 1
+            rec.width = (other.top_left[1] - self.get_bottom_right()[1]) + 1
+        elif other.contains_point(self.top_left):
+            rec.top_left = self.top_left
+            rec.height = (self.top_left[0] - other.get_bottom_right()[0]) + 1
+            rec.width = (self.top_left[1] - other.get_bottom_right()[1]) + 1
+        else:
+            return None
+
+        return rec
 
     def __str__(self):
         return str(self.top_left) + ', ' + str(self.width) + 'x' + str(self.height)
 
     def to_csv(self):
-
-        annotation = str(self.top_left[0]) + ' ' + str(self.top_left[1])+ ' ' + str(self.get_bottom_right()[0]) + ' ' + str(self.get_bottom_right()[1])
-        return annotation
+        return str(self.top_left[0]) + ' ' + str(self.top_left[1]) + ' ' + str(self.get_bottom_right()[0]) + ' ' + \
+               str(self.get_bottom_right()[1])
