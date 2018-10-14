@@ -42,14 +42,7 @@ class SegmentationRGB:
         """
         # Color segmentation in RGB
         mask, im = segregation(im, 'rgb')
-        # Hole filling
-        mask = fill_holes(mask)
 
-        # Mask Blurring
-        mask = morpho(mask)
-
-        # Compute the final mask
-        mask = discard_geometry.get_mask(mask)
 
         return mask, im
 

@@ -5,7 +5,7 @@ from methods.operations import fill_holes, discard_geometry, segregation, histog
 from model import Data
 
 
-class Method4:
+class MorphologicalOperators:
     """
 
     
@@ -27,7 +27,7 @@ class Method4:
         """
         discard_geometry.train(data)
 
-    def get_mask(self, im: np.array):
+    def get_mask(self, mask: np.array):
         """
         get_mask(im)
 
@@ -40,11 +40,6 @@ class Method4:
 
         Returns the mask, binary image with the detections.
         """
-        # Adaptive-equalization of the Y channel of the image
-        im = histogram_equalization(im, True)
-
-        # Color segmentation in HSV
-        mask, im = segregation(im, 'hsv')
 
         # Mask Blurring
         mask = morpho(mask)
@@ -58,4 +53,4 @@ class Method4:
         return mask, im
 
 
-instance = Method4()
+instance = MorphologicalOperators()

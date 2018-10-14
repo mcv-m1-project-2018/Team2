@@ -43,17 +43,12 @@ class Method3:
         # Equalization of the Y channel of the image
         im = histogram_equalization(im, False)
 
+        # Adaptive-equalization of the Y channel of the image
+        im = histogram_equalization(im, True)
+
         # Color segmentation in HSV
         mask, im = segregation(im, 'hsv')
 
-        # Mask Blurring
-        mask = morpho(mask)
-
-        # Hole filling
-        mask = fill_holes(mask)
-
-        # Compute the final mask
-        mask = discard_geometry.get_mask(mask)
 
         return mask, im
 

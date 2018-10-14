@@ -44,14 +44,6 @@ class SegmentationHSV:
         # Color segmentation in HSV
         mask, im = segregation(im, 'hsv')
 
-        # Blurring the mask
-        mask = morpho(mask)
-
-        # Hole filling
-        mask = fill_holes(mask)
-
-        # Compute the final mask
-        mask = discard_geometry.get_mask(mask)
 
         return mask, im
 
