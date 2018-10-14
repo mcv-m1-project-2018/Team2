@@ -1,10 +1,14 @@
+import cv2
+
 from model import Rectangle
 import numpy as np
 
-MAX_SIZE = 200
-MIN_SIZE = 25
+SIDE = 200
 INTERMEDIATE_STEPS = 10
 STEP_FACTOR = 0.2
+SHRINK_MULTIPLIER = .9
+
+THRESHOLD = 0.5
 
 
 class Window:
@@ -13,28 +17,36 @@ class Window:
         pass
 
     def get_mask(self, mask: np.array):
-        size = MAX_SIZE
-        step = (MAX_SIZE - MIN_SIZE) / INTERMEDIATE_STEPS
+        window = Rectangle(
+            top_left=(0, 0),
+            width=SIDE + 1,
+            height=SIDE + 1
+        )
+        move_step = SIDE * STEP_FACTOR
 
-        width, height = mask.shape
+        regions = []
+        m = mask
+        for _ in range(INTERMEDIATE_STEPS):
+            width, height = m.shape
 
-        while size >= MIN_SIZE:
-            window = Rectangle(
-                top_left=(0, 0),
-                width=size,
-                height=size
-            )
-
-            move_step = size * STEP_FACTOR
             x = 0
-            while x + size < width:
+            while x + SIDE < width:
                 y = 0
-                while y + size < height:
+                while y + SIDE < height:
                     window.top_left = (y, x)
-                    # Run code for the area inside the rectangle
+
+                    count = 0
+                    for i in range(y, y + SIDE + 1):
+                        for j in range(x, x + SIDE + 1):
+                            if mask[i, j] > 0:
+                                count += 1
+
+                    if count / window.get_area() > THRESHOLD:
+                        regions.append(window.clone())
+
                     y += move_step
                 x += move_step
 
-            size -= step
+            m = cv2.resize(m, 0, fx=SHRINK_MULTIPLIER, fy=SHRINK_MULTIPLIER)
 
-        return mask
+        return mask, regions
