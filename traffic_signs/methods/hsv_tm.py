@@ -51,9 +51,8 @@ class HSV_TM:
         mask = fill_holes(mask)
 
         # Compute the final mask
-        mask = discard_geometry.get_mask(mask)
+        mask, region = discard_geometry.get_mask(mask)
 
-        return mask, im
-
+        return region, mask, im
 
 instance = HSV_TM()

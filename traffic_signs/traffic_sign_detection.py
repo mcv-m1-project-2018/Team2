@@ -37,7 +37,7 @@ def validate(analysis, dataset_manager, pixel_methods):
         for dat in verify:
             im = dat.get_img()
 
-            mask, im = pixel_method.get_mask(im)
+            region, mask, im = pixel_method.get_mask(im)
 
             start = timer()
             mask_solution = dat.get_mask_img()
@@ -100,10 +100,12 @@ def test_mode(train_dir: str, test_dir: str, output_dir: str, pixel_method, wind
     for name in file_names:
         img_path = '{}/{}.jpg'.format(test_dir, name)
         im = cv2.imread(img_path)
-        mask, im = pixel_method.get_mask(im)
+        region, mask, im = pixel_method.get_mask(im)
         mask = cv2.divide(mask, 255)
         cv2.imwrite('{}/mask.{}.png'.format(output_dir, name), mask)
-
+        with open('{}/gt.{}.txt'.format(output_dir, name), 'a+') as text_file:
+            for rect in region:
+                text_file.write(rect.to_csv)
 
 def main():
     # read arguments

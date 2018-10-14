@@ -32,3 +32,8 @@ class Rectangle:
 
     def __str__(self):
         return str(self.top_left) + ', ' + str(self.width) + 'x' + str(self.height)
+
+    def to_csv(self):
+
+        annotation = str(self.top_left[0]) + ' ' + str(self.top_left[1])+ ' ' + str(self.get_bottom_right()[0]) + ' ' + str(self.get_bottom_right()[1])
+        return annotation

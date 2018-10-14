@@ -38,7 +38,7 @@ class DiscardGeometry:
 
     def get_mask(self, mask: np.array):
         a, contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
+        region = []
         for contour in contours:
             min_point = np.full(2, np.iinfo(np.int).max)
             max_point = np.zeros(2).astype(int)
@@ -61,8 +61,10 @@ class DiscardGeometry:
                     ff < self.min_form_factor or
                     ff > self.max_form_factor):
                 cv2.rectangle(mask, (min_point[1], min_point[0]), (max_point[1], max_point[0]), 0, thickness=cv2.FILLED)
+            else:
+                region.append(rectangle)
 
-        return mask
+        return mask, region
 
 
 instance = DiscardGeometry()
