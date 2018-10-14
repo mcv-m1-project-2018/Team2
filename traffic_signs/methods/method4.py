@@ -46,7 +46,7 @@ class Method4:
         # Color segmentation in HSV
         mask, im = segregation(im, 'hsv')
 
-        # Mask Blurring
+        # Mask morpho
         mask = morpho(mask)
 
         # Hole filling
