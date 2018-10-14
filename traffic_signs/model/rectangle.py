@@ -30,5 +30,27 @@ class Rectangle:
     def get_form_factor(self):
         return self.width / self.height
 
+    def clone(self) -> 'Rectangle':
+        rec = Rectangle()
+        rec.top_left = tuple(self.top_left)
+        rec.width = self.width
+        rec.height = self.height
+
+        return rec
+
+    def union(self, other: 'Rectangle') -> 'Rectangle':
+        rec = Rectangle()
+        rec.top_left = (min(self.top_left[0], other.top_left[0]), min(self.top_left[1], other.top_left[1]))
+        bottom_right = (min(self.get_bottom_right()[0], other.get_bottom_right()[0]),
+                        min(self.get_bottom_right()[1], other.get_bottom_right()[1]))
+
+        rec.width = (bottom_right[1] - self.top_left[1]) + 1
+        rec.height = (bottom_right[0] - self.top_left[0]) + 1
+
+        return rec
+
+    def intersection(self, other):
+        pass
+
     def __str__(self):
         return str(self.top_left) + ', ' + str(self.width) + 'x' + str(self.height)
