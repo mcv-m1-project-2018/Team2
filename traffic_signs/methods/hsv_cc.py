@@ -1,17 +1,17 @@
 from typing import List
 
 import numpy as np
-from methods.operations import fill_holes, discard_geometry, segregation, histogram_equalization,morpho
+from methods.operations import fill_holes, discard_geometry, segregation, morpho
 from model import Data
+import matplotlib.pyplot as plt
 
 
-class Method3:
+class HSV_CC:
     """
-
     
-    In this class we implement the third detection method of the signals in the
-    dataset images. In particular, in this third method the color segmentation
-    is done in HSV to an image with the Y-histogram equalised.  
+    In this class we implement the first detection method of the signals in the
+    dataset images. In particular, in this first method the color segmentation
+    is done in HSV.
 
     """
 
@@ -32,7 +32,7 @@ class Method3:
         get_mask(im)
     
         Function to compute the mask of an certain image,in this case is done 
-        in HSV system to an image with Y-histogram equalised
+        in HSV system
     
         Parameters   Value
        ----------------------
@@ -40,17 +40,20 @@ class Method3:
     
         Returns the mask, binary image with the detections.
         """
-        # Equalization of the Y channel of the image
-        im = histogram_equalization(im, False)
-
-        # Adaptive-equalization of the Y channel of the image
-        im = histogram_equalization(im, True)
 
         # Color segmentation in HSV
         mask, im = segregation(im, 'hsv')
 
+        # Mask morpho
+        mask = morpho(mask)
+
+        # Hole filling
+        mask = fill_holes(mask)
+
+        # Compute the final mask
+        mask = discard_geometry.get_mask(mask)
 
         return mask, im
 
 
-instance = Method3()
+instance = HSV_CC()

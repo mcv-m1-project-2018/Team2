@@ -1,17 +1,17 @@
 from typing import List
 
 import numpy as np
-from methods.operations import fill_holes, discard_geometry, segregation, histogram_equalization, morpho
+from methods.operations import fill_holes, discard_geometry, segregation, morpho
 from model import Data
+import matplotlib.pyplot as plt
 
 
-class MorphologicalOperators:
+class HSV_SW_TM:
     """
-
     
-    In this class we implement the fourth detection method of the signals in the
-    dataset image. In particular, in this fourth method the color segmentation
-    is done in HSV to an image with the Y-histogram adaptive equalised.
+    In this class we implement the first detection method of the signals in the
+    dataset images. In particular, in this first method the color segmentation
+    is done in HSV.
 
     """
 
@@ -21,25 +21,28 @@ class MorphologicalOperators:
     
         Function to train the values used in discard_geometry
     
-        Parameters      Value
+        Parameters   Value
        ----------------------
         'data'          All the Data elements
         """
         discard_geometry.train(data)
 
-    def get_mask(self, mask: np.array):
+    def get_mask(self, im: np.array):
         """
         get_mask(im)
-
-        Function to compute the mask of an certain image,in this case is done
-        in HSV system to an image with Y-histogram adaptive equalised
-
-        Parameters    Value
+    
+        Function to compute the mask of an certain image,in this case is done 
+        in HSV system
+    
+        Parameters   Value
        ----------------------
         'im'          Dataset image
-
+    
         Returns the mask, binary image with the detections.
         """
+
+        # Color segmentation in HSV
+        mask, im = segregation(im, 'hsv')
 
         # Mask morpho
         mask = morpho(mask)
@@ -53,4 +56,4 @@ class MorphologicalOperators:
         return mask, im
 
 
-instance = MorphologicalOperators()
+instance = HSV_SW_TM()

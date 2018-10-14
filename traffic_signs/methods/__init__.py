@@ -1,4 +1,6 @@
-from .segmentation_rgb import instance as method1
-from .segmentation_hsv import instance as method2
-from .method3 import instance as method3
-from .morphological_operators import instance as method4
+from .segmentation_hsv import instance as hsv
+from .hsv_cc import instance as hsv_cc
+from .hsv_sw import import instance as hsv_sw
+from .hsv_cc_tm import instance as hsv_cc_tm
+from .HSV_SW_TM import instance as hvs_sw_tm
+from .hsv_tm import instance as hvs_tm

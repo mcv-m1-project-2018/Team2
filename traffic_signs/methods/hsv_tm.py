@@ -3,15 +3,15 @@ from typing import List
 import numpy as np
 from methods.operations import fill_holes, discard_geometry, segregation, morpho
 from model import Data
-from matplotlib import pyplot as plt
+import matplotlib.pyplot as plt
 
 
-class SegmentationRGB:
+class HSV_TM:
     """
     
     In this class we implement the first detection method of the signals in the
     dataset images. In particular, in this first method the color segmentation
-    is done in RGB.
+    is done in HSV.
 
     """
 
@@ -32,7 +32,7 @@ class SegmentationRGB:
         get_mask(im)
     
         Function to compute the mask of an certain image,in this case is done 
-        in RGB system
+        in HSV system
     
         Parameters   Value
        ----------------------
@@ -40,11 +40,20 @@ class SegmentationRGB:
     
         Returns the mask, binary image with the detections.
         """
-        # Color segmentation in RGB
-        mask, im = segregation(im, 'rgb')
 
+        # Color segmentation in HSV
+        mask, im = segregation(im, 'hsv')
+
+        # Mask morpho
+        mask = morpho(mask)
+
+        # Hole filling
+        mask = fill_holes(mask)
+
+        # Compute the final mask
+        mask = discard_geometry.get_mask(mask)
 
         return mask, im
 
 
-instance = SegmentationRGB()
+instance = HSV_TM()

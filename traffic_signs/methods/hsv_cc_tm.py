@@ -6,7 +6,7 @@ from model import Data
 import matplotlib.pyplot as plt
 
 
-class SegmentationHSV:
+class HSV_CC_TM:
     """
     
     In this class we implement the first detection method of the signals in the
@@ -56,4 +56,4 @@ class SegmentationHSV:
         return mask, im
 
 
-instance = SegmentationHSV()
+instance = HSV_CC_TM()
