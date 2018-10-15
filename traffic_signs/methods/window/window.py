@@ -2,8 +2,10 @@ from typing import List
 
 import cv2
 
+from methods.window import combine_overlapped_regions, clear_non_region_mask
 from model import Rectangle
 import numpy as np
+
 
 SIDE = 201
 INTERMEDIATE_STEPS = 10
@@ -45,5 +47,8 @@ def get_mask(mask: np.array) -> (np.array, List[Rectangle]):
             x += move_step
 
         m = cv2.resize(m, 0, fx=SHRINK_MULTIPLIER, fy=SHRINK_MULTIPLIER)
+
+    regions = combine_overlapped_regions(regions)
+    mask = clear_non_region_mask(mask, regions)
 
     return mask, regions

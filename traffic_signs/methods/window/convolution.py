@@ -4,6 +4,7 @@ from typing import List
 from model import Rectangle
 from .window import THRESHOLD, SIDE, INTERMEDIATE_STEPS, SHRINK_MULTIPLIER
 import numpy as np
+from methods.window import combine_overlapped_regions, clear_non_region_mask
 
 
 def get_mask(mask: np.array) -> (np.array, List[Rectangle]):
@@ -27,5 +28,8 @@ def get_mask(mask: np.array) -> (np.array, List[Rectangle]):
                     regions.append(rec)
 
         m = cv2.resize(m, 0, fx=SHRINK_MULTIPLIER, fy=SHRINK_MULTIPLIER)
+
+    regions = combine_overlapped_regions(regions)
+    mask = clear_non_region_mask(mask, regions)
 
     return mask, regions

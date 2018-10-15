@@ -4,6 +4,7 @@ from typing import List
 from model import Rectangle
 from .window import THRESHOLD, SIDE, INTERMEDIATE_STEPS, SHRINK_MULTIPLIER
 import numpy as np
+from methods.window import combine_overlapped_regions, clear_non_region_mask
 
 
 def get_mask(mask: np.array) -> (np.array, List[Rectangle]):
@@ -15,9 +16,9 @@ def get_mask(mask: np.array) -> (np.array, List[Rectangle]):
 
     regions = []
     for _ in range(INTERMEDIATE_STEPS):
-        for i in range((SIDE-1)/2, height - (SIDE-1)/2):
-            for j in range((SIDE-1)/2, width - (SIDE-1)/2):
-                if integral[i, j] / SIDE**2 > THRESHOLD:
+        for i in range((SIDE - 1) / 2, height - (SIDE - 1) / 2):
+            for j in range((SIDE - 1) / 2, width - (SIDE - 1) / 2):
+                if integral[i, j] / SIDE ** 2 > THRESHOLD:
                     rec = Rectangle(
                         top_left=(i - int(SIDE / 2), j - int(SIDE / 2)),
                         width=SIDE,
@@ -29,4 +30,7 @@ def get_mask(mask: np.array) -> (np.array, List[Rectangle]):
         if side % 2 == 0:
             side += 1
 
-    return regions
+    regions = combine_overlapped_regions(regions)
+    mask = clear_non_region_mask(mask, regions)
+
+    return mask, regions
