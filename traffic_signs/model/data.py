@@ -4,6 +4,7 @@ from typing import List
 from model import GroundTruth, Rectangle
 import numpy as np
 
+
 class Data:
     """
     In this class we store in a list the content of a data element of our dataset:
@@ -43,10 +44,11 @@ class Data:
                 parts = line.strip().split(' ')
                 gt = GroundTruth()
                 gt.type = parts[4]
-                gt.rectangle = Rectangle()
-                gt.rectangle.top_left = (float(parts[0]), float(parts[1]))
-                gt.rectangle.width = float(parts[3]) - float(parts[1]) + 1
-                gt.rectangle.height = float(parts[2]) - float(parts[0]) + 1
+                gt.rectangle = Rectangle(
+                    top_left=(int(float(parts[0])), int(float(parts[1]))),
+                    width=int(float(parts[3]) - float(parts[1]) + 1),
+                    height=int(float(parts[2]) - float(parts[0]) + 1)
+                )
                 self.gt.append(gt)
 
     def get_img(self):

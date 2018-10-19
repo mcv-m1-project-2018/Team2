@@ -17,6 +17,6 @@ def clear_non_region_mask(mask: np.array, regions: List[Rectangle]) -> np.array:
         cv2.rectangle(m, (region.top_left[1], region.top_left[0]),
                       (region.get_bottom_right()[1], region.get_bottom_right()[0]), 255, thickness=cv2.FILLED)
 
-    m = cv2.invert(m)
+    m = cv2.bitwise_not(m)
     cv2.subtract(mask, m)
     return mask

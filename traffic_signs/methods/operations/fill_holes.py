@@ -4,7 +4,7 @@ from methods.operations import segregation
 import numpy as np
 
 
-def get_mask(mask: np.array):
+def get_mask(mask: np.array) -> np.array:
     """ 
     get_mask(mask)
     

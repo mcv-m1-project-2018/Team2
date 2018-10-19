@@ -4,7 +4,7 @@
 import argparse
 import fnmatch
 import os
-from concurrent.futures.process import ProcessPoolExecutor
+from concurrent.futures.thread import ThreadPoolExecutor
 from timeit import default_timer as timer
 
 import cv2
@@ -13,8 +13,8 @@ from tabulate import tabulate
 
 import evaluation.evaluation_funcs as evalf
 from data_analysis import data_analysis
+from methods import hsv_convolution, hsv_integral, hsv_window
 from model import DatasetManager
-from methods import method1, method2, method3, method4
 from model import Result
 
 
@@ -72,10 +72,9 @@ def train_mode(train_dir: str, pixel_methods, window_method: str, analysis=False
     """In train mode, we split the dataset and evaluate the result of several executions"""
     # Use this class to load and manage states
     dataset_manager = DatasetManager(train_dir)
-
     time = timer()
     # Perform the executions in parallel
-    with ProcessPoolExecutor(max_workers=threads) as executor:
+    with ThreadPoolExecutor(max_workers=threads) as executor:
         results = [executor.submit(validate, analysis, dataset_manager, pixel_methods)
                    for _ in range(executions)]
 
@@ -125,10 +124,9 @@ def main():
 
     methods = args.pixel_methods.split(';')
     method_refs = {
-        'method1': method1,
-        'method2': method2,
-        'method3': method3,
-        'method4': method4
+        'hsv_window': hsv_window,
+        'hsv_convolution': hsv_convolution,
+        'hsv_integral': hsv_integral
     }
     methods = seq(methods).map(lambda x: method_refs.get(x, None)).to_list()
     if not all(methods):

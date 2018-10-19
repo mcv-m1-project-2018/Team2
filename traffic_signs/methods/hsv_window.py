@@ -1,7 +1,10 @@
+from typing import List
+
 import numpy as np
 
-from methods.operations import segregation
-from methods.window import window
+from .operations import segregation, fill_holes, morpho
+from .window import move_window
+from model import Data
 
 
 class hsv_window:
@@ -10,6 +13,15 @@ class hsv_window:
         # Color segmentation in HSV
         mask, im = segregation(im, 'hsv')
 
-        mask, regions = window(mask)
+        mask = morpho(mask)
+        mask = fill_holes(mask)
+
+        mask, regions = move_window(mask)
 
         return regions, mask, im
+
+    def train(self, data: List[Data]):
+        pass
+
+
+instance = hsv_window()
