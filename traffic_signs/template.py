@@ -136,11 +136,12 @@ class Template:
      def template_matching(img,data:Data):
          masks=draw_masks(data)
          
-         res = cv2.matchTemplate(img,template,method)
+         res = cv2.matchTemplate(img,template,cv2.TM_CCOEFF_NORMED)
          min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
          
-         
-         
+        threshold = 0.8
+        loc = np.where( res >= threshold)
+       
          
          
             
