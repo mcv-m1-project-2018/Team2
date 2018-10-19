@@ -24,6 +24,12 @@ class Rectangle:
     def get_bottom_right(self) -> (float, float):
         return self.top_left[0] + self.height, self.top_left[1] + self.width
 
+    def get_bottom_left(self) -> (float, float):
+        return self.top_left[0] + self.height, self.top_left[1]
+
+    def get_top_right(self) -> (float, float):
+        return self.top_left[0], self.top_left[1] + self.width
+
     def get_area(self) -> float:
         return self.width * self.height
 
@@ -41,6 +47,12 @@ class Rectangle:
     def contains_point(self, point: (float, float)) -> bool:
         return (self.top_left[0] <= point[0] <= self.get_bottom_right()[0] and
                 self.top_left[1] <= point[1] <= self.get_bottom_right()[1])
+
+    def contains_rectangle(self, rectangle) -> bool:
+        return self.contains_point(rectangle.top_left) or self.contains_point(rectangle.get_bottom_right()) or \
+                self.contains_point(rectangle.get_top_right()) or self.contains_point(rectangle.get_bottom_left()) or \
+                rectangle.contains_point(self.top_left) or rectangle.contains_point(self.get_bottom_right()) or \
+                rectangle.contains_point(self.get_top_right()) or rectangle.contains_point(self.get_bottom_left())
 
     def union(self, other: 'Rectangle') -> 'Rectangle':
         rec = Rectangle()

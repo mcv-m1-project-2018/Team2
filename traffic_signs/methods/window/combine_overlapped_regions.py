@@ -16,8 +16,7 @@ def combine_overlapped_regions(regions: List[Rectangle]) -> List[Rectangle]:
         j = i + 1
         region = regions[i]
         while j < len(regions):
-            if region.contains_point(regions[j].top_left) or \
-                    region.contains_point(regions[j].get_bottom_right()):
+            if region.contains_rectangle(regions[j]):
                 region = region.union(regions[j])
                 regions.remove(j)
                 j -= 1
