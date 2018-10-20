@@ -5,17 +5,23 @@ class Result:
     of the results
     """
     tp: float
-    fp: float
+    fp_w: float
     tn: float
     fn: float
     time: float
+    tp_w: float
+    fp_w: float
+    fn_w: float
 
-    def __init__(self, tp=0, fp=0, tn=0, fn=0, time=0):
+    def __init__(self, tp=0, fp=0, tn=0, fn=0, time=0, tp_w=0, fn_w=0, fp_w=0):
         self.tp = tp
         self.fp = fp
         self.tn = tn
         self.fn = fn
         self.time = time
+        self.tp_w = tp_w
+        self.fn_w = fn_w
+        self.fp_w = fp_w
 
     def get_precision(self):
         return float(self.tp) / float(self.tp + self.fp)
@@ -31,3 +37,15 @@ class Result:
 
     def get_f1(self):
         return (2 * self.get_precision() * self.get_recall()) / (self.get_precision() + self.get_recall())
+
+    def get_precision_w(self):
+        return float(self.tp_w) / float(self.tp_w + self.fp_w)
+
+    def get_accuracy_w(self):
+        return float(self.tp_w) / float(self.tp_w + self.fp_w + self.fn_w)
+
+    def get_recall_w(self):
+        return float(self.tp_w) / float(self.tp_w + self.fn_w)
+
+    def get_f1_w(self):
+        return (2 * self.get_precision_w() * self.get_recall_w()) / (self.get_precision_w() + self.get_recall_w())
