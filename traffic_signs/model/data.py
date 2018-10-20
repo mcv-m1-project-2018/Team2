@@ -42,9 +42,8 @@ class Data:
         with open('{}/gt/gt.{}.txt'.format(directory, name)) as f:
             for line in f.readlines():
                 parts = line.strip().split(' ')
-                gt = GroundTruth()
-                gt.type = parts[4]
-                gt.rectangle = Rectangle(
+                gt = GroundTruth(
+                    type=parts[4],
                     top_left=(int(float(parts[0])), int(float(parts[1]))),
                     width=int(float(parts[3]) - float(parts[1]) + 1),
                     height=int(float(parts[2]) - float(parts[0]) + 1)

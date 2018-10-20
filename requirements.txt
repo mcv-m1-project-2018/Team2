@@ -9,6 +9,7 @@ imageio==2.4.1
 kiwisolver==1.0.1
 matplotlib==3.0.0
 networkx==2.2
+numba==0.40.1
 numpy==1.15.2
 opencv-python==3.4.3.18
 Pillow==5.3.0

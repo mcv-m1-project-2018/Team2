@@ -13,10 +13,12 @@ from functional import seq
 from tabulate import tabulate
 
 import evaluation.evaluation_funcs as evalf
+from evaluation.bbox_iou import bbox_iou
 from data_analysis import data_analysis
-from methods import hsv_convolution, hsv_integral, hsv_window
+from methods import hsv_convolution, hsv_integral, hsv_window, hsv_cc
 from model import DatasetManager
 from model import Result
+import matplotlib.pyplot as plt
 
 
 def validate(analysis, dataset_manager, pixel_methods):
@@ -40,7 +42,7 @@ def validate(analysis, dataset_manager, pixel_methods):
         for dat in verify:
             im = dat.get_img()
 
-            region, mask, im = pixel_method.get_mask(im)
+            regions, mask, im = pixel_method.get_mask(im)
 
             start = timer()
             mask_solution = dat.get_mask_img()
@@ -49,7 +51,7 @@ def validate(analysis, dataset_manager, pixel_methods):
             [local_tp, local_fp, local_fn, local_tn] = evalf.performance_accumulation_pixel(
                 mask, mask_solution)
 
-            [local_tp_w, local_fn_w, local_fp_w] = performance_accumulation_window(region ,dat.gt)
+            [local_tp_w, local_fn_w, local_fp_w] = performance_accumulation_window(regions, dat.gt)
 
             tp += local_tp
             fp += local_fp
@@ -60,6 +62,19 @@ def validate(analysis, dataset_manager, pixel_methods):
             fn_w += local_fn_w
             fp_w += local_fp_w
 
+            """print(tp_w, fn_w, fp_w)
+            print(len(regions))
+            for region in regions:
+                cv2.rectangle(mask, (region.top_left[1], region.top_left[0]),
+                              (region.get_bottom_right()[1], region.get_bottom_right()[0]), (255,), thickness=5)
+            for gt in dat.gt:
+                cv2.rectangle(mask, (gt.top_left[1], gt.top_left[0]),
+                              (gt.get_bottom_right()[1], gt.get_bottom_right()[0]), (255,), thickness=5)
+
+            plt.imshow(mask, 'gray')
+            plt.show()
+            pass"""
+
         results.append(Result(
             tp=tp,
             fp=fp,
@@ -69,7 +84,6 @@ def validate(analysis, dataset_manager, pixel_methods):
             tp_w=tp_w,
             fn_w=fn_w,
             fp_w=fp_w
-
         ))
     return results
 
@@ -100,13 +114,13 @@ def performance_accumulation_window(detections_gt, annotations_gt):
     """
     detections = []
     for element in detections_gt:
-         detections.append([element.top_left[0], element.top_left[1], element.get_bottom_right[0],
-                      element.get_bottom_right[1]])
+        detections.append([element.top_left[0], element.top_left[1], element.get_bottom_right()[0],
+                           element.get_bottom_right()[1]])
 
     annotations = []
     for element in annotations_gt:
-        annotations.append([element.top_left[0], element.top_left[1], element.get_bottom_right[0],
-                      element.get_bottom_right[1]])
+        annotations.append([element.top_left[0], element.top_left[1], element.get_bottom_right()[0],
+                            element.get_bottom_right()[1]])
 
     detections_used = np.zeros(len(detections))
     annotations_used = np.zeros(len(annotations))
@@ -123,12 +137,16 @@ def performance_accumulation_window(detections_gt, annotations_gt):
 
     return [TP, FN, FP]
 
-def combine_results(result1, result2, executions):
+
+def combine_results(result1: Result, result2: Result, executions):
     result1.tp += result2.tp / executions
     result1.fp += result2.fp / executions
     result1.fn += result2.fn / executions
     result1.tn += result2.tn / executions
     result1.time += result2.time / executions
+    result1.tp_w += result2.tp_w / executions
+    result1.fp_w += result2.fp_w / executions
+    result1.fn_w += result2.fn_w / executions
     return result1
 
 
@@ -136,7 +154,6 @@ def train_mode(train_dir: str, pixel_methods, window_method: str, analysis=False
     """In train mode, we split the dataset and evaluate the result of several executions"""
     # Use this class to load and manage states
     dataset_manager = DatasetManager(train_dir)
-    time = timer()
     # Perform the executions in parallel
     with ThreadPoolExecutor(max_workers=threads) as executor:
         results = [executor.submit(validate, analysis, dataset_manager, pixel_methods)
@@ -190,7 +207,8 @@ def main():
     method_refs = {
         'hsv_window': hsv_window,
         'hsv_convolution': hsv_convolution,
-        'hsv_integral': hsv_integral
+        'hsv_integral': hsv_integral,
+        'hsv_cc': hsv_cc
     }
     methods = seq(methods).map(lambda x: method_refs.get(x, None)).to_list()
     if not all(methods):
@@ -205,9 +223,11 @@ def main():
     if results:
         print(tabulate(seq(results)
                        .map(lambda result: [result.get_precision(), result.get_accuracy(), result.get_recall(),
-                                            result.get_f1(), result.tp, result.fp, result.fn, result.time])
+                                            result.get_f1(), result.get_precision_w(), result.get_f1_w(), result.tp,
+                                            result.fp, result.fn, result.time])
                        .reduce(lambda accum, r: accum + [r], []),
-                       headers=['Precision', 'Accuracy', 'Recall', 'F1', 'TP', 'FP', 'FN', 'Time']))
+                       headers=['Precision', 'Accuracy', 'Recall', 'F1', 'Precision w', 'F1 w', 'TP', 'FP',
+                                'FN', 'Time']))
 
 
 if __name__ == '__main__':

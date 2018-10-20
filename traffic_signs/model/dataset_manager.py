@@ -43,8 +43,7 @@ class DatasetManager:
         types = seq(self.data).group_by(lambda sample: sample.gt[0].type).to_dict()
         return types
 
-    def get_data_splits(self):
-
+    def get_data_splits(self) -> (Data, Data):
         training = []
         verification = []
         types = self.get_data_by_type()

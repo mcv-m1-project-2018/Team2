@@ -30,7 +30,7 @@ class DiscardGeometry:
         data          The training dataset
         """
         self.min_area, self.min_fill_ratio, self.max_fill_ratio, self.min_form_factor, self.max_form_factor = \
-            seq(data).flat_map(lambda d: seq(d.gt).map(lambda gt: (d.get_mask_img(), gt.rectangle)).to_list()) \
+            seq(data).flat_map(lambda d: seq(d.gt).map(lambda gt: (d.get_mask_img(), gt)).to_list()) \
                      .map(lambda l: (l[1].get_area(), get_filling_ratio(l[1], l[0]), l[1].get_form_factor())) \
                      .reduce(lambda accum, l: (min(accum[0], l[0]), min(accum[1], l[1]), max(accum[2], l[1]),
                                                min(accum[3], l[2]), max(accum[4], l[2])),

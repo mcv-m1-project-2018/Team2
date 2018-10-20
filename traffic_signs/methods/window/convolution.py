@@ -21,7 +21,6 @@ def get_mask(mask: np.array) -> (np.array, List[Rectangle]):
 
         width, height = m.shape
         positions = conv_iter(conv_mask, width, height)
-        print(len(positions))
         for pos in positions:
             rec = Rectangle(
                 top_left=(pos[0] - int(SIDE / 2), pos[1] - int(SIDE / 2)),

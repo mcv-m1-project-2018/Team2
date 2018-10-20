@@ -20,7 +20,6 @@ class hsv_convolution:
         mask = fill_holes(mask)
 
         mask, regions = convolution(mask)
-        print(1)
         return regions, mask, im
 
 

@@ -20,7 +20,6 @@ class hsv_integral:
         mask = fill_holes(mask)
 
         mask, regions = integral(mask)
-        print(1)
         return regions, mask, im
 
 

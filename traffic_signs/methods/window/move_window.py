@@ -4,10 +4,8 @@ import cv2
 import numpy as np
 from numba import njit
 
-from . import combine_overlapped_regions, clear_non_region_mask
 from model import Rectangle
-from matplotlib import pyplot as plt
-
+from . import combine_overlapped_regions, clear_non_region_mask
 
 SIDE = 121
 INTERMEDIATE_STEPS = 10
@@ -34,11 +32,8 @@ def get_mask(mask: np.array) -> (np.array, List[Rectangle]):
 
         m = cv2.resize(m, (0, 0), fx=SHRINK_MULTIPLIER, fy=SHRINK_MULTIPLIER)
 
-    plt.imshow(mask, 'gray')
-    plt.show()
     regions = combine_overlapped_regions(regions)
     mask = clear_non_region_mask(mask, regions)
-    print(len(regions))
     return mask, regions
 
 

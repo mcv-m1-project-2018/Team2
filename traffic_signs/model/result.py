@@ -1,11 +1,10 @@
 class Result:
-
     """
     We define and initialize the different variables for the evaluation
     of the results
     """
     tp: float
-    fp_w: float
+    fp: float
     tn: float
     fn: float
     time: float
@@ -39,13 +38,13 @@ class Result:
         return (2 * self.get_precision() * self.get_recall()) / (self.get_precision() + self.get_recall())
 
     def get_precision_w(self):
-        return float(self.tp_w) / float(self.tp_w + self.fp_w)
+        return float(self.tp_w) / max(float(self.tp_w + self.fp_w), 1)
 
     def get_accuracy_w(self):
-        return float(self.tp_w) / float(self.tp_w + self.fp_w + self.fn_w)
+        return float(self.tp_w) / max(float(self.tp_w + self.fp_w + self.fn_w), 1)
 
     def get_recall_w(self):
-        return float(self.tp_w) / float(self.tp_w + self.fn_w)
+        return float(self.tp_w) / max(float(self.tp_w + self.fn_w), 1)
 
     def get_f1_w(self):
-        return (2 * self.get_precision_w() * self.get_recall_w()) / (self.get_precision_w() + self.get_recall_w())
+        return (2 * self.get_precision_w() * self.get_recall_w()) / max(self.get_precision_w() + self.get_recall_w(), 1)
