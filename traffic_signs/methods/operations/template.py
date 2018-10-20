@@ -49,7 +49,7 @@ class Template:
                 if sign_type[i].signs[j].get_area()>max1: 
                     max1 = sign_type_stats[i].signs[j]; 
     
-                max[i].add_sign(sign_type[i].signs[j],i)
+                max[i].add_sign(sign_type[i].signs[j])
                 
         return max    
     
@@ -115,7 +115,7 @@ class Template:
         func = switcher.get(type, lambda: "Invalid Type")
 
         # Execute the function
-        image=func(width,height)
+        image=self.func(width,height)
         
         return image    
     def draw_masks(self,data:Data):   
@@ -126,21 +126,26 @@ class Template:
         for i in enumerate(types):  
             average_width=0;
             average_height=0;    
-            for j in length(maxes[i]):
+            for j in len(maxes[i]):
                 average_width=average_width+maxes[i].signs[j].rectangle.width
                 average_height=average_height+ maxes[i].signs[j].rectangle.height  
-            images[i]=draw_by_type(i,int(average_width/length(maxes[i])), int(average_height/length(maxes[i])))
+            images[i]=self.draw_by_type(i,int(average_width/len(maxes[i])), int(average_height/len(maxes[i])))
         
         return images                            
     
     def template_matching(self, img,data:Data):
-        masks=selfdraw_masks(data)
+        masks=self.draw_masks(data)
          
         res = cv2.matchTemplate(img,template,cv2.TM_CCOEFF_NORMED)
-        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+        (min_val, max_val, min_loc, max_loc)= cv2.minMaxLoc(res)
          
-        threshold = 0.8
-        loc = np.where( res >= threshold)
+        threshold = 0.5
+        locations = np.where( res >= threshold)
+        
+        
+        
+        
+        
        
          
          
