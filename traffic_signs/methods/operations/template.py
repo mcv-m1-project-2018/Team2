@@ -134,6 +134,8 @@ class Template:
         threshold = 0.5
         locations = np.where( res >= threshold)
         
+        return locations
+        
         
         
         
