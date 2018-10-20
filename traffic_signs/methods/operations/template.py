@@ -25,10 +25,11 @@ class Template:
                 if gt.type not in sign_type.keys():
                     sign_type[gt.type] = Template()
 
-                sign_type[gt.type] = Rectangle(
-                    top_left=gt.top_left,
-                    width=gt.width,
-                    height=gt.height)
+                 
+                sign_type[gt.type].signs.append(Rectangle(
+                top_left=gt.top_left,
+                width=gt.width,
+                height=gt.height))
             total += 1
 
         return sign_type, total
@@ -40,9 +41,8 @@ class Template:
         max = []
         max1 = 0
         for pos, i in enumerate(types):
-
             max.append(Template())
-            for j in range(len(sign_type[pos])):
+            for j in range(len(sign_type[pos].signs)):
                 if sign_type[pos].signs[j].get_area() > max1:
                     max1 = sign_type[pos].signs[j]
 
