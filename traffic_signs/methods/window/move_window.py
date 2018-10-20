@@ -24,7 +24,7 @@ def get_mask(mask: np.array) -> (np.array, List[Rectangle]):
         for pos in positions:
             regions.append(
                 Rectangle(
-                    top_left=(pos[0] - int(SIDE / 2), pos[1] - int(SIDE / 2)),
+                    top_left=(pos[0], pos[1]),
                     width=SIDE,
                     height=SIDE
                 )

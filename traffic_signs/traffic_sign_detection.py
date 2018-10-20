@@ -15,7 +15,7 @@ from tabulate import tabulate
 import evaluation.evaluation_funcs as evalf
 from evaluation.bbox_iou import bbox_iou
 from data_analysis import data_analysis
-from methods import hsv_convolution, hsv_integral, hsv_window, hsv_cc
+from methods import hsv_convolution, hsv_integral, hsv_window, hsv_cc, hsv_window_template
 from model import DatasetManager
 from model import Result
 import matplotlib.pyplot as plt
@@ -62,18 +62,17 @@ def validate(analysis, dataset_manager, pixel_methods):
             fn_w += local_fn_w
             fp_w += local_fp_w
 
-            """print(tp_w, fn_w, fp_w)
             print(len(regions))
             for region in regions:
                 cv2.rectangle(mask, (region.top_left[1], region.top_left[0]),
                               (region.get_bottom_right()[1], region.get_bottom_right()[0]), (255,), thickness=5)
-            for gt in dat.gt:
+            """for gt in dat.gt:
                 cv2.rectangle(mask, (gt.top_left[1], gt.top_left[0]),
                               (gt.get_bottom_right()[1], gt.get_bottom_right()[0]), (255,), thickness=5)
-
+"""
             plt.imshow(mask, 'gray')
             plt.show()
-            pass"""
+            pass
 
         results.append(Result(
             tp=tp,
@@ -208,7 +207,8 @@ def main():
         'hsv_window': hsv_window,
         'hsv_convolution': hsv_convolution,
         'hsv_integral': hsv_integral,
-        'hsv_cc': hsv_cc
+        'hsv_cc': hsv_cc,
+        'hsv_window_template': hsv_window_template
     }
     methods = seq(methods).map(lambda x: method_refs.get(x, None)).to_list()
     if not all(methods):

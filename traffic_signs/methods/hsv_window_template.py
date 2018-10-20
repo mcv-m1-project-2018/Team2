@@ -18,12 +18,12 @@ class hsv_window_template:
 
         mask, regions = move_window(mask)
 
-        res= template_matching(mask)
-        
+        res = template_matching.template_matching(mask)
+
         return regions, mask, im
 
     def train(self, data: List[Data]):
-        template_matching.train_masks(data) 
+        template_matching.train_masks(data)
         pass
 
 
