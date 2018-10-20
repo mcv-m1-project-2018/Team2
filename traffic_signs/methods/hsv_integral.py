@@ -17,7 +17,6 @@ class hsv_integral:
         mask, im = segregation(im, 'hsv')
 
         mask = morpho(mask)
-        mask = fill_holes(mask)
 
         mask, regions = integral(mask)
         return regions, mask, im

@@ -11,18 +11,16 @@ from methods.window import combine_overlapped_regions, clear_non_region_mask
 
 
 def get_mask(mask: np.array) -> (np.array, List[Rectangle]):
-    integral = cv2.integral(mask)
+    integral = cv2.integral(mask / 255)
 
-    width, height = mask.shape
-
-    positions = int_iter(integral, width, height, SIDE)
+    positions = int_iter(integral)
     regions = []
     for pos in positions:
         regions.append(
             Rectangle(
-                top_left=(pos[0] - int(SIDE / 2), pos[1] - int(SIDE / 2)),
-                width=SIDE,
-                height=SIDE
+                top_left=(pos[0], pos[1]),
+                width=pos[2],
+                height=pos[2]
             )
         )
 
@@ -32,14 +30,16 @@ def get_mask(mask: np.array) -> (np.array, List[Rectangle]):
 
 
 @njit()
-def int_iter(integral: np.array, width: int, height: int, initial_side: int) -> List[Tuple[int, int]]:
+def int_iter(integral: np.array) -> List[Tuple[int, int, int]]:
     ret = []
-    side = initial_side
+    side = SIDE
     for _ in range(INTERMEDIATE_STEPS):
-        for i in range(int((side - 1) / 2), width - int((side - 1) / 2), int(side * STEP_FACTOR)):
-            for j in range(int((side - 1) / 2), height - int((side - 1) / 2), int(side * STEP_FACTOR)):
-                if integral[i, j] / initial_side ** 2 > THRESHOLD:
-                    ret.append((i, j))
+        for i in range(0, integral.shape[0] - side, int(side * STEP_FACTOR)):
+            for j in range(0, integral.shape[1] - side, int(side * STEP_FACTOR)):
+                s = integral[i + side, j + side] - integral[i + side, j] - integral[i, j + side] + integral[i, j]
+                if s / side ** 2 > THRESHOLD:
+                    ret.append((i, j, side))
+
         side = int(side / SHRINK_MULTIPLIER)
         if side % 2 == 0:
             side += 1

@@ -48,7 +48,7 @@ class Rectangle:
         return (self.top_left[0] <= point[0] <= self.get_bottom_right()[0] and
                 self.top_left[1] <= point[1] <= self.get_bottom_right()[1])
 
-    def contains_rectangle(self, rectangle) -> bool:
+    def intersects(self, rectangle) -> bool:
         return self.contains_point(rectangle.top_left) or self.contains_point(rectangle.get_bottom_right()) or \
                 self.contains_point(rectangle.get_top_right()) or self.contains_point(rectangle.get_bottom_left()) or \
                 rectangle.contains_point(self.top_left) or rectangle.contains_point(self.get_bottom_right()) or \

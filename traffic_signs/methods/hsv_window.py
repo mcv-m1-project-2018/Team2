@@ -14,7 +14,6 @@ class hsv_window:
         mask, im = segregation(im, 'hsv')
 
         mask = morpho(mask)
-        mask = fill_holes(mask)
 
         mask, regions = move_window(mask)
 

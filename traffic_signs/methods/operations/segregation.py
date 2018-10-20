@@ -49,11 +49,11 @@ def _get_mask_hsv(im):
     hsv_im = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
 
     lower_red_begin = np.array([0, 150, 50])
-    upper_red_begin = np.array([20, 255, 255])
-    lower_red_end = np.array([160, 150, 50])
+    upper_red_begin = np.array([15, 255, 255])
+    lower_red_end = np.array([165, 150, 50])
     upper_red_end = np.array([180, 255, 255])
-    lower_blue = np.array([100, 150, 50])
-    upper_blue = np.array([140, 255, 255])
+    lower_blue = np.array([105, 150, 50])
+    upper_blue = np.array([135, 255, 255])
     # lower_white=np.array([0, 0, 225])
     # upper_white=np.array([145, 60, 255])
 

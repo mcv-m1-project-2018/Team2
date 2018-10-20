@@ -5,8 +5,7 @@ import argparse
 import fnmatch
 import os
 from concurrent.futures.thread import ThreadPoolExecutor
-from timeit import default_timer as timer
-
+import time
 import cv2
 import numpy as np
 from functional import seq
@@ -32,7 +31,7 @@ def validate(analysis, dataset_manager, pixel_methods):
         fn = 0
         fp = 0
         tn = 0
-        time = 0
+        t = 0
         tp_w = 0
         fn_w = 0
         fp_w = 0
@@ -42,11 +41,10 @@ def validate(analysis, dataset_manager, pixel_methods):
         for dat in verify:
             im = dat.get_img()
 
+            start = time.time()
             regions, mask, im = pixel_method.get_mask(im)
-
-            start = timer()
             mask_solution = dat.get_mask_img()
-            time += timer() - start
+            t += time.time() - start
 
             [local_tp, local_fp, local_fn, local_tn] = evalf.performance_accumulation_pixel(
                 mask, mask_solution)
@@ -62,24 +60,23 @@ def validate(analysis, dataset_manager, pixel_methods):
             fn_w += local_fn_w
             fp_w += local_fp_w
 
-            print(len(regions))
-            for region in regions:
+            """for region in regions:
                 cv2.rectangle(mask, (region.top_left[1], region.top_left[0]),
                               (region.get_bottom_right()[1], region.get_bottom_right()[0]), (255,), thickness=5)
-            """for gt in dat.gt:
+            for gt in dat.gt:
                 cv2.rectangle(mask, (gt.top_left[1], gt.top_left[0]),
-                              (gt.get_bottom_right()[1], gt.get_bottom_right()[0]), (255,), thickness=5)
-"""
-            plt.imshow(mask, 'gray')
+                              (gt.get_bottom_right()[1], gt.get_bottom_right()[0]), (128,), thickness=5)
+
+            plt.imshow(mask, 'gray', vmax=255)
             plt.show()
-            pass
+            pass"""
 
         results.append(Result(
             tp=tp,
             fp=fp,
             fn=fn,
             tn=tn,
-            time=(time / len(verify)),
+            time=(t / len(verify)),
             tp_w=tp_w,
             fn_w=fn_w,
             fp_w=fp_w

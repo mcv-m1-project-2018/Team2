@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 from functional import seq
 
+from methods.window import clear_non_region_mask
 from model import Rectangle, Data
 from matplotlib import pyplot as plt
 from utils import get_filling_ratio
@@ -38,7 +39,7 @@ class DiscardGeometry:
 
     def get_mask(self, mask: np.array):
         a, contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        region = []
+        regions = []
         for contour in contours:
             min_point = np.full(2, np.iinfo(np.int).max)
             max_point = np.zeros(2).astype(int)
@@ -50,8 +51,8 @@ class DiscardGeometry:
 
             rectangle = Rectangle()
             rectangle.top_left = min_point.astype(int).tolist()
-            rectangle.height = int(max_point[0] - min_point[0])
-            rectangle.width = int(max_point[1] - min_point[1])
+            rectangle.height = int(max_point[0] - min_point[0]) + 1
+            rectangle.width = int(max_point[1] - min_point[1]) + 1
 
             fr = get_filling_ratio(rectangle, mask)
             ff = rectangle.get_form_factor()
@@ -62,9 +63,11 @@ class DiscardGeometry:
                     ff > self.max_form_factor):
                 cv2.rectangle(mask, (min_point[1], min_point[0]), (max_point[1], max_point[0]), 0, thickness=cv2.FILLED)
             else:
-                region.append(rectangle)
+                regions.append(rectangle)
 
-        return mask, region
+        mask = clear_non_region_mask(mask, regions)
+
+        return mask, regions
 
 
 instance = DiscardGeometry()
