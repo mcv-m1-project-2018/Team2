@@ -1,21 +1,12 @@
-from model.dataset_manager import DatasetManager
-import data_analysis as dat
 from typing import List
 import numpy as np
-from matplotlib import pyplot as plt
-import cv2
-from functional import seq
-import evaluation.evaluation_funcs as evalf
-from timeit import default_timer as timer
-from model import Result
 from model import GroundTruth
 from model import rectangle
-from model import data
+from model import Data
 
 class Template: 
     
     signs: List[rectangle]
-    type: List[str]
         
     def __init__(self):
         self.signs= []
@@ -23,7 +14,7 @@ class Template:
     def add_sign(self,a:rectangle):
         self.signs.append(a)
  
-    def get_sizes(self,data):  
+    def get_sizes(self,data:Data):  
         sign_type= {}
         total = 0
         for sample in data:
@@ -36,7 +27,7 @@ class Template:
 
         return sign_type, total  
 
-    def get_max_areas(self,data):    
+    def get_max_areas(self,data:Data):    
         sign_types=self.get_sizes(data)
         sum=0
         types=['A','B','C','D','E','F']
@@ -73,7 +64,7 @@ class Template:
         cv2.circle(image, point2, 2, (255,255,255), -1)
         cv2.circle(image, point3, 2, (255,255,255), -1)
         
-        triangle= np.array( [pt1, pt2, pt3] )
+        triangle= np.array( [point1, point2, point3] )
 
         cv2.drawContours(image, [triangle], 0, (255,255,255), -1)
         
@@ -102,6 +93,7 @@ class Template:
         bottom_right=(4+width,4+height) 
         cv2.rectangle(image,top_rigth,bottom_right,(255,255,255),-1)
         return image
+    
     def draw_by_type(self, type:str, width:int, height:int):
         switcher = {
              'A': draw_mask_triangle,
@@ -133,7 +125,7 @@ class Template:
         
         return images                            
     
-    def template_matching(self, img,data:Data):
+    def template_matching(self, img: np.array ,data:Data):
         masks=self.draw_masks(data)
          
         res = cv2.matchTemplate(img,template,cv2.TM_CCOEFF_NORMED)
