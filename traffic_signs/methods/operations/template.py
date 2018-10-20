@@ -47,14 +47,14 @@ class Template:
     
     def draw_mask_circle(self, width:int,height:int):
         image = np.zeros((int(width)+10, int(height)+10, 3), np.uint8)
-        image[:]=0; 
+        image[:]=0
         center=int(width)/2
         cv2.circle(image, center, width/2, (255,255,255),-1)
         return image 
     
     def draw_mask_triangle(self,width:int,height:int):
         image = np.zeros((int(width)+10, int(height)+10, 3), np.uint8)
-        image[:]=0; 
+        image[:]=0
         
         point1= (4, int(width/2)+4)
         point2= ((height+4), 4)
@@ -72,7 +72,7 @@ class Template:
         return image
     def draw_mask_triangle_inv(self,width:int,height:int):
         image = np.zeros((int(width)+10, int(height)+10, 3), np.uint8)
-        image[:]=0; 
+        image[:]=0
         
         point1= (4, 4)
         point2= (4, 4+width)
@@ -89,7 +89,7 @@ class Template:
         return image    
     def draw_rectangles(self,width:int,height:int):
         image = np.zeros((int(width)+10, int(height)+10, 3), np.uint8)
-        image[:]=0; 
+        image[:]=0
         top_rigth=(4,4)
         bottom_right=(4+width,4+height) 
         cv2.rectangle(image,top_rigth,bottom_right,(255,255,255),-1)
@@ -97,18 +97,18 @@ class Template:
     
     def draw_by_type(self, type:str, width:int, height:int):
         switcher = {
-            'A': draw_mask_triangle,
-            'B': draw_mask_triangle_inv,
-            'C': draw_mask_circle,
-            'D': draw_mask_circle,
-            'E': draw_mask_circle,
-            'F': draw_rectangles
+            'A': self.draw_mask_triangle,
+            'B': self.raw_mask_triangle_inv,
+            'C': self.draw_mask_circle,
+            'D': self.draw_mask_circle,
+            'E': self.draw_mask_circle,
+            'F': self.draw_rectangles
         }
          
         func = switcher.get(type, lambda: "Invalid Type")
 
         # Execute the function
-        image=self.func(width,height)
+        image=func(width,height)
         
         return image
         
