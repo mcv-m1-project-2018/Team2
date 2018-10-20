@@ -29,7 +29,7 @@ class Template:
         return sign_type, total  
 
     def get_max_areas(self,data:Data):    
-        sign_types=self.get_sizes(data)
+        sign_type=self.get_sizes(data)
         sum=0
         types=['A','B','C','D','E','F']
         max={}
@@ -37,7 +37,7 @@ class Template:
         for i in enumerate(types):  
             if i not in max.keys():
                 max[i] = Template()     
-            for j in range(len(sign_types[i])):        
+            for j in range(len(sign_type[i])):        
                 if sign_type[i].signs[j].get_area()>max1: 
                     max1 = sign_type_stats[i].signs[j]; 
     
