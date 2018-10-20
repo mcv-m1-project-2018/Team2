@@ -3,6 +3,7 @@ import numpy as np
 from model import GroundTruth
 from model import rectangle
 from model import Data
+import cv2
 
 class Template: 
     
@@ -121,20 +122,25 @@ class Template:
             for j in len(maxes[i]):
                 average_width=average_width+maxes[i].signs[j].rectangle.width
                 average_height=average_height+ maxes[i].signs[j].rectangle.height  
-            images[i]=self.draw_by_type(i,int(average_width/len(maxes[i])), int(average_height/len(maxes[i])))
+            masks[i]=self.draw_by_type(i,int(average_width/len(maxes[i])), int(average_height/len(maxes[i])))
         
-        return images                            
+        return masks                            
     
     def template_matching(self, img: np.array ,data:Data):
         masks=self.draw_masks(data)
-         
-        res = cv2.matchTemplate(img,template,cv2.TM_CCOEFF_NORMED)
-        (min_val, max_val, min_loc, max_loc)= cv2.minMaxLoc(res)
+        res={}
+        types=['A','B','C','D','E','F']
+        final=0
+        for i in enumerate(types): 
+            res[i]= cv2.matchTemplate(img,masks[i],cv2.TM_CCOEFF_NORMED)
+            if res[i]>final:
+                final=res[i]
+                type=i;
          
         threshold = 0.5
-        locations = np.where( res >= threshold)
+        locations = np.where( final >= threshold)
         
-        return locations
+        return locations,type
         
         
         
