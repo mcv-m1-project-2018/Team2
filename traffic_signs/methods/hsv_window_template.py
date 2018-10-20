@@ -7,7 +7,7 @@ from .window import move_window
 from model import Data
 
 
-class hsv_window:
+class hsv_window_template:
 
     def get_mask(self, im: np.array):
         # Color segmentation in HSV
@@ -27,4 +27,4 @@ class hsv_window:
         pass
 
 
-instance = hsv_window()
+instance = hsv_window_template()

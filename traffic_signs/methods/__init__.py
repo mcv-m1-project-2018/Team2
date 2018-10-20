@@ -5,5 +5,6 @@ from .hsv_cc_tm import instance as hsv_cc_tm
 from .hsv_sw_tm import instance as hvs_sw_tm
 from .hsv_tm import instance as hvs_tm
 from .hsv_window import instance as hsv_window
+from .hsv_window_template import instance as hsv_window_template
 from .hsv_convolution import instance as hsv_convolution
 from .hsv_integral import instance as hsv_integral

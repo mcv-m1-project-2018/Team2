@@ -7,7 +7,7 @@ import cv2
 
 
 class Template:
-    signs: List[rectangle]
+    signs: List[Rectangle]
     masks: List[np.array]
 
     def __init__(self):
@@ -25,16 +25,17 @@ class Template:
                 if gt.type not in sign_type.keys():
                     sign_type[gt.type] = Template()
 
-            sign_type["a"] = Rectangle(
-                top_left=gt.rectangle.top_left,
-                width=gt.rectangle.width,
-                height=gt.rectangle.height)
+                sign_type[gt.type] = Rectangle(
+                    top_left=gt.top_left,
+                    width=gt.width,
+                    height=gt.height)
             total += 1
 
         return sign_type, total
 
     def get_max_areas(self, data: List[Data]):
         sign_type = self.get_sizes(data)
+        print(sign_type)
         types = ['A', 'B', 'C', 'D', 'E', 'F']
         max = []
         max1 = 0
