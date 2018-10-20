@@ -23,7 +23,7 @@ class Template:
     def add_sign(self,a:rectangle):
         self.signs.append(a)
  
-    def get_sizes(data):  
+    def get_sizes(self,data):  
         sign_type= {}
         total = 0
         for sample in data:
@@ -34,7 +34,7 @@ class Template:
             sign_type[gt.type].add_sign(a=rectangle(gt.rectangle.top_left,gt.rectangle.width,gt.rectangle.height))
             total += 1
 
-    return sign_type, total  
+        return sign_type, total  
 
     def get_max_areas(self,data):    
         sign_types=self.get_sizes(data)
@@ -53,14 +53,14 @@ class Template:
                 
         return max    
     
-    def draw_mask_circle( width:int,height:int):
+    def draw_mask_circle(self, width:int,height:int):
         image = np.zeros((int(width)+10, int(height)+10, 3), np.uint8)
         image[:]=0; 
         center=int(width)/2
         cv2.circle(image, center, width/2, (255,255,255),-1)
         return image 
     
-    def draw_mask_triangle(width:int,height:int):
+    def draw_mask_triangle(self,width:int,height:int):
         image = np.zeros((int(width)+10, int(height)+10, 3), np.uint8)
         image[:]=0; 
         
@@ -78,7 +78,7 @@ class Template:
         cv2.drawContours(image, [triangle], 0, (255,255,255), -1)
         
         return image
-    def draw_mask_triangle_inv(width:int,height:int):
+    def draw_mask_triangle_inv(self,width:int,height:int):
         image = np.zeros((int(width)+10, int(height)+10, 3), np.uint8)
         image[:]=0; 
         
@@ -90,12 +90,12 @@ class Template:
         cv2.circle(image, point2, 2, (255,255,255), -1)
         cv2.circle(image, point3, 2, (255,255,255), -1)
         
-        triangle= np.array( [pt1, pt2, pt3] )
+        triangle= np.array( [point1, point2, point2] )
 
         cv2.drawContours(image, [triangle], 0, (255,255,255), -1)
         
         return image    
-    def draw_rectangles(width:int,height:int):
+    def draw_rectangles(self,width:int,height:int):
         image = np.zeros((int(width)+10, int(height)+10, 3), np.uint8)
         image[:]=0; 
         top_rigth=(4,4)
@@ -133,11 +133,11 @@ class Template:
         
         return images                            
     
-     def template_matching(img,data:Data):
-         masks=draw_masks(data)
+    def template_matching(self, img,data:Data):
+        masks=selfdraw_masks(data)
          
-         res = cv2.matchTemplate(img,template,cv2.TM_CCOEFF_NORMED)
-         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+        res = cv2.matchTemplate(img,template,cv2.TM_CCOEFF_NORMED)
+        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
          
         threshold = 0.8
         loc = np.where( res >= threshold)
