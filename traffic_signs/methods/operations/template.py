@@ -97,12 +97,12 @@ class Template:
     
     def draw_by_type(self, type:str, width:int, height:int):
         switcher = {
-             'A': draw_mask_triangle,
-             'B': draw_mask_triangle_inv,
-             'C': draw_mask_circle,
-             'D': draw_mask_circle,
-             'E': draw_mask_circle,
-             'F': draw_rectangles
+            'A': draw_mask_triangle,
+            'B': draw_mask_triangle_inv,
+            'C': draw_mask_circle,
+            'D': draw_mask_circle,
+            'E': draw_mask_circle,
+            'F': draw_rectangles
         }
          
         func = switcher.get(type, lambda: "Invalid Type")
@@ -110,7 +110,8 @@ class Template:
         # Execute the function
         image=self.func(width,height)
         
-        return image    
+        return image
+        
     def draw_masks(self,data:Data):   
         images={}
         maxes=self.get_max_areas(data)
