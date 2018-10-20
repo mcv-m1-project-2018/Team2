@@ -2,7 +2,7 @@ from typing import List
 
 import numpy as np
 
-from .operations import segregation, fill_holes, morpho
+from .operations import segregation, fill_holes, morpho, template_matching
 from .window import move_window
 from model import Data
 
@@ -18,9 +18,12 @@ class hsv_window:
 
         mask, regions = move_window(mask)
 
+        res= template_matching(mask)
+        
         return regions, mask, im
 
     def train(self, data: List[Data]):
+        template_matching.train_masks(data) 
         pass
 
 
