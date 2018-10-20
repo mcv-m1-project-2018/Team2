@@ -8,10 +8,12 @@ import cv2
 class Template: 
     
     signs: List[rectangle]
-        
+    masks: List[np.array] 
+       
     def __init__(self):
         self.signs= []
-        self.type=[]
+        self.masks=[]
+    
     def add_sign(self,a:rectangle):
         self.signs.append(a)
  
@@ -112,7 +114,7 @@ class Template:
         
         return image
         
-    def draw_masks(self,data:Data):   
+    def train_masks(self,data:Data):   
         images={}
         maxes=self.get_max_areas(data)
         types=['A','B','C','D','E','F']
@@ -123,17 +125,15 @@ class Template:
             for j in len(maxes[i]):
                 average_width=average_width+maxes[i].signs[j].rectangle.width
                 average_height=average_height+ maxes[i].signs[j].rectangle.height  
-            masks[i]=self.draw_by_type(i,int(average_width/len(maxes[i])), int(average_height/len(maxes[i])))
-        
-        return masks                            
+            self.masks[i]=self.draw_by_type(i,int(average_width/len(maxes[i])), int(average_height/len(maxes[i])))
+                                  
     
-    def template_matching(self, img: np.array ,data:Data):
-        masks=self.draw_masks(data)
+    def template_matching(self, img: np.array):
         res={}
         types=['A','B','C','D','E','F']
         final=0
         for i in enumerate(types): 
-            res[i]= cv2.matchTemplate(img,masks[i],cv2.TM_CCOEFF_NORMED)
+            res[i]= cv2.matchTemplate(img,self.masks[i],cv2.TM_CCOEFF_NORMED)
             if res[i]>final:
                 final=res[i]
                 type=i;
@@ -142,7 +142,8 @@ class Template:
         locations = np.where( final >= threshold)
         
         return locations,type
-        
+
+instance= Template()        
         
         
         
