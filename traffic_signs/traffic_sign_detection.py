@@ -8,6 +8,7 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from timeit import default_timer as timer
 
 import cv2
+import numpy as np
 from functional import seq
 from tabulate import tabulate
 
@@ -30,6 +31,9 @@ def validate(analysis, dataset_manager, pixel_methods):
         fp = 0
         tn = 0
         time = 0
+        tp_w = 0
+        fn_w = 0
+        fp_w = 0
 
         pixel_method.train(train)
 
@@ -44,20 +48,80 @@ def validate(analysis, dataset_manager, pixel_methods):
 
             [local_tp, local_fp, local_fn, local_tn] = evalf.performance_accumulation_pixel(
                 mask, mask_solution)
+
+            [local_tp_w, local_fn_w, local_fp_w] = performance_accumulation_window(region ,dat.gt)
+
             tp += local_tp
             fp += local_fp
             fn += local_fn
             tn += local_tn
+
+            tp_w += local_tp_w
+            fn_w += local_fn_w
+            fp_w += local_fp_w
 
         results.append(Result(
             tp=tp,
             fp=fp,
             fn=fn,
             tn=tn,
-            time=(time / len(verify))
+            time=(time / len(verify)),
+            tp_w=tp_w,
+            fn_w=fn_w,
+            fp_w=fp_w
+
         ))
     return results
 
+
+def performance_accumulation_window(detections_gt, annotations_gt):
+    """
+    performance_accumulation_window()
+
+    Function to compute different performance indicators (True Positive,
+    False Positive, False Negative) at the object level.
+
+    Objects are defined by means of rectangular windows circumscribing them.
+    Window format is [ struct(x,y,w,h)  struct(x,y,w,h)  ... ] in both
+    detections and annotations.
+
+    An object is considered to be detected correctly if detection and annotation
+    windows overlap by more of 50%
+
+       function [TP,FN,FP] = PerformanceAccumulationWindow(detections, annotations)
+
+       Parameter name      Value
+       --------------      -----
+       'detections'        List of windows marking the candidate detections
+       'annotations'       List of windows with the ground truth positions of the objects
+
+    The function returns the number of True Positive (TP), False Positive (FP),
+    False Negative (FN) objects
+    """
+    detections = []
+    for element in detections_gt:
+         detections.append([element.top_left[0], element.top_left[1], element.get_bottom_right[0],
+                      element.get_bottom_right[1]])
+
+    annotations = []
+    for element in annotations_gt:
+        annotations.append([element.top_left[0], element.top_left[1], element.get_bottom_right[0],
+                      element.get_bottom_right[1]])
+
+    detections_used = np.zeros(len(detections))
+    annotations_used = np.zeros(len(annotations))
+    TP = 0
+    for ii in range(len(annotations)):
+        for jj in range(len(detections)):
+            if (detections_used[jj] == 0) & (bbox_iou(annotations[ii], detections[jj]) > 0.5):
+                TP = TP + 1
+                detections_used[jj] = 1
+                annotations_used[ii] = 1
+
+    FN = np.sum(annotations_used == 0)
+    FP = np.sum(detections_used == 0)
+
+    return [TP, FN, FP]
 
 def combine_results(result1, result2, executions):
     result1.tp += result2.tp / executions
