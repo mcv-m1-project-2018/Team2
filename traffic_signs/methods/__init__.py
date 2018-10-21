@@ -7,3 +7,4 @@ from .hsv_tm import instance as hvs_tm
 from .hsv_cc_template import instance as hsv_cc_template
 from .hsv_convolution import instance as hsv_convolution
 from .hsv_integral import instance as hsv_integral
+from .glob_template import instance as glob_template

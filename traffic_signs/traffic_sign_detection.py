@@ -17,7 +17,7 @@ from tabulate import tabulate
 import evaluation.evaluation_funcs as evalf
 from data_analysis import data_analysis
 from evaluation.bbox_iou import bbox_iou
-from methods import hsv_convolution, hsv_integral, hsv_sw, hsv_cc, hsv_cc_template
+from methods import hsv_convolution, hsv_integral, hsv_sw, hsv_cc, hsv_cc_template, glob_template
 from model import DatasetManager, Data
 from model import Result
 
@@ -56,7 +56,8 @@ def validateMethod(train: List[Data], verify: List[Data], method):
         fn_w += local_fn_w
         fp_w += local_fp_w
 
-        """for region in regions:
+        """import matplotlib.pyplot as plt
+        for region in regions:
             cv2.rectangle(mask, (region.top_left[1], region.top_left[0]),
                           (region.get_bottom_right()[1], region.get_bottom_right()[0]), (255,), thickness=5)
         for gt in dat.gt:
@@ -215,7 +216,8 @@ def main():
         'hsv_convolution': hsv_convolution,
         'hsv_integral': hsv_integral,
         'hsv_cc': hsv_cc,
-        'hsv_cc_template': hsv_cc_template
+        'hsv_cc_template': hsv_cc_template,
+        'glob_template': glob_template
     }
     methods = seq(method_names).map(lambda x: method_refs.get(x, None)).to_list()
     if not all(methods):

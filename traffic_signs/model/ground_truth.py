@@ -10,3 +10,12 @@ class GroundTruth(Rectangle):
 
     def to_csv(self):
         return super().to_csv() + ' ' + self.type
+
+    def union(self, other: Rectangle):
+        rec = super().union(other)
+        return GroundTruth(
+            top_left=rec.top_left,
+            width=rec.width,
+            height=rec.height,
+            sign_type=self.type
+        )

@@ -1,11 +1,12 @@
 from typing import List, Dict
+
+import cv2
 import numpy as np
+from matplotlib import pyplot as plt
+
+from model import Data
 from model import GroundTruth, Rectangle
 from model import rectangle
-from model import Data
-import cv2
-from matplotlib import pyplot as plt
-from PIL.ImageOps import grayscale
 
 
 class Template:
@@ -144,26 +145,19 @@ class Template:
 
     def template_matching_global(self, img: np.array) -> (np.array, int):
         types = ['A', 'B', 'C', 'D', 'E', 'F']
-        max_value = 0
-        top_left= (0,0)
-        signal_type =None
-        position = (0, 0)
-        region=Rectangle()
-        
+        regions = []
+
         for pos, i in enumerate(types):
             res = cv2.matchTemplate(img, self.masks[pos], cv2.TM_CCOEFF_NORMED)
             min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
 
-            if max_val > 0.4 and max_val > max_value:
-                max_value = max_val
-                position = max_loc
-                signal_type = i
-                top_left=min_loc
-                width=masks[pos].width
-                height=masks[pos].height
-                
-        region=GroundTruth(top_left, width, height, sign_type)
-        return region
+            if max_val > 0.4:
+                regions.append(
+                    GroundTruth(top_left=min_loc, width=self.masks[pos].width, height=self.masks[pos].height,
+                                sign_type=i)
+                )
+
+        return regions
 
     def template_matching_reg(self, img: np.array, regions: List[Rectangle]) -> (np.array, int):
         types = ['A', 'B', 'C', 'D', 'E', 'F']
@@ -188,7 +182,8 @@ class Template:
                     max_value = max_val
 
             if sign is not None:
-                regions[i] = GroundTruth(top_left=region.top_left, width=region.width, height=region.height, sign_type=sign)
+                regions[i] = GroundTruth(top_left=region.top_left, width=region.width, height=region.height,
+                                         sign_type=sign)
 
         return regions
 
