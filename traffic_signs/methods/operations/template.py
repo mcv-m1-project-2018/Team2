@@ -164,23 +164,30 @@ class Template:
 
     def template_matching_reg(self, img: np.array, regions: List[Rectangle]) -> (np.array, int):
         types = ['A', 'B', 'C', 'D', 'E', 'F']
-        imag = []
-        signal_type = []
-        position = []
+        sign_types = []
+        positions = []
 
-        for region in regions:
+        for i, region in enumerate(regions):
+            max_value = 0
+            sign = None
+            pos = None
             imag = img[region.top_left[0]:region.top_left[0] + region.height,
-                       region.top_left[1]:region.top_left[1] + region.width]
-            for pos, i in enumerate(types):
+                   region.top_left[1]:region.top_left[1] + region.width]
+            for pos, j in enumerate(types):
+
                 resized_mask = cv2.resize(self.masks[pos], (region.width, region.height))
                 res = cv2.matchTemplate(imag, resized_mask, cv2.TM_CCOEFF_NORMED)
                 min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
-                print(max_val)
-                if max_val > 0.4:
-                    position.append(max_loc)
-                    signal_type.append(i)
 
-        return position, signal_type
+                if max_val > 0.4 and max_val > max_value:
+                    pos = max_loc
+                    sign = j
+                    max_value = max_val
+
+            if sign is not None:
+                regions[i] = GroundTruth(top_left=region.top_left, width=region.width, height=region.height, sign_type=sign)
+
+        return regions
 
 
 instance = Template()

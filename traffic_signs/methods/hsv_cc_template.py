@@ -17,14 +17,16 @@ class hsv_cc_template:
 
         regions = get_cc_regions(mask)
 
+        # Compute the final mask
         mask, regions = discard_geometry.get_mask(mask, regions)
 
-        res, signs = template_matching.template_matching_reg(mask, regions)
+        template_matching.template_matching_reg(mask, regions)
 
         return regions, mask, im
 
     def train(self, data: List[Data]):
         template_matching.train_masks(data)
+        discard_geometry.train(data)
         pass
 
 
