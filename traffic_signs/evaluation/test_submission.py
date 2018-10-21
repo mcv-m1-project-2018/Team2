@@ -95,7 +95,7 @@ for method in methods:
                                                                                                              pixelFP,
                                                                                                              pixelFN,
                                                                                                              pixelTN)
-    pixelF1 = 2 * ((pixelPrecision * pixelSensitivity) / (pixelPrecision + pixelSensitivity))
+    pixelF1 = 2 * ((pixelPrecision * pixelSensitivity) / max(pixelPrecision + pixelSensitivity, 1))
 
     print(
         'Team {:02d} pixel, method {} : {:.2f}, {:.2f}, {:.2f}\n'.format(team, method, pixelPrecision, pixelSensitivity,
