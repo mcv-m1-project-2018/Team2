@@ -2,6 +2,7 @@ from typing import List
 
 import numpy as np
 from methods.operations import fill_holes, discard_geometry, segregation, morpho
+from methods.window import sliding_window
 from model import Data
 import matplotlib.pyplot as plt
 
@@ -16,44 +17,18 @@ class HSV_SW_TM:
     """
 
     def train(self, data: List[Data]):
-        """
-        train(data)
-    
-        Function to train the values used in discard_geometry
-    
-        Parameters   Value
-       ----------------------
-        'data'          All the Data elements
-        """
         discard_geometry.train(data)
 
     def get_mask(self, im: np.array):
-        """
-        get_mask(im)
-    
-        Function to compute the mask of an certain image,in this case is done 
-        in HSV system
-    
-        Parameters   Value
-       ----------------------
-        'im'          Dataset image
-    
-        Returns the mask, binary image with the detections.
-        """
-
-        # Color segmentation in HSV
         mask, im = segregation(im, 'hsv')
 
-        # Mask morpho
         mask = morpho(mask)
 
-        # Hole filling
-        mask = fill_holes(mask)
+        mask, regions = sliding_window(mask)
 
-        # Compute the final mask
-        mask, region = discard_geometry.get_mask(mask)
+        mask, regions = discard_geometry.get_mask(mask, regions)
 
-        return region, mask, im
+        return regions, mask, im
 
 
 instance = HSV_SW_TM()

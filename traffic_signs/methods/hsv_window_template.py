@@ -3,7 +3,7 @@ from typing import List
 import numpy as np
 
 from .operations import segregation, fill_holes, morpho, template_matching
-from .window import move_window
+from .window import sliding_window
 from model import Data
 
 
@@ -16,7 +16,7 @@ class hsv_window_template:
         mask = morpho(mask)
         mask = fill_holes(mask)
 
-        mask, regions = move_window(mask)
+        mask, regions = sliding_window(mask)
 
         res = template_matching.template_matching(mask)
 

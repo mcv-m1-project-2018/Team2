@@ -6,7 +6,7 @@ from numba import njit
 
 from methods.window import combine_overlapped_regions, clear_non_region_mask
 from model import Rectangle
-from .move_window import THRESHOLD, SIDE, INTERMEDIATE_STEPS, SHRINK_MULTIPLIER, STEP_FACTOR
+from .sliding_window import THRESHOLD, SIDE, INTERMEDIATE_STEPS, SHRINK_MULTIPLIER, STEP_FACTOR
 
 
 def get_mask(mask: np.array) -> (np.array, List[Rectangle]):

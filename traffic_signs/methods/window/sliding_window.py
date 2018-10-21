@@ -13,7 +13,7 @@ SHRINK_MULTIPLIER = .9
 THRESHOLD = 0.5
 
 
-def get_mask(mask: np.array) -> (np.array, List[Rectangle]):
+def sliding_window(mask: np.array) -> (np.array, List[Rectangle]):
     regions = []
 
     side = SIDE

@@ -5,7 +5,7 @@ from functional import seq
 from numba import njit
 
 from model import Rectangle
-from .move_window import THRESHOLD, SIDE, INTERMEDIATE_STEPS, SHRINK_MULTIPLIER, STEP_FACTOR
+from .sliding_window import THRESHOLD, SIDE, INTERMEDIATE_STEPS, SHRINK_MULTIPLIER, STEP_FACTOR
 import numpy as np
 from methods.window import combine_overlapped_regions, clear_non_region_mask
 

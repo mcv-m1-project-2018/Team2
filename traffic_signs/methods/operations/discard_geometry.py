@@ -37,33 +37,20 @@ class DiscardGeometry:
                                                min(accum[3], l[2]), max(accum[4], l[2])),
                              (np.inf, np.inf, 0, np.inf, 0))
 
-    def get_mask(self, mask: np.array):
-        a, contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        regions = []
-        for contour in contours:
-            min_point = np.full(2, np.iinfo(np.int).max)
-            max_point = np.zeros(2).astype(int)
-            for point in contour:
-                min_point[0] = min(min_point[0], int(point[0][1]))
-                min_point[1] = min(min_point[1], int(point[0][0]))
-                max_point[0] = max(max_point[0], int(point[0][1]))
-                max_point[1] = max(max_point[1], int(point[0][0]))
-
-            rectangle = Rectangle()
-            rectangle.top_left = min_point.astype(int).tolist()
-            rectangle.height = int(max_point[0] - min_point[0]) + 1
-            rectangle.width = int(max_point[1] - min_point[1]) + 1
-
-            fr = get_filling_ratio(rectangle, mask)
-            ff = rectangle.get_form_factor()
-            if (rectangle.get_area() < self.min_area or
+    def get_mask(self, mask: np.array, regions: List[Rectangle]):
+        ret = []
+        for region in regions:
+            fr = get_filling_ratio(region, mask)
+            ff = region.get_form_factor()
+            if (region.get_area() < self.min_area or
                     fr < self.min_fill_ratio or
                     fr > self.max_fill_ratio or
                     ff < self.min_form_factor or
                     ff > self.max_form_factor):
-                cv2.rectangle(mask, (min_point[1], min_point[0]), (max_point[1], max_point[0]), 0, thickness=cv2.FILLED)
+                cv2.rectangle(mask, (region.top_left[1], region.top_left[0]),
+                              (region.get_bottom_right()[1], region.get_bottom_right()[0]), 0, thickness=cv2.FILLED)
             else:
-                regions.append(rectangle)
+                ret.append(region)
 
         mask = clear_non_region_mask(mask, regions)
 

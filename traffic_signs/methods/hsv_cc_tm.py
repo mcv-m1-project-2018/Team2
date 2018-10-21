@@ -1,7 +1,7 @@
 from typing import List
 
 import numpy as np
-from methods.operations import fill_holes, discard_geometry, segregation, morpho
+from methods.operations import fill_holes, discard_geometry, segregation, morpho, get_cc_regions
 from model import Data
 import matplotlib.pyplot as plt
 
@@ -50,10 +50,12 @@ class HSV_CC_TM:
         # Hole filling
         mask = fill_holes(mask)
 
-        # Compute the final mask
-        mask, region = discard_geometry.get_mask(mask)
+        regions = get_cc_regions(mask)
 
-        return region, mask, im
+        # Compute the final mask
+        mask, regions = discard_geometry.get_mask(mask, regions)
+
+        return regions, mask, im
 
 
 instance = HSV_CC_TM()

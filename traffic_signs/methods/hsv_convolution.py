@@ -2,7 +2,7 @@ from typing import List
 
 import numpy as np
 
-from methods.operations import segregation, fill_holes, morpho
+from methods.operations import segregation, fill_holes, morpho, discard_geometry
 from methods.window import convolution
 from model import Data
 
@@ -20,6 +20,8 @@ class hsv_convolution:
         mask = fill_holes(mask)
 
         mask, regions = convolution(mask)
+        mask, regions = discard_geometry.get_mask(mask, regions)
+
         return regions, mask, im
 
 
