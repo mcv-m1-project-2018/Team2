@@ -145,22 +145,25 @@ class Template:
     def template_matching_global(self, img: np.array) -> (np.array, int):
         types = ['A', 'B', 'C', 'D', 'E', 'F']
         final = 0
-        final2 = 0
-        signal_type = 0
+        top_left= (0,0)
+        signal_type =None
         position = (0, 0)
+        region=Rectangle()
+        
         for pos, i in enumerate(types):
-            print(types[pos])
-            plt.imshow(self.masks[pos], cmap="gray")
             res = cv2.matchTemplate(img, self.masks[pos], cv2.TM_CCOEFF_NORMED)
             min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
 
             if max_val > final:
                 final = max_val
-
                 position = max_loc
                 signal_type = i
-
-        return position, signal_type
+                top_left=min_loc
+                width=masks[pos].width
+                height=masks[pos].height
+                
+        region=GroundTruth(top_left, width, height, sign_type)
+        return region
 
     def template_matching_reg(self, img: np.array, regions: List[Rectangle]) -> (np.array, int):
         types = ['A', 'B', 'C', 'D', 'E', 'F']
