@@ -144,7 +144,7 @@ class Template:
 
     def template_matching_global(self, img: np.array) -> (np.array, int):
         types = ['A', 'B', 'C', 'D', 'E', 'F']
-        final = 0
+        max_value = 0
         top_left= (0,0)
         signal_type =None
         position = (0, 0)
@@ -154,8 +154,8 @@ class Template:
             res = cv2.matchTemplate(img, self.masks[pos], cv2.TM_CCOEFF_NORMED)
             min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
 
-            if max_val > final:
-                final = max_val
+            if if max_val > 0.4 and max_val > max_value:
+                max_value = max_val
                 position = max_loc
                 signal_type = i
                 top_left=min_loc
