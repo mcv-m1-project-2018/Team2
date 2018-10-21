@@ -193,8 +193,12 @@ def test_mode(train_dir: str, test_dir: str, output_dir: str, method):
         regions, mask, im = method.get_mask(im)
         mask = cv2.divide(mask, 255)
         cv2.imwrite('{}/mask.{}.png'.format(output_dir, name), mask)
-        with open('{}/{}.pkl'.format(output_dir, name), 'wb') as file:
-            pickle.dump(regions, file)
+        with open('{}/mask.{}.pkl'.format(output_dir, name), 'wb') as file:
+            pickle.dump(seq(regions)
+                        .map(lambda r: (r.top_left[0], r.top_left[1], r.get_bottom_right()[0],
+                                        r.get_bottom_right()[1]))
+                        .to_list(),
+                        file)
 
 
 def main():

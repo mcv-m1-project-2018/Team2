@@ -96,7 +96,7 @@ def performance_evaluation_pixel(pixelTP, pixelFP, pixelFN, pixelTN):
     pixel_precision   = float(pixelTP) / float(pixelTP+pixelFP)
     pixel_accuracy    = float(pixelTP+pixelTN) / float(pixelTP+pixelFP+pixelFN+pixelTN)
     pixel_specificity = float(pixelTN) / float(pixelTN+pixelFP)
-    pixel_sensitivity = float(pixelTP) / float(pixelTP+pixelFN)
+    pixel_sensitivity = float(pixelTP) / max(float(pixelTP+pixelFN), 1)
 
     return [pixel_precision, pixel_accuracy, pixel_specificity, pixel_sensitivity]
 
