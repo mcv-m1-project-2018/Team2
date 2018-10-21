@@ -18,9 +18,9 @@ class hsv_window_template:
 
         mask, regions = sliding_window(mask)
 
-        res = template_matching.template_matching(mask)
+        res ,signs= template_matching.template_matching_reg(mask,regions)
 
-        return regions, mask, im
+        return regions, mask, im,res,signs
 
     def train(self, data: List[Data]):
         template_matching.train_masks(data)

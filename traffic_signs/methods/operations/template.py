@@ -4,6 +4,8 @@ from model import GroundTruth, Rectangle
 from model import rectangle
 from model import Data
 import cv2
+from matplotlib import pyplot as plt
+from PIL.ImageOps import grayscale
 
 
 class Template:
@@ -49,54 +51,54 @@ class Template:
         return max
 
     def draw_mask_circle(self, width: int, height: int):
-        image = np.zeros((int(width) + 10, int(height) + 10), np.uint8)
+        image = np.zeros((int(width) , int(height) ), np.uint8)
         image[:] = 0
         center = (int(width / 2), int(height / 2))
         cv2.circle(image, center, int(width / 2), (255,), -1)
         return image
 
     def draw_mask_triangle(self, width: int, height: int):
-        image = np.zeros((int(width) + 10, int(height) + 10), np.uint8)
+        image = np.zeros((int(width) , int(height) ), np.uint8)
         image[:] = 0
 
-        point1 = (4, int(width / 2) + 4)
-        point2 = ((height + 4), 4)
-        point3 = ((height + 4), 4 + width)
+        point1 = (0, int(width / 2) + 0)
+        point2 = ((height +0), 0)
+        point3 = ((height + 0), 0 + width)
 
-        cv2.circle(image, point1, 2, (255,), -1)
-        cv2.circle(image, point2, 2, (255,), -1)
-        cv2.circle(image, point3, 2, (255,), -1)
+        cv2.circle(image, point1, 2, (255), -1)
+        cv2.circle(image, point2, 2, (255), -1)
+        cv2.circle(image, point3, 2, (255), -1)
 
-        triangle = np.array([point1, point2, point3])
+        triangle = np.array([point1, point3, point2])
 
         cv2.drawContours(image, [triangle], 0, (255,), -1)
 
         return image
 
     def draw_mask_triangle_inv(self, width: int, height: int):
-        image = np.zeros((int(width) + 10, int(height) + 10 ), np.uint8)
+        image = np.zeros((int(width) , int(height)  ), np.uint8)
         image[:] = 0
 
-        point1 = (4, 4)
-        point2 = (4, 4 + width)
-        point3 = (height + 4, int(width / 2) + 2)
+        point1 = (0,0)
+        point2 = (0, width)
+        point3 = (height , int(width / 2) )
 
-        cv2.circle(image, point1, 2, (255,), -1)
-        cv2.circle(image, point2, 2, (255,), -1)
-        cv2.circle(image, point3, 2, (255,), -1)
+        cv2.circle(image, point1, 2, (255), -1)
+        cv2.circle(image, point2, 2, (255), -1)
+        cv2.circle(image, point3, 2, (255), -1)
 
-        triangle = np.array([point1, point2, point2])
+        triangle = np.array([point1, point3, point2])
 
         cv2.drawContours(image, [triangle], 0, (255,), -1)
 
         return image
 
     def draw_rectangles(self, width: int, height: int):
-        image = np.zeros((int(width) + 10, int(height) + 10), np.uint8)
+        image = np.zeros((int(width) , int(height) ), np.uint8)
         image[:] = 0
-        top_rigth = (4, 4)
-        bottom_right = (4 + width, 4 + height)
-        cv2.rectangle(image, top_rigth, bottom_right, (255,), -1)
+        top_rigth = (0, 0)
+        bottom_right = (int(width),  int(height))
+        cv2.rectangle(image, (top_rigth), (bottom_right), (255,), -1)
         return image
 
     def draw_by_type(self, type: str, width: int, height: int):
@@ -129,20 +131,44 @@ class Template:
             self.masks.append(self.draw_by_type(i, int(average_width / len(maxes)),
                                                 int(average_height / len(maxes))))
 
-    def template_matching(self, img: np.array) -> (np.array, int):
+    def template_matching_global(self, img: np.array) -> (np.array, int):
         types = ['A', 'B', 'C', 'D', 'E', 'F']
         final = 0
+        final2= 0
         signal_type = 0
         position = (0, 0)
         for pos, i in enumerate(types):
+            print(types[pos])
+            plt.imshow(self.masks[pos],cmap="gray")
             res = cv2.matchTemplate(img, self.masks[pos], cv2.TM_CCOEFF_NORMED)
             min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+           
             if max_val > final:
                 final = max_val
+                
                 position = max_loc
                 signal_type = i
 
         return position, signal_type
+    def template_matching_reg(self, img: np.array, regions: List[Rectangle]) -> (np.array, int):
+        types = ['A', 'B', 'C', 'D', 'E', 'F']
+        imag=[]
+        p=0
+        final = []
+        signal_type = []
+        position = []
+        
+        for region in regions:
+            imag=img[region.top_left[0]:region.top_left[0]+ region.height, region.top_left[1]:region.top_left[1]+region.width]
+            for pos, i in enumerate(types):
+                resized_mask= cv2.resize(self.masks[pos], (region.width,region.height))
+                res = cv2.matchTemplate(imag, resized_mask, cv2.TM_CCOEFF_NORMED)
+                min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+                if max_val > 0.5:
+                    final.append(max_val)
+                    position.append(max_loc)
+                    signal_type.append(i)
 
+        return position, signal_type
 
 instance = Template()
