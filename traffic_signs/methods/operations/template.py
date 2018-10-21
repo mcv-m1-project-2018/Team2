@@ -154,7 +154,7 @@ class Template:
             res = cv2.matchTemplate(img, self.masks[pos], cv2.TM_CCOEFF_NORMED)
             min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
 
-            if if max_val > 0.4 and max_val > max_value:
+            if max_val > 0.4 and max_val > max_value:
                 max_value = max_val
                 position = max_loc
                 signal_type = i
