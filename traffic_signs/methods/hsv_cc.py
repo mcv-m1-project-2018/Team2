@@ -1,3 +1,4 @@
+import cv2
 from typing import List
 
 import numpy as np
@@ -43,6 +44,8 @@ class HSV_CC:
 
         # Color segmentation in HSV
         mask, im = segregation(im, 'hsv')
+
+        mask = morpho(mask)
 
         regions = get_cc_regions(mask)
 

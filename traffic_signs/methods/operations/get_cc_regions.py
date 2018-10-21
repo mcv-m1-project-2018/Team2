@@ -20,7 +20,8 @@ def get_cc_regions(mask: np.array):
         rectangle.top_left = min_point.astype(int).tolist()
         rectangle.height = int(max_point[0] - min_point[0]) + 1
         rectangle.width = int(max_point[1] - min_point[1]) + 1
-
-        regions.append(rectangle)
+        if rectangle.height < mask.shape[0] and \
+                rectangle.width < mask.shape[1]:
+            regions.append(rectangle)
 
     return regions

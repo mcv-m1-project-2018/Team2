@@ -3,7 +3,7 @@ import numpy as np
 from . import fill_holes
 
 
-def morphology_operations(mask: np.array, kernel_open=(3, 3), kernel_close=(11, 11)):
+def morphology_operations(mask: np.array, kernel_open=(5, 5), kernel_close=(11, 11)):
     """
     morphology_operation(mask)
     

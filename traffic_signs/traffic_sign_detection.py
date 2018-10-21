@@ -4,83 +4,95 @@
 import argparse
 import fnmatch
 import os
-from concurrent.futures.thread import ThreadPoolExecutor
+import pickle
 import time
+from concurrent.futures import Executor, ThreadPoolExecutor
+from typing import List
+
 import cv2
 import numpy as np
 from functional import seq
 from tabulate import tabulate
 
 import evaluation.evaluation_funcs as evalf
-from evaluation.bbox_iou import bbox_iou
 from data_analysis import data_analysis
-from methods import hsv_convolution, hsv_integral, hsv_window, hsv_cc, hsv_window_template
-from model import DatasetManager
+from evaluation.bbox_iou import bbox_iou
+from methods import hsv_convolution, hsv_integral, hsv_sw, hsv_cc, hsv_cc_template
+from model import DatasetManager, Data
 from model import Result
-import matplotlib.pyplot as plt
 
 
-def validate(analysis, dataset_manager, pixel_methods):
+def validateMethod(train: List[Data], verify: List[Data], method):
+    method.train(train)
+    tp = 0
+    fn = 0
+    fp = 0
+    tn = 0
+    t = 0
+    tp_w = 0
+    fn_w = 0
+    fp_w = 0
+
+    for pos, dat in enumerate(verify):
+        print(method, str(pos) + '/' + str(len(verify)))
+        im = dat.get_img()
+
+        start = time.time()
+        regions, mask, im = method.get_mask(im)
+        mask_solution = dat.get_mask_img()
+        t += time.time() - start
+
+        [local_tp, local_fp, local_fn, local_tn] = evalf.performance_accumulation_pixel(
+            mask, mask_solution)
+
+        [local_tp_w, local_fn_w, local_fp_w] = performance_accumulation_window(regions, dat.gt)
+
+        tp += local_tp
+        fp += local_fp
+        fn += local_fn
+        tn += local_tn
+
+        tp_w += local_tp_w
+        fn_w += local_fn_w
+        fp_w += local_fp_w
+
+        """for region in regions:
+            cv2.rectangle(mask, (region.top_left[1], region.top_left[0]),
+                          (region.get_bottom_right()[1], region.get_bottom_right()[0]), (255,), thickness=5)
+        for gt in dat.gt:
+            cv2.rectangle(mask, (gt.top_left[1], gt.top_left[0]),
+                          (gt.get_bottom_right()[1], gt.get_bottom_right()[0]), (128,), thickness=5)
+
+        plt.imshow(mask, 'gray', vmax=255)
+        plt.title(cv2.countNonZero(mask))
+        plt.show()
+        pass"""
+
+    return Result(
+        tp=tp,
+        fp=fp,
+        fn=fn,
+        tn=tn,
+        time=(t / len(verify)),
+        tp_w=tp_w,
+        fn_w=fn_w,
+        fp_w=fp_w
+    )
+
+
+def validate(analysis: bool, dataset_manager: DatasetManager, pixel_methods: List, executor: Executor):
     """In each job, the methods are executed with the same dataset split and their results are put in an array."""
-    results = []
     train, verify = dataset_manager.get_data_splits()
-    if analysis is True:
+    if analysis:
         data_analysis(train)
-    for pixel_method in pixel_methods:
-        tp = 0
-        fn = 0
-        fp = 0
-        tn = 0
-        t = 0
-        tp_w = 0
-        fn_w = 0
-        fp_w = 0
 
-        pixel_method.train(train)
+    results = [executor.submit(validateMethod, train, verify, pixel_method)
+               for pixel_method in pixel_methods]
 
-        for dat in verify:
-            im = dat.get_img()
+    results = seq(results) \
+        .map(lambda f: f.result()) \
+        .to_list()
 
-            start = time.time()
-            regions, mask, im = pixel_method.get_mask(im)
-            mask_solution = dat.get_mask_img()
-            t += time.time() - start
-
-            [local_tp, local_fp, local_fn, local_tn] = evalf.performance_accumulation_pixel(
-                mask, mask_solution)
-
-            [local_tp_w, local_fn_w, local_fp_w] = performance_accumulation_window(regions, dat.gt)
-
-            tp += local_tp
-            fp += local_fp
-            fn += local_fn
-            tn += local_tn
-
-            tp_w += local_tp_w
-            fn_w += local_fn_w
-            fp_w += local_fp_w
-
-            """for region in regions:
-                cv2.rectangle(mask, (region.top_left[1], region.top_left[0]),
-                              (region.get_bottom_right()[1], region.get_bottom_right()[0]), (255,), thickness=5)
-            for gt in dat.gt:
-                cv2.rectangle(mask, (gt.top_left[1], gt.top_left[0]),
-                              (gt.get_bottom_right()[1], gt.get_bottom_right()[0]), (128,), thickness=5)
-
-            plt.imshow(mask, 'gray', vmax=255)
-            plt.show()
-            pass"""
-
-        results.append(Result(
-            tp=tp,
-            fp=fp,
-            fn=fn,
-            tn=tn,
-            time=(t / len(verify)),
-            tp_w=tp_w,
-            fn_w=fn_w,
-            fp_w=fp_w
-        ))
     return results
 
 
@@ -146,41 +158,40 @@ def combine_results(result1: Result, result2: Result, executions):
     return result1
 
 
-def train_mode(train_dir: str, pixel_methods, window_method: str, analysis=False, threads=4, executions=10):
+def train_mode(train_dir: str, methods, analysis=False, threads=4, executions=10):
     """In train mode, we split the dataset and evaluate the result of several executions"""
     # Use this class to load and manage states
     dataset_manager = DatasetManager(train_dir)
     # Perform the executions in parallel
     with ThreadPoolExecutor(max_workers=threads) as executor:
-        results = [executor.submit(validate, analysis, dataset_manager, pixel_methods)
+        results = [executor.submit(validate, analysis, dataset_manager, methods, executor)
                    for _ in range(executions)]
 
-    # Average the results of each execution
-    results = seq(results) \
-        .map(lambda fut: fut.result()) \
-        .reduce(lambda a, b: seq(a).zip(b).map(lambda l: combine_results(l[0], l[1], executions)).to_list(),
-                [Result() for _i in range(executions)]) \
-        .to_list()
+        # Average the results of each execution
+        results = seq(results) \
+            .map(lambda fut: seq(fut.result())) \
+            .reduce(lambda a, b: seq(a).zip(b).map(lambda l: combine_results(l[0], l[1], executions)).to_list(),
+                    [Result() for _i in range(len(methods))]) \
+            .to_list()
 
-    return results
+        return results
 
 
-def test_mode(train_dir: str, test_dir: str, output_dir: str, pixel_method, window_method: str):
+def test_mode(train_dir: str, test_dir: str, output_dir: str, method):
     """In test mode, the output of the method is stored in disk and no evaluation is performed."""
     dataset_manager = DatasetManager(train_dir)
-    pixel_method.train(dataset_manager.data)
+    method.train(dataset_manager.data)
 
     file_names = sorted(fnmatch.filter(os.listdir(test_dir), '*.jpg'))
     file_names = seq(file_names).map(lambda s: s.replace('.jpg', '')).to_list()
     for name in file_names:
         img_path = '{}/{}.jpg'.format(test_dir, name)
         im = cv2.imread(img_path)
-        region, mask, im = pixel_method.get_mask(im)
+        regions, mask, im = method.get_mask(im)
         mask = cv2.divide(mask, 255)
         cv2.imwrite('{}/mask.{}.png'.format(output_dir, name), mask)
-        with open('{}/gt.{}.txt'.format(output_dir, name), 'a+') as text_file:
-            for rect in region:
-                text_file.write(rect.to_csv())
+        with open('{}/{}.pkl'.format(output_dir, name), 'w') as file:
+            pickle.dump(regions, file)
 
 
 def main():
@@ -191,7 +202,6 @@ def main():
                                               'param. Valid values are method1, method2, method3 and method4')
     parser.add_argument('--test', help='Test directory, if using test dataset to generate masks.')
     parser.add_argument('--output', help='Output directory, if using test dataset to generate masks.')
-    parser.add_argument('--window-method', help='Window method to use.')
     parser.add_argument('--analysis', action='store_true',
                         help='Whether to perform an analysis of the train split before evaluation. Train mode only.')
     parser.add_argument('--threads', type=int, help='Number of threads to use. Train mode only.', default=4)
@@ -199,31 +209,32 @@ def main():
                         default=10)
     args = parser.parse_args()
 
-    methods = args.pixel_methods.split(';')
+    method_names = args.pixel_methods.split(';')
     method_refs = {
-        'hsv_window': hsv_window,
+        'hsv_sw': hsv_sw,
         'hsv_convolution': hsv_convolution,
         'hsv_integral': hsv_integral,
         'hsv_cc': hsv_cc,
-        'hsv_window_template': hsv_window_template
+        'hsv_cc_template': hsv_cc_template
     }
-    methods = seq(methods).map(lambda x: method_refs.get(x, None)).to_list()
+    methods = seq(method_names).map(lambda x: method_refs.get(x, None)).to_list()
     if not all(methods):
         raise Exception('Invalid method')
     results = None
     if args.output and len(methods) == 1:
-        test_mode(args.train_path, args.test, args.output, methods[0], args.window_method)
+        test_mode(args.train_path, args.test, args.output, methods[0])
     else:
-        results = train_mode(args.train_path, methods, args.window_method, threads=args.threads,
+        results = train_mode(args.train_path, methods, threads=args.threads,
                              executions=args.executions)
 
     if results:
         print(tabulate(seq(results)
-                       .map(lambda result: [result.get_precision(), result.get_accuracy(), result.get_recall(),
-                                            result.get_f1(), result.get_precision_w(), result.get_f1_w(), result.tp,
-                                            result.fp, result.fn, result.time])
+                       .zip(method_names)
+                       .map(lambda pair: [pair[1], pair[0].get_precision(), pair[0].get_accuracy(),
+                                          pair[0].get_recall(), pair[0].get_f1(), pair[0].get_precision_w(),
+                                          pair[0].get_f1_w(), pair[0].tp, pair[0].fp, pair[0].fn, pair[0].time])
                        .reduce(lambda accum, r: accum + [r], []),
-                       headers=['Precision', 'Accuracy', 'Recall', 'F1', 'Precision w', 'F1 w', 'TP', 'FP',
+                       headers=['Method', 'Precision', 'Accuracy', 'Recall', 'F1', 'Precision w', 'F1 w', 'TP', 'FP',
                                 'FN', 'Time']))
 
 

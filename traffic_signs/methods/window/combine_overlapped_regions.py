@@ -1,3 +1,4 @@
+import sys
 from typing import List
 
 from model import Rectangle
@@ -9,6 +10,9 @@ def combine_overlapped_regions(regions: List[Rectangle]) -> List[Rectangle]:
     :param regions: the list of regions probably overlapped
     :return: a list of regions that are not overlapped
     """
+    if len(regions) > 10000:
+        print('Too many regions detected, returning []', file=sys.stderr)
+        return []
     ret = list(regions)
 
     while combine(ret):

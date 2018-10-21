@@ -52,16 +52,10 @@ class DiscardGeometry:
             else:
                 ret.append(region)
 
-        mask = clear_non_region_mask(mask, regions)
+        mask = clear_non_region_mask(mask, ret)
 
-        return mask, regions
+        return mask, ret
 
 
 instance = DiscardGeometry()
 
-
-def main():
-    mask = cv2.imread('../datasets/train/mask/mask.00.000948.png', cv2.IMREAD_GRAYSCALE)
-    _, mask = cv2.threshold(mask, 0, 255, cv2.THRESH_BINARY)
-    plt.imshow(DiscardGeometry().get_mask(mask), 'gray')
-    plt.show()

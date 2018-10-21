@@ -10,7 +10,7 @@ SIDE = 51
 INTERMEDIATE_STEPS = 15
 STEP_FACTOR = 0.1
 SHRINK_MULTIPLIER = .9
-THRESHOLD = 0.5
+THRESHOLD = 0.6
 
 
 def sliding_window(mask: np.array) -> (np.array, List[Rectangle]):
