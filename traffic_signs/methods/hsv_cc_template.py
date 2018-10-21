@@ -20,7 +20,7 @@ class hsv_cc_template:
         # Compute the final mask
         mask, regions = discard_geometry.get_mask(mask, regions)
 
-        template_matching.template_matching_reg(mask, regions)
+        mask, regions = template_matching.template_matching_reg(mask, regions)
 
         return regions, mask, im
 

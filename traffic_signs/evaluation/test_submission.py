@@ -10,7 +10,7 @@ import evaluation.evaluation_funcs as evalf
 
 # Configure this
 team = 2  # Your team number
-week = 1  # Week number
+week = 2  # Week number
 window_evaluation = 1  # Whether to perform or not window evaluation: 0 for week 1, 1 for week 2
 
 # Do not make changes below this point ---------------------------------

@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 from matplotlib import pyplot as plt
 
+from methods.window import clear_non_region_mask
 from model import Data
 from model import GroundTruth, Rectangle
 from model import rectangle
@@ -159,16 +160,13 @@ class Template:
 
         return regions
 
-    def template_matching_reg(self, img: np.array, regions: List[Rectangle]) -> (np.array, int):
+    def template_matching_reg(self, mask: np.array, regions: List[Rectangle]) -> (np.array, int):
         types = ['A', 'B', 'C', 'D', 'E', 'F']
-        sign_types = []
-        positions = []
 
         for i, region in enumerate(regions):
             max_value = 0
             sign = None
-            pos = None
-            imag = img[region.top_left[0]:region.top_left[0] + region.height,
+            imag = mask[region.top_left[0]:region.top_left[0] + region.height,
                    region.top_left[1]:region.top_left[1] + region.width]
             for pos, j in enumerate(types):
 
@@ -177,15 +175,18 @@ class Template:
                 min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
 
                 if max_val > 0.4 and max_val > max_value:
-                    pos = max_loc
                     sign = j
                     max_value = max_val
 
             if sign is not None:
                 regions[i] = GroundTruth(top_left=region.top_left, width=region.width, height=region.height,
                                          sign_type=sign)
+            else:
+                regions.remove(regions[i])
+                i -= 1
 
-        return regions
+        mask = clear_non_region_mask(mask, regions)
+        return mask, regions
 
 
 instance = Template()

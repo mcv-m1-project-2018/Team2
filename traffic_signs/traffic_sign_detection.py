@@ -5,6 +5,7 @@ import argparse
 import fnmatch
 import os
 import pickle
+import sys
 import time
 from concurrent.futures import Executor, ThreadPoolExecutor
 from typing import List
@@ -81,14 +82,15 @@ def validateMethod(train: List[Data], verify: List[Data], method):
     )
 
 
-def validate(analysis: bool, dataset_manager: DatasetManager, pixel_methods: List, executor: Executor):
+def validate(analysis: bool, dataset_manager: DatasetManager, pixel_methods: List):
     """In each job, the methods are executed with the same dataset split and their results are put in an array."""
     train, verify = dataset_manager.get_data_splits()
     if analysis:
         data_analysis(train)
 
-    results = [executor.submit(validateMethod, train, verify, pixel_method)
-               for pixel_method in pixel_methods]
+    with ThreadPoolExecutor() as executor:
+        results = [executor.submit(validateMethod, train, verify, pixel_method)
+                   for pixel_method in pixel_methods]
 
     results = seq(results) \
         .map(lambda f: f.result()) \
@@ -165,7 +167,7 @@ def train_mode(train_dir: str, methods, analysis=False, threads=4, executions=10
     dataset_manager = DatasetManager(train_dir)
     # Perform the executions in parallel
     with ThreadPoolExecutor(max_workers=threads) as executor:
-        results = [executor.submit(validate, analysis, dataset_manager, methods, executor)
+        results = [executor.submit(validate, analysis, dataset_manager, methods)
                    for _ in range(executions)]
 
         # Average the results of each execution
@@ -191,7 +193,7 @@ def test_mode(train_dir: str, test_dir: str, output_dir: str, method):
         regions, mask, im = method.get_mask(im)
         mask = cv2.divide(mask, 255)
         cv2.imwrite('{}/mask.{}.png'.format(output_dir, name), mask)
-        with open('{}/{}.pkl'.format(output_dir, name), 'w') as file:
+        with open('{}/{}.pkl'.format(output_dir, name), 'wb') as file:
             pickle.dump(regions, file)
 
 
@@ -223,8 +225,11 @@ def main():
     if not all(methods):
         raise Exception('Invalid method')
     results = None
-    if args.output and len(methods) == 1:
-        test_mode(args.train_path, args.test, args.output, methods[0])
+    if args.output:
+        if len(methods) != 1:
+            print('Test mode must receive a single method', file=sys.stderr)
+        else:
+            test_mode(args.train_path, args.test, args.output, methods[0])
     else:
         results = train_mode(args.train_path, methods, threads=args.threads,
                              executions=args.executions)
@@ -234,10 +239,11 @@ def main():
                        .zip(method_names)
                        .map(lambda pair: [pair[1], pair[0].get_precision(), pair[0].get_accuracy(),
                                           pair[0].get_recall(), pair[0].get_f1(), pair[0].get_precision_w(),
-                                          pair[0].get_f1_w(), pair[0].tp, pair[0].fp, pair[0].fn, pair[0].time])
+                                          pair[0].get_recall_w(), pair[0].get_f1_w(), pair[0].tp, pair[0].fp,
+                                          pair[0].fn, pair[0].time])
                        .reduce(lambda accum, r: accum + [r], []),
-                       headers=['Method', 'Precision', 'Accuracy', 'Recall', 'F1', 'Precision w', 'F1 w', 'TP', 'FP',
-                                'FN', 'Time']))
+                       headers=['Method', 'Precision', 'Accuracy', 'Recall', 'F1', 'Precision w', 'Recall w', 'F1 w',
+                                'TP', 'FP', 'FN', 'Time']))
 
 
 if __name__ == '__main__':
