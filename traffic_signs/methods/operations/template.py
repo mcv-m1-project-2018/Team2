@@ -51,12 +51,23 @@ class Template:
         return max
 
     def draw_mask_circle(self, width: int, height: int):
-        image = np.zeros((int(width) , int(height) ), np.uint8)
-        image[:] = 0
-        center = (int(width / 2), int(height / 2))
-        cv2.circle(image, center, int(width / 2), (255,), -1)
+        radio=height
+        if width>height:
+            radio=width   
+        image = np.zeros((int(radio) , int(radio) ), np.uint8)
+        image[:] = 0 
+        center = (int(radio / 2), int(radio / 2))
+        cv2.circle(image, center, int(radio / 2), (255,), -1)
         return image
-
+   
+    def draw_mask_circle_dif(self, width: int, height: int):
+        image = np.zeros((int(width) , int(width)), np.uint8)
+        image[:] = 0
+        center = (int(width / 2), int(width / 2))
+        cv2.circle(image, center, int(width / 2), (255,), -1)
+        image=cv2.resize(image, (width,height))
+        return image
+   
     def draw_mask_triangle(self, width: int, height: int):
         image = np.zeros((int(width) , int(height) ), np.uint8)
         image[:] = 0
@@ -106,8 +117,8 @@ class Template:
             'A': self.draw_mask_triangle,
             'B': self.draw_mask_triangle_inv,
             'C': self.draw_mask_circle,
-            'D': self.draw_mask_circle,
-            'E': self.draw_mask_circle,
+            'D': self.draw_mask_circle_dif,
+            'E': self.draw_mask_circle_dif,
             'F': self.draw_rectangles
         }
 
@@ -153,10 +164,8 @@ class Template:
     def template_matching_reg(self, img: np.array, regions: List[Rectangle]) -> (np.array, int):
         types = ['A', 'B', 'C', 'D', 'E', 'F']
         imag=[]
-        p=0
-        final = []
         signal_type = []
-        position = []
+        position = List[np.array]
         
         for region in regions:
             imag=img[region.top_left[0]:region.top_left[0]+ region.height, region.top_left[1]:region.top_left[1]+region.width]
@@ -164,8 +173,8 @@ class Template:
                 resized_mask= cv2.resize(self.masks[pos], (region.width,region.height))
                 res = cv2.matchTemplate(imag, resized_mask, cv2.TM_CCOEFF_NORMED)
                 min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
-                if max_val > 0.5:
-                    final.append(max_val)
+                print(max_val)
+                if max_val > 0.4:
                     position.append(max_loc)
                     signal_type.append(i)
 

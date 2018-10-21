@@ -18,7 +18,7 @@ class hsv_window_template:
 
         mask, regions = sliding_window(mask)
 
-        res ,signs= template_matching.template_matching_reg(mask,regions)
+        res,signs= template_matching.template_matching_reg(mask,regions)
 
         return regions, mask, im,res,signs
 
