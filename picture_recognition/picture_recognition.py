@@ -8,6 +8,10 @@ def main():
     parser.add_argument('query', help='Query images folder')
     parser.add_argument('--threads', type=int, help='Number of threads to use.', default=4)
 
+    args = parser.parse_args()
+
+    dataset = args.dataset
+    query = args.query
 
 if __name__ == '__main__':
     main()
