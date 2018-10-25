@@ -1,9 +1,8 @@
 import math
+from enum import Enum
+from typing import List
 
 import cv2
-from enum import Enum
-from typing import List, Tuple
-
 import numpy as np
 from functional import seq
 
@@ -47,14 +46,14 @@ class CompareHistograms:
             pass
 
     def _compare_histograms_full(self, h1: np.array, h2: np.array) -> List[float]:
-        channels = 1
+        channels_range = range(0, 1)
         if self.histogram_type == HistogramTypes.HSV:
-            channels = 1
-        elif self.histogram_type == HistogramTypes.LUV:
-            channels = 2
+            channels_range = range(0, 1)
+        elif self.histogram_type == HistogramTypes.YCbCr:
+            channels_range = range(1, 3)
 
         val = []
-        for i in range(channels):
+        for i in channels_range:
             val.append(cv2.compareHist(h1[i], h2[i], cv2.HISTCMP_CORREL))
         return val
 
@@ -67,5 +66,8 @@ class CompareHistograms:
 
     def train(self, images: List[Picture]):
         self.db = []
-        for image in images:
-            self.db.append((image, get_histogram(image, self.histogram_type)))
+        if self.method == CompareHistogramsMethods.FULL_IMAGE:
+            for image in images:
+                self.db.append((image, get_histogram(image, self.histogram_type)))
+        elif self.method == CompareHistogramsMethods.BLOCKS:
+            pass
