@@ -1,22 +1,22 @@
-from typing import List
+from typing import List, Tuple
 
-import numpy as np
+from methods import AbstractMethod
+from methods.operations import CompareHistograms, CompareHistogramsMethods, HistogramTypes
+from model import Picture
 
-from picture_recognition.methods.operations import CompareHistograms, CompareHistogramsMethods, HistogramTypes
-from picture_recognition.model import Picture
 
-
-class Method1:
+class Method1(AbstractMethod):
     compare_histograms: CompareHistograms
 
     def __init__(self):
         self.compare_histograms = CompareHistograms(CompareHistogramsMethods.FULL_IMAGE, HistogramTypes.HSV)
 
-    def query(self, im: np.array) -> List[(Picture, float)]:
-        return self.compare_histograms.query(im)
+    def query(self, picture: Picture) -> List[Tuple[Picture, float]]:
+        res = self.compare_histograms.query(picture)
+        return res
 
     def train(self, images: List[Picture]):
         self.compare_histograms.train(images)
 
 
-instance = Method1
+instance = Method1()

@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import List
 
 import cv2
 import numpy as np
@@ -9,15 +10,19 @@ class HistogramTypes(Enum):
     YCbCr = 1
 
 
-def get_histogram(im: np.array, histogram_type=HistogramTypes.HSV) -> np.array:
-    hist = None
+def get_histogram(im: np.array, histogram_type=HistogramTypes.HSV) -> List[np.array]:
+    hist = []
     if histogram_type == HistogramTypes.HSV:
         im = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
-        hist = cv2.calcHist([im], [0, 1, 2], None, [256, 256, 256], [0, 180, 0, 256, 0, 256])
-        hist = cv2.normalize(hist, hist).flatten()
+        for i in range(im.shape[2]):
+            h = cv2.calcHist([im[:, :, i]], [0], None, [256], [0, 256])
+            cv2.normalize(h, h)
+            hist.append(h)
     elif histogram_type == HistogramTypes.YCbCr:
         im = cv2.cvtColor(im, cv2.COLOR_BGR2YCrCb)
-        hist = cv2.calcHist([im], [0, 1, 2], None, [256, 256, 256], [0, 256, 0, 256, 0, 256])
-        hist = cv2.normalize(hist, hist).flatten()
+        for i in range(im.shape[2]):
+            h = cv2.calcHist([im[:, :, i]], [0], None, [256], [0, 256])
+            cv2.normalize(h, h)
+            hist.append(h)
 
     return hist
