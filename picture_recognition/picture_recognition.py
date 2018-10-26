@@ -5,9 +5,11 @@ import pickle
 from concurrent.futures.thread import ThreadPoolExecutor
 from typing import List
 
+import ml_metrics as metrics
 from functional import seq
+from tabulate import tabulate
 
-from methods import method1, AbstractMethod
+from methods import method1, AbstractMethod, method2, method3, method4, method5
 from model import Data, Picture
 
 
@@ -47,33 +49,44 @@ def main():
     args = parser.parse_args()
 
     method_refs = {
-        'method1': method1
+        'method1': method1,
+        'method2': method2,
+        'method3': method3,
+        'method4': method4,
+        'method5': method5
     }
-    methods = seq(args.methods).map(lambda x: method_refs.get(x, None)).to_list()
+    method_names = args.methods.split(';')
+    methods = seq(method_names).map(lambda x: method_refs.get(x, None)).to_list()
     if not all(methods):
         raise Exception('Invalid method')
 
     results = query(args.dataset, args.query, methods, args.threads)
 
-    # Evaluate
-    with open(args.query + '/query_corresp_simple_devel.pkl', 'rb') as file:
+    show_results(args.query, method_names, results)
+
+
+def show_results(query_dir, method_names, results):
+    with open(query_dir + '/query_corresp_simple_devel.pkl', 'rb') as file:
         query_dict = pickle.load(file)
 
-    for r in results:
-        for q in r:
-            q[0].show()
-            q[1][0][0].show()
-
-    """for pos, method_name in enumerate(methods):
-        solutions = seq(results[pos]).map(lambda r: query_dict.get(r[0].id)).to_list()
+    table = []
+    for pos, method_name in enumerate(method_names):
+        solutions = seq(results[pos]).map(lambda r: [query_dict.get(r[0].id)]).to_list()
         result_values = (
             seq(results[pos])
                 .map(lambda r: r[1])
-                .map(lambda r: seq(r).map(lambda s: s[0].id))
+                .map(lambda r: seq(r).map(lambda s: s[0].id).to_list())
                 .to_list()
         )
-        for i in range(len(solutions)):
-            print(solutions[i] in result_values[i])"""
+
+        correct_first_places = (
+            seq(solutions)
+                .zip(result_values)
+                .count(lambda p: p[0][0] == p[1][0])
+        )
+
+        table.append((method_name, metrics.mapk(solutions, result_values), correct_first_places))
+    print(tabulate(table, headers=['Method name', 'MAPK Score', 'Correct first places']))
 
 
 if __name__ == '__main__':

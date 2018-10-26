@@ -26,3 +26,9 @@ class Picture:
         rgb = cv2.cvtColor(self.get_image(), cv2.COLOR_BGR2RGB)
         plt.imshow(rgb)
         plt.show()
+
+    def show_hsv(self):
+        plt.figure()
+        rgb = cv2.cvtColor(self.get_image(), cv2.COLOR_BGR2HSV)
+        plt.imshow(rgb[:, :, 0], 'gray')
+        plt.show()
