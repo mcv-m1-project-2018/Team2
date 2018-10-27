@@ -9,7 +9,7 @@ class Method4(AbstractMethod):
     compare_histograms: CompareHistograms
 
     def __init__(self):
-        self.compare_histograms = CompareHistograms(CompareHistogramsMethods.BLOCKS, HistogramTypes.YCbCr)
+        self.compare_histograms = CompareHistograms(CompareHistogramsMethods.BLOCKS_16_16, HistogramTypes.YCbCr)
 
     def query(self, picture: Picture) -> List[Tuple[Picture, float]]:
         res = self.compare_histograms.query(picture)

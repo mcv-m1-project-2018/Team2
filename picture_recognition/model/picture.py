@@ -32,3 +32,9 @@ class Picture:
         rgb = cv2.cvtColor(self.get_image(), cv2.COLOR_BGR2HSV)
         plt.imshow(rgb[:, :, 0], 'gray')
         plt.show()
+
+    def show_gray(self):
+        plt.figure()
+        gray = cv2.cvtColor(self.get_image(), cv2.COLOR_BGR2GRAY)
+        plt.imshow(gray, 'gray')
+        plt.show()

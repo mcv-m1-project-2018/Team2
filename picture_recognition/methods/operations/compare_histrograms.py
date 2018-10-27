@@ -14,8 +14,8 @@ K = 10
 
 class CompareHistogramsMethods(Enum):
     FULL_IMAGE = 0
-    BLOCKS = 1
-    BLOCKS16 = 2
+    BLOCKS_16_16 = 1
+    BLOCKS_32_32 = 2
 
 
 class CompareHistograms:
@@ -80,10 +80,10 @@ class CompareHistograms:
         columns = rows = 1
         if self.method == CompareHistogramsMethods.FULL_IMAGE:
             columns = rows = 1
-        elif self.method == CompareHistogramsMethods.BLOCKS:
-            columns = rows = 3
-        elif self.method == CompareHistogramsMethods.BLOCKS16:
-            columns = rows = 3
+        elif self.method == CompareHistogramsMethods.BLOCKS_16_16:
+            columns = rows = 16
+        elif self.method == CompareHistogramsMethods.BLOCKS_32_32:
+            columns = rows = 32
         block_hist = []
         block_x = image.shape[0] / rows
         block_y = image.shape[1] / columns
