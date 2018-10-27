@@ -60,11 +60,11 @@ def main():
 
     results = query(args.dataset, args.query, methods, args.threads)
 
-    show_results(args.query, method_names, results)
+    show_results(method_names, results)
 
 
-def show_results(query_dir, method_names, results):
-    with open(query_dir + '/query_corresp_simple_devel.pkl', 'rb') as file:
+def show_results(method_names, results):
+    with open('./query_corresp_simple_devel.pkl', 'rb') as file:
         query_dict = pickle.load(file)
 
     table = []
