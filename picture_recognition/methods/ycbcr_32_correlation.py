@@ -2,14 +2,16 @@ from typing import List, Tuple
 
 from methods import AbstractMethod
 from methods.operations import CompareHistograms, CompareHistogramsMethods, HistogramTypes
+from methods.operations.compare_histrograms import HistogramComparisonMethods
 from model import Picture
 
 
-class Method5(AbstractMethod):
+class ycbcr_32_correlation(AbstractMethod):
     compare_histograms: CompareHistograms
 
     def __init__(self):
-        self.compare_histograms = CompareHistograms(CompareHistogramsMethods.BLOCKS_32_32, HistogramTypes.YCbCr)
+        self.compare_histograms = CompareHistograms(CompareHistogramsMethods.BLOCKS_32_32, HistogramTypes.YCbCr,
+                                                    HistogramComparisonMethods.HISTCMP_CORREL)
 
     def query(self, picture: Picture) -> List[Tuple[Picture, float]]:
         res = self.compare_histograms.query(picture)
@@ -19,4 +21,4 @@ class Method5(AbstractMethod):
         self.compare_histograms.train(images)
 
 
-instance = Method5()
+instance = ycbcr_32_correlation()

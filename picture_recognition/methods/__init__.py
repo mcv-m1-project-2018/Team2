@@ -1,4 +1,7 @@
 from .abstract_method import AbstractMethod
-from .method2 import instance as method2
-from .method4 import instance as method4
-from .method5 import instance as method5
+from .hsv_16_hellinger import instance as hsv_16_hellinger
+from .method1 import instance as method1
+from .ycbcr_16_hellington import instance as ycbcr_16_hellington
+from .ycbcr_32_correlation import instance as ycbcr_32_correlation
+
+

@@ -7,7 +7,8 @@ import numpy as np
 
 class HistogramTypes(Enum):
     HSV = 0,
-    YCbCr = 1
+    YCbCr = 1,
+    RGB = 2
 
 
 def get_histogram(im: np.array, histogram_type=HistogramTypes.HSV) -> List[np.array]:
@@ -20,6 +21,11 @@ def get_histogram(im: np.array, histogram_type=HistogramTypes.HSV) -> List[np.ar
             hist.append(h)
     elif histogram_type == HistogramTypes.YCbCr:
         im = cv2.cvtColor(im, cv2.COLOR_BGR2YCrCb)
+        for i in range(im.shape[2]):
+            h = cv2.calcHist([im[:, :, i]], [0], None, [256], [0, 256])
+            cv2.normalize(h, h)
+            hist.append(h)
+    elif histogram_type == HistogramTypes.RGB:
         for i in range(im.shape[2]):
             h = cv2.calcHist([im[:, :, i]], [0], None, [256], [0, 256])
             cv2.normalize(h, h)

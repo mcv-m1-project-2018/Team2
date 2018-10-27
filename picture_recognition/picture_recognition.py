@@ -9,7 +9,7 @@ import ml_metrics as metrics
 from functional import seq
 from tabulate import tabulate
 
-from methods import AbstractMethod, method2, method4, method5
+from methods import AbstractMethod, method1, ycbcr_16_hellington, ycbcr_32_correlation, hsv_16_hellinger
 from model import Data, Picture
 
 
@@ -49,9 +49,10 @@ def main():
     args = parser.parse_args()
 
     method_refs = {
-        'method2': method2,
-        'method4': method4,
-        'method5': method5
+        'method1': method1,
+        'ycbcr_16_hellington': ycbcr_16_hellington,
+        'ycbcr_32_correlation': ycbcr_32_correlation,
+        'hsv_16_hellinger': hsv_16_hellinger
     }
     method_names = args.methods.split(';')
     methods = seq(method_names).map(lambda x: method_refs.get(x, None)).to_list()

@@ -1,5 +1,5 @@
 import math
-from enum import Enum
+from enum import Enum, IntEnum
 from typing import List, Tuple
 
 import cv2
@@ -8,6 +8,7 @@ from functional import seq
 
 from methods.operations.histograms import HistogramTypes, get_histogram
 from model import Picture
+import matplotlib.pyplot as plt
 
 K = 10
 
@@ -16,16 +17,25 @@ class CompareHistogramsMethods(Enum):
     FULL_IMAGE = 0
     BLOCKS_16_16 = 1
     BLOCKS_32_32 = 2
+    BLOCKS_4_4 = 3
+
+
+class HistogramComparisonMethods(IntEnum):
+    HISTCMP_CORREL = cv2.HISTCMP_CORREL
+    HISTCMP_HELLINGER = cv2.HISTCMP_HELLINGER
 
 
 class CompareHistograms:
     method: CompareHistogramsMethods
     histogram_type: HistogramTypes
     db: List[Tuple[Picture, np.array]]
+    histogram_comparison_method: int
 
-    def __init__(self, method: CompareHistogramsMethods, histogram_type: HistogramTypes):
+    def __init__(self, method: CompareHistogramsMethods, histogram_type: HistogramTypes,
+                 histogram_comparison_method=HistogramComparisonMethods.HISTCMP_CORREL):
         self.method = method
         self.histogram_type = histogram_type
+        self.histogram_comparison_method = histogram_comparison_method
 
     def query(self, picture: Picture) -> List[Tuple[Picture, float]]:
         hist = self._get_histogram(picture.get_image())
@@ -36,7 +46,8 @@ class CompareHistograms:
                 # Calculate distance to center
                 .map(lambda entry: (entry[0], self._euclidean_distance_to_origin(entry[1])))
                 # Order by distance
-                .sorted(lambda entry_res: entry_res[1], True)
+                .sorted(lambda entry_res: entry_res[1],
+                        False if self.histogram_comparison_method == cv2.HISTCMP_HELLINGER else True)
                 # Take first K
                 .take(K)
                 .to_list()
@@ -55,7 +66,7 @@ class CompareHistograms:
             val = []
             # Iterate channels to compare
             for j in channels_range:
-                val.append(cv2.compareHist(h1[i][j], h2[i][j], cv2.HISTCMP_CORREL))
+                val.append(cv2.compareHist(h1[i][j], h2[i][j], self.histogram_comparison_method))
             val_list.append(val)
 
         return val_list
@@ -84,14 +95,24 @@ class CompareHistograms:
             columns = rows = 16
         elif self.method == CompareHistogramsMethods.BLOCKS_32_32:
             columns = rows = 32
+        elif self.method == CompareHistogramsMethods.BLOCKS_4_4:
+            columns = rows = 4
         block_hist = []
         block_x = image.shape[0] / rows
         block_y = image.shape[1] / columns
 
+        """plt.figure()
+        pos = 1"""
         for i in range(rows):
             for j in range(columns):
                 block = image[int(i * block_x):int((i + 1) * block_x),
                         int(j * block_y):int((j + 1) * block_y)]
                 block_hist.append(get_histogram(block, self.histogram_type))
+                """plt.subplot(4, 4, pos)
+                pos += 1
+                plt.gca().axes.get_xaxis().set_visible(False)
+                plt.gca().axes.get_yaxis().set_visible(False)
+                plt.imshow(cv2.cvtColor(block, cv2.COLOR_BGR2RGB))
 
+        plt.show()"""
         return block_hist

@@ -5,11 +5,11 @@ from methods.operations import CompareHistograms, CompareHistogramsMethods, Hist
 from model import Picture
 
 
-class Method4(AbstractMethod):
+class Method1(AbstractMethod):
     compare_histograms: CompareHistograms
 
     def __init__(self):
-        self.compare_histograms = CompareHistograms(CompareHistogramsMethods.BLOCKS_16_16, HistogramTypes.YCbCr)
+        self.compare_histograms = CompareHistograms(CompareHistogramsMethods.BLOCKS_4_4, HistogramTypes.HSV)
 
     def query(self, picture: Picture) -> List[Tuple[Picture, float]]:
         res = self.compare_histograms.query(picture)
@@ -19,4 +19,4 @@ class Method4(AbstractMethod):
         self.compare_histograms.train(images)
 
 
-instance = Method4()
+instance = Method1()
