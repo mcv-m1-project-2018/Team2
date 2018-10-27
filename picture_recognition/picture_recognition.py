@@ -9,7 +9,7 @@ import ml_metrics as metrics
 from functional import seq
 from tabulate import tabulate
 
-from methods import method1, AbstractMethod, method2, method3, method4, method5
+from methods import AbstractMethod, method2, method4, method5
 from model import Data, Picture
 
 
@@ -49,9 +49,7 @@ def main():
     args = parser.parse_args()
 
     method_refs = {
-        'method1': method1,
         'method2': method2,
-        'method3': method3,
         'method4': method4,
         'method5': method5
     }
