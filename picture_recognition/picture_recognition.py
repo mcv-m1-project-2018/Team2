@@ -9,7 +9,7 @@ import ml_metrics as metrics
 from functional import seq
 from tabulate import tabulate
 
-from methods import AbstractMethod, method1, ycbcr_16_hellington, ycbcr_32_correlation, hsv_16_hellinger
+from methods import AbstractMethod, method1, ycbcr_16_hellinger, ycbcr_32_correlation, hsv_16_hellinger
 from model import Data, Picture
 
 
@@ -54,7 +54,7 @@ def main():
 
     method_refs = {
         'method1': method1,
-        'ycbcr_16_hellington': ycbcr_16_hellington,
+        'ycbcr_16_hellinger': ycbcr_16_hellinger,
         'ycbcr_32_correlation': ycbcr_32_correlation,
         'hsv_16_hellinger': hsv_16_hellinger
     }
