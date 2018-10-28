@@ -9,7 +9,7 @@ import ml_metrics as metrics
 from functional import seq
 from tabulate import tabulate
 
-from methods import AbstractMethod, method1, ycbcr_16_hellinger, ycbcr_32_correlation, hsv_16_hellinger
+from methods import AbstractMethod, ycbcr_16_hellinger, ycbcr_32_correlation, hsv_16_hellinger
 from model import Data, Picture
 
 
