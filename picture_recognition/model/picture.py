@@ -38,3 +38,6 @@ class Picture:
         gray = cv2.cvtColor(self.get_image(), cv2.COLOR_BGR2GRAY)
         plt.imshow(gray, 'gray')
         plt.show()
+
+    def get_trimmed_name(self):
+        return self.name.replace('.jpg', '')

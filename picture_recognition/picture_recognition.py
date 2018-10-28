@@ -45,6 +45,7 @@ def main():
     parser.add_argument('query', help='Query images folder')
     parser.add_argument('methods', help='Method list separated by ;')
     parser.add_argument('--threads', type=int, help='Number of threads to use.', default=4)
+    parser.add_argument('--out', help='Output directory to run as test execution. Don\'t evaluate results')
 
     args = parser.parse_args()
 
@@ -61,10 +62,30 @@ def main():
 
     results = query(args.dataset, args.query, methods, args.threads)
 
-    show_results(method_names, results)
+    if args.out is not None:
+        save_results(method_names, results, args.out)
+    else:
+        show_results(method_names, results)
 
 
-def show_results(method_names, results):
+def save_results(method_names: List[str], results, output_dir: str):
+    for pos, method_name in enumerate(method_names):
+        if not os.path.isdir(output_dir + '/' + method_name):
+            os.mkdir(output_dir + '/' + method_name)
+
+        result_values = (
+            seq(results[pos])
+                .map(lambda r: r[1])
+                .map(lambda r: seq(r).map(lambda s: s[0].get_trimmed_name()).to_list())
+                .to_list()
+        )
+
+        with open(output_dir + '/' + method_name + '/result.pkl', 'wb') as f:
+            pickle.dump(result_values, f)
+    pass
+
+
+def show_results(method_names: List[str], results):
     with open('./query_corresp_simple_devel.pkl', 'rb') as file:
         query_dict = pickle.load(file)
 
