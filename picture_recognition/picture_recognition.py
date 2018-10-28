@@ -21,7 +21,10 @@ def query(dataset_dir: str, query_dir: str, methods: List[AbstractMethod], threa
     data = Data(dataset_dir)
     file_names = fnmatch.filter(os.listdir(query_dir), '*.jpg')
     with ThreadPoolExecutor(max_workers=threads) as executor:
-        seq(methods).for_each(lambda m: m.train(data.pictures))
+        # Parallel training
+        training = [executor.submit(method.train, data.pictures) for method in methods]
+        seq(training).for_each(lambda t: t.result())
+
         query_pictures = seq(file_names).map(lambda query_name: Picture(query_dir, query_name)).to_list()
         result = (
             seq(methods)
@@ -106,7 +109,7 @@ def show_results(method_names: List[str], results):
         )
 
         table.append((method_name, metrics.mapk(solutions, result_values), correct_first_places))
-    print(tabulate(table, headers=['Method name', 'MAPK Score', 'Correct first places']))
+    print(tabulate(table, headers=['Method name', 'MAPK Score', 'Correct first']))
 
 
 if __name__ == '__main__':
