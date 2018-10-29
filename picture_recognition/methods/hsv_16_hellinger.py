@@ -13,7 +13,7 @@ class hsv_16_hellinger(AbstractMethod):
         self.compare_histograms = CompareHistograms(CompareHistogramsMethods.BLOCKS_16_16, HistogramTypes.HSV,
                                                     HistogramComparisonMethods.HISTCMP_HELLINGER)
 
-    def query(self, picture: Picture) -> List[Tuple[Picture, float]]:
+    def query(self, picture: Picture) -> List[Picture]:
         res = self.compare_histograms.query(picture)
         return res
 

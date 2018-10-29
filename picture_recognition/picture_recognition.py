@@ -9,7 +9,8 @@ import ml_metrics as metrics
 from functional import seq
 from tabulate import tabulate
 
-from methods import AbstractMethod, ycbcr_16_hellinger, ycbcr_32_correlation, hsv_16_hellinger
+from methods import AbstractMethod, ycbcr_16_hellinger, ycbcr_32_correlation, hsv_16_hellinger, orb_brute, \
+    orb_brute_ratio_test
 from model import Data, Picture
 
 
@@ -55,7 +56,9 @@ def main():
     method_refs = {
         'ycbcr_16_hellinger': ycbcr_16_hellinger,
         'ycbcr_32_correlation': ycbcr_32_correlation,
-        'hsv_16_hellinger': hsv_16_hellinger
+        'hsv_16_hellinger': hsv_16_hellinger,
+        'orb_brute': orb_brute,
+        'orb_brute_ratio_test': orb_brute_ratio_test,
     }
     method_names = args.methods.split(';')
     methods = seq(method_names).map(lambda x: method_refs.get(x, None)).to_list()
@@ -71,6 +74,7 @@ def main():
 
 
 def save_results(method_names: List[str], results, output_dir: str):
+    table = []
     for pos, method_name in enumerate(method_names):
         if not os.path.isdir(output_dir + '/' + method_name):
             os.mkdir(output_dir + '/' + method_name)
@@ -78,13 +82,13 @@ def save_results(method_names: List[str], results, output_dir: str):
         result_values = (
             seq(results[pos])
                 .map(lambda r: r[1])
-                .map(lambda r: seq(r).map(lambda s: s[0].get_trimmed_name()).to_list())
+                .map(lambda r: seq(r).map(lambda s: s.get_trimmed_name()).to_list())
                 .to_list()
         )
 
         with open(output_dir + '/' + method_name + '/result.pkl', 'wb') as f:
             pickle.dump(result_values, f)
-    pass
+    print(tabulate(table, headers=['Method name', 'MAPK Score', 'Correct first']))
 
 
 def show_results(method_names: List[str], results):
@@ -97,18 +101,13 @@ def show_results(method_names: List[str], results):
         result_values = (
             seq(results[pos])
                 .map(lambda r: r[1])
-                .map(lambda r: seq(r).map(lambda s: s[0].id).to_list())
+                .map(lambda r: seq(r).map(lambda s: s.id).to_list())
                 .to_list()
         )
 
-        correct_first_places = (
-            seq(solutions)
-                .zip(result_values)
-                .count(lambda p: p[0][0] == p[1][0])
-        )
-
-        table.append((method_name, metrics.mapk(solutions, result_values), correct_first_places))
-    print(tabulate(table, headers=['Method name', 'MAPK Score', 'Correct first']))
+        table.append((method_name, metrics.mapk(solutions, result_values, k=10),
+                      metrics.mapk(solutions, result_values, k=5), metrics.mapk(solutions, result_values, k=1)))
+    print(tabulate(table, headers=['Method', 'MAPK K=10', 'MAPK K=5', 'MAPK K=1']))
 
 
 if __name__ == '__main__':

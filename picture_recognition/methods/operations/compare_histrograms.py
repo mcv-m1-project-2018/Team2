@@ -37,7 +37,7 @@ class CompareHistograms:
         self.histogram_type = histogram_type
         self.histogram_comparison_method = histogram_comparison_method
 
-    def query(self, picture: Picture) -> List[Tuple[Picture, float]]:
+    def query(self, picture: Picture) -> List[Picture]:
         hist = self._get_histogram(picture.get_image())
         return (
             seq(self.db)
@@ -48,6 +48,7 @@ class CompareHistograms:
                 # Order by distance
                 .sorted(lambda entry_res: entry_res[1],
                         False if self.histogram_comparison_method == cv2.HISTCMP_HELLINGER else True)
+                .map(lambda entry: entry[0])
                 # Take first K
                 .take(K)
                 .to_list()

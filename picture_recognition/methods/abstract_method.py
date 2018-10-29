@@ -7,7 +7,7 @@ from model import Picture
 class AbstractMethod(ABC):
 
     @abstractmethod
-    def query(self, im: Picture) -> List[Tuple[Picture, float]]:
+    def query(self, picture: Picture) -> List[Picture]:
         pass
 
     @abstractmethod
