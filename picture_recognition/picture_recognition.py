@@ -11,7 +11,7 @@ from tabulate import tabulate
 
 from methods import AbstractMethod, ycbcr_16_hellinger, ycbcr_32_correlation, hsv_16_hellinger, orb_brute, \
     orb_brute_ratio_test, sift_brute
-    
+
 from model import Data, Picture
 
 
@@ -72,7 +72,7 @@ def main():
     if args.out is not None:
         save_results(method_names, results, args.out)
     else:
-        show_results(method_names, results)
+        show_results(args.query, method_names, results)
 
 
 def save_results(method_names: List[str], results, output_dir: str):
@@ -93,23 +93,35 @@ def save_results(method_names: List[str], results, output_dir: str):
     print(tabulate(table, headers=['Method name', 'MAPK Score', 'Correct first']))
 
 
-def show_results(method_names: List[str], results):
-    with open('./query_corresp_simple_devel.pkl', 'rb') as file:
-        query_dict = pickle.load(file)
+def show_results(query_path: str, method_names: List[str], results):
+    if 'W4' in query_path:
+        with open('./w4_query_devel.pkl', 'rb') as file:
+            query_dict = pickle.load(file)
+    else:
+        with open('./query_corresp_simple_devel.pkl', 'rb') as file:
+            query_dict = pickle.load(file)
 
     table = []
     for pos, method_name in enumerate(method_names):
-        solutions = seq(results[pos]).map(lambda r: [query_dict.get(r[0].id)]).to_list()
+        solutions = seq(results[pos]).map(lambda r: query_dict[r[0].id][1]).to_list()
         result_values = (
             seq(results[pos])
                 .map(lambda r: r[1])
                 .map(lambda r: seq(r).map(lambda s: s.id).to_list())
+                .map(replace_empty)
                 .to_list()
         )
 
         table.append((method_name, metrics.mapk(solutions, result_values, k=10),
                       metrics.mapk(solutions, result_values, k=5), metrics.mapk(solutions, result_values, k=1)))
     print(tabulate(table, headers=['Method', 'MAPK K=10', 'MAPK K=5', 'MAPK K=1']))
+
+
+def replace_empty(lst: List[int]) -> List[int]:
+    if len(lst) == 0:
+        return [-1]
+    else:
+        return lst
 
 
 if __name__ == '__main__':

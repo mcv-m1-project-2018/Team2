@@ -5,11 +5,11 @@ from methods.operations import CompareHistograms, SIFTBrute
 from model import Picture
 
 
-class orb_brute(AbstractMethod):
+class sift_brute(AbstractMethod):
     sift: SIFTBrute
 
     def __init__(self):
-        self.orb = ORBBrute()
+        self.orb = SIFTBrute()
 
     def query(self, picture: Picture) -> List[Picture]:
         res = self.orb.query(picture)
@@ -19,4 +19,4 @@ class orb_brute(AbstractMethod):
         self.orb.train(images)
 
 
-instance = orb_brute()
+instance = sift_brute()

@@ -11,7 +11,7 @@ THRESHOLD = 25
 class SIFTBrute:
     db: List[Tuple[Picture, List[cv2.KeyPoint], np.array]]
     bf: cv2.BFMatcher
-    sift: cv2.SIFT
+    sift: cv2.xfeatures2d.SIFT_create
 
     def __init__(self):
         self.db = []
@@ -23,7 +23,7 @@ class SIFTBrute:
 
         return (
             seq(self.db)
-                .map(lambda p: (p[0], self.bf.knnMatch(p[2], des,k=2)))
+                .map(lambda p: (p[0], self.bf.match(p[2], des)))
                 .map(lambda p: (p[0],
                                 seq(p[1]).filter(lambda d: d.distance < max(THRESHOLD,
                                                                             seq(p[1]).map(lambda m: m.distance).min()))

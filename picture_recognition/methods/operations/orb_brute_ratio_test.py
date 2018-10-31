@@ -24,7 +24,7 @@ class ORBBruteRatioTest:
                 .map(lambda p: (p[0], self.bf.knnMatch(p[2], des, k=2)))
                 .map(lambda p: (p[0], self._ratio_test(p[1])))
                 .map(lambda p: (p[0], len(p[1])))
-                .filter(lambda p: p[1] > 0)
+                .filter(lambda p: p[1] > 4)
                 .sorted(lambda p: p[1], reverse=True)
                 .map(lambda p: p[0])
                 .take(10)

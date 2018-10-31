@@ -9,7 +9,7 @@ from model import Picture
 class SIFTBruteRatioTest:
     db: List[Tuple[Picture, List[cv2.KeyPoint], np.array]]
     bf: cv2.BFMatcher
-    orb: 
+    sift: cv2.xfeatures2d.SIFT_create
 
     def __init__(self):
         self.db = []
