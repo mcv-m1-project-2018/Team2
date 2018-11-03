@@ -1,14 +1,15 @@
 from typing import List
+
 from methods import AbstractMethod
-from methods.operations import ORBBrute
+from methods.operations import ORBBruteHomography
 from model import Picture
 
 
-class orb_brute(AbstractMethod):
-    orb: ORBBrute
+class orb_brute_homography(AbstractMethod):
+    orb: ORBBruteHomography
 
     def __init__(self):
-        self.orb = ORBBrute()
+        self.orb = ORBBruteHomography()
 
     def query(self, picture: Picture) -> List[Picture]:
         res = self.orb.query(picture)
@@ -18,4 +19,4 @@ class orb_brute(AbstractMethod):
         self.orb.train(images)
 
 
-instance = orb_brute()
+instance = orb_brute_homography()

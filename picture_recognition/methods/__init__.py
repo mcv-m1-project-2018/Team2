@@ -6,3 +6,5 @@ from .orb_brute import instance as orb_brute
 from .orb_brute_ratio_test import instance as orb_brute_ratio_test
 from .sift_brute import instance as sift_brute
 from .sift_brute_ratio_test import instance as sift_brute_ratio_test
+from .orb_brute_homography import instance as orb_brute_homography
+
