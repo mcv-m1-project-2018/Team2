@@ -10,7 +10,8 @@ from functional import seq
 from tabulate import tabulate
 
 from methods import AbstractMethod, ycbcr_16_hellinger, ycbcr_32_correlation, hsv_16_hellinger, orb_brute, \
-    orb_brute_ratio_test, sift_brute, sift_brute_ratio_test, orb_brute_homography, flann_matcher,brief, surf_brute, flann_matcher_orb
+    orb_brute_ratio_test, sift_brute, sift_brute_ratio_test, orb_brute_homography, flann_matcher, brief, \
+    surf_brute, flann_matcher_orb, orb_brute_ratio_test_homography
 
 from model import Data, Picture
 
@@ -63,6 +64,7 @@ def main():
         'sift_brute': sift_brute,
         'sift_brute_ratio_test': sift_brute_ratio_test,
         'orb_brute_homography': orb_brute_homography,
+        'orb_brute_ratio_test_homography': orb_brute_ratio_test_homography,
         'flann_matcher': flann_matcher,
         'brief': brief,
         'flann_matcher_orb': flann_matcher_orb,

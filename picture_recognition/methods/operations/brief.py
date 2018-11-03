@@ -5,20 +5,20 @@ from functional import seq
 import numpy as np
 from model import Picture
 
+THRESHOLD = 28
 
-THRESHOLD=28
 
 class BRIEF:
     db: List[Tuple[Picture, List[cv2.KeyPoint], np.array]]
     bf: cv2.BFMatcher
     star: cv2.xfeatures2d_StarDetector
-    brief:cv2.xfeatures2d_BriefDescriptorExtractor
+    brief: cv2.xfeatures2d_BriefDescriptorExtractor
 
     def __init__(self):
         self.db = []
         self.bf = cv2.BFMatcher_create(cv2.NORM_HAMMING, crossCheck=True)
         self.star = cv2.xfeatures2d.StarDetector_create()
-        self.brief= cv2.xfeatures2d.BriefDescriptorExtractor_create()
+        self.brief = cv2.xfeatures2d.BriefDescriptorExtractor_create()
 
     def query(self, picture: Picture) -> List[Picture]:
         kp = self.star.detect(picture.get_image(), None)
