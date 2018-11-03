@@ -21,7 +21,7 @@ class SIFTBruteRatioTest:
 
         return (
             seq(self.db)
-                .map(lambda p: (p[0], self.bf.knnMatch(p[2], des,k=2)))
+                .map(lambda p: (p[0], self.bf.knnMatch(p[2], des, k=2)))
                 .map(lambda p: (p[0], self._ratio_test(p[1])))
                 .map(lambda p: (p[0], len(p[1])))
                 .filter(lambda p: p[1] > 0)
@@ -41,5 +41,6 @@ class SIFTBruteRatioTest:
 
     def train(self, images: List[Picture]) -> None:
         for image in images:
+
             kp, des = self.sift.detectAndCompute(image.get_image(), None)
             self.db.append((image, kp, des))

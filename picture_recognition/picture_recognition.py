@@ -10,7 +10,7 @@ from functional import seq
 from tabulate import tabulate
 
 from methods import AbstractMethod, ycbcr_16_hellinger, ycbcr_32_correlation, hsv_16_hellinger, orb_brute, \
-    orb_brute_ratio_test, sift_brute
+    orb_brute_ratio_test, sift_brute, sift_brute_ratio_test
 
 from model import Data, Picture
 
@@ -61,6 +61,7 @@ def main():
         'orb_brute': orb_brute,
         'orb_brute_ratio_test': orb_brute_ratio_test,
         'sift_brute': sift_brute,
+        'sift_brute_ratio_test': sift_brute_ratio_test
     }
     method_names = args.methods.split(';')
     methods = seq(method_names).map(lambda x: method_refs.get(x, None)).to_list()
@@ -97,13 +98,14 @@ def show_results(query_path: str, method_names: List[str], results):
     if 'W4' in query_path:
         with open('./w4_query_devel.pkl', 'rb') as file:
             query_dict = pickle.load(file)
+            print('W4')
     else:
         with open('./query_corresp_simple_devel.pkl', 'rb') as file:
             query_dict = pickle.load(file)
 
     table = []
     for pos, method_name in enumerate(method_names):
-        solutions = seq(results[pos]).map(lambda r: query_dict[r[0].id][1]).to_list()
+
         result_values = (
             seq(results[pos])
                 .map(lambda r: r[1])
@@ -112,6 +114,7 @@ def show_results(query_path: str, method_names: List[str], results):
                 .to_list()
         )
 
+        solutions = seq(results[pos]).map(lambda r: query_dict[r[0].id][1]).to_list()
         table.append((method_name, metrics.mapk(solutions, result_values, k=10),
                       metrics.mapk(solutions, result_values, k=5), metrics.mapk(solutions, result_values, k=1)))
     print(tabulate(table, headers=['Method', 'MAPK K=10', 'MAPK K=5', 'MAPK K=1']))
