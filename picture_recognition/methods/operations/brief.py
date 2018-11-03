@@ -5,21 +5,24 @@ from functional import seq
 import numpy as np
 from model import Picture
 
-THRESHOLD = 28
 
+THRESHOLD=28
 
-class ORBBrute:
+class BRIEF:
     db: List[Tuple[Picture, List[cv2.KeyPoint], np.array]]
     bf: cv2.BFMatcher
-    orb: cv2.ORB
+    star: cv2.xfeatures2d_StarDetector
+    brief:cv2.xfeatures2d_BriefDescriptorExtractor
 
     def __init__(self):
         self.db = []
         self.bf = cv2.BFMatcher_create(cv2.NORM_HAMMING, crossCheck=True)
-        self.orb = cv2.ORB_create()
+        self.star = cv2.xfeatures2d.StarDetector_create()
+        self.brief= cv2.xfeatures2d.BriefDescriptorExtractor_create()
 
     def query(self, picture: Picture) -> List[Picture]:
-        kp, des = self.orb.detectAndCompute(picture.get_image(), None)
+        kp = self.star.detect(picture.get_image(), None)
+        kp, des = self.brief.compute(picture.get_image(), kp)
 
         return (
             seq(self.db)
@@ -40,5 +43,6 @@ class ORBBrute:
 
     def train(self, images: List[Picture]) -> None:
         for image in images:
-            kp, des = self.orb.detectAndCompute(image.get_image(), None)
+            kp = self.star.detect(image.get_image(), None)
+            kp, des = self.brief.compute(image.get_image(), kp)
             self.db.append((image, kp, des))

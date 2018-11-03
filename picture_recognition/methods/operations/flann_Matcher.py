@@ -17,12 +17,12 @@ class FLANN_Matcher:
     def __init__(self):
         self.db = []
         self.flann = cv2.FlannBasedMatcher_create()
-        self.sift = cv2.xfeatures2d.SIFT_create()
+        self.sift = cv2.xfeatures2d.SIFT_create(600)
 
     def query(self, picture: Picture) -> List[Picture]:
         kp, des = self.sift.detectAndCompute(picture.get_image(), None)
         FLANN_INDEX_KDTREE = 1
-        flann_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=4)
+        flann_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
         flann = cv2.FlannBasedMatcher(flann_params, {})
         return (
             seq(self.db)
@@ -40,7 +40,7 @@ class FLANN_Matcher:
     def _ratio_test(matches):
         good = []
         for m, n in matches:
-            if m.distance < 0.7 * n.distance:
+            if m.distance < 0.75 * n.distance:
                 good.append([m])
         return good
 

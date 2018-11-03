@@ -5,7 +5,7 @@ from methods.operations import Flann_Matcher_ORB
 from model import Picture
 
 
-class Flann_Matcher_ORB(AbstractMethod):
+class flann_matcher_orb(AbstractMethod):
     flann_orb: Flann_Matcher_ORB
 
     def __init__(self):
@@ -19,4 +19,4 @@ class Flann_Matcher_ORB(AbstractMethod):
         self.flann_orb.train(images)
 
 
-instance = Flann_Matcher_ORB()
+instance = flann_matcher_orb()

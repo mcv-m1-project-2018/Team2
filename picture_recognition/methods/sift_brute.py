@@ -1,15 +1,15 @@
 from typing import List, Tuple
 
 from methods import AbstractMethod
-from methods.operations import CompareHistograms, SIFTBrute
+from methods.operations import CompareHistograms, FLANN_Matcher
 from model import Picture
 
 
 class sift_brute(AbstractMethod):
-    sift: SIFTBrute
+    sift: FLANN_Matcher
 
     def __init__(self):
-        self.orb = SIFTBrute()
+        self.orb = FLANN_Matcher()
 
     def query(self, picture: Picture) -> List[Picture]:
         res = self.orb.query(picture)
