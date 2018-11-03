@@ -5,9 +5,10 @@ from functional import seq
 import numpy as np
 from model import Picture
 
+MIN_MATCH_COUNT = 10
+
 
 class ORBBruteHomography:
-
     db: List[Tuple[Picture, List[cv2.KeyPoint], np.array]]
     bf: cv2.BFMatcher
     orb: cv2.ORB
@@ -22,14 +23,15 @@ class ORBBruteHomography:
 
         return (
             seq(self.db)
-            .map(lambda p: (p[0], self.bf.knnMatch(p[2], des, k=2)))
-            .map(lambda p: (p[0], self._ratio_test(p[1])))
-            .map(lambda p: (p[0], len(p[1])))
-            .filter(lambda p: p[1] > 4)
-            .sorted(lambda p: p[1], reverse=True)
-            .map(lambda p: p[0])
-            .take(10)
-            .to_list()
+                .map(lambda p: (p[0], p[1], self.bf.knnMatch(p[2], des, k=2)))
+                .map(lambda p: (p[0], p[1], self._ratio_test(p[2])))
+                .filter(lambda p: len(p[2]) > MIN_MATCH_COUNT)
+                .map(lambda p: (p[0], self._homography(kp, p[1], p[2])))
+                .map(lambda p: (p[0], len(p[1])))
+                .sorted(lambda p: p[1], reverse=True)
+                .map(lambda p: p[0])
+                .take(10)
+                .to_list()
         )
 
     def train(self, images: List[Picture]) -> None:
@@ -44,3 +46,15 @@ class ORBBruteHomography:
             if m.distance < 0.75 * n.distance:
                 good.append([m])
         return good
+
+    @staticmethod
+    def _homography(kp1, kp2, good):
+
+        src_pts = np.float32([kp1[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
+        dst_pts = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
+
+        M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
+        matchesMask = mask.ravel().tolist()
+
+        return matchesMask
+
