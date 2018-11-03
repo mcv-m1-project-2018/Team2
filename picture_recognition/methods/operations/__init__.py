@@ -5,4 +5,7 @@ from .orb_brute_ratio_test import ORBBruteRatioTest
 from .sift_brute import SIFTBrute
 from .sift_brute_ratio_test import SIFTBruteRatioTest
 from .orb_brute_homography import ORBBruteHomography
-
+from .flann_Matcher import FLANN_Matcher
+from .brief import BRIEF
+from .Flann_Matcher_ORB import Flann_Matcher_ORB
+from .surf_brute import SURFBrute
