@@ -5,7 +5,7 @@ from functional import seq
 import numpy as np
 from model import Picture
 
-THRESHOLD = 25
+THRESHOLD = 28
 
 
 class SIFTBrute:
@@ -15,8 +15,8 @@ class SIFTBrute:
 
     def __init__(self):
         self.db = []
-        self.bf = cv2.BFMatcher_create(cv2.NORM_HAMMING, crossCheck=True)
-        self.sift = cv2.xfeatures2d.SIFT_create()
+        self.bf = cv2.BFMatcher_create(cv2.NORM_L2, crossCheck=True)
+        self.sift = cv2.xfeatures2d.SIFT_create(500)
 
     def query(self, picture: Picture) -> List[Picture]:
         kp, des = self.sift.detectAndCompute(picture.get_image(), None)

@@ -5,7 +5,7 @@ from functional import seq
 import numpy as np
 from model import Picture
 
-MIN_MATCH_COUNT = 10
+MIN_MATCH_COUNT = 6
 THRESHOLD = 28
 
 
@@ -33,6 +33,7 @@ class ORBBruteHomography:
                      )
                 .filter(lambda p: len(p[2]) > MIN_MATCH_COUNT)
                 .map(lambda p: (p[0], self._homography(kp, p[1], p[2])))
+                .filter(lambda p: p[1] > MIN_MATCH_COUNT)
                 .sorted(lambda p: p[1], reverse=True)
                 .map(lambda p: p[0])
                 .take(10)
@@ -49,12 +50,11 @@ class ORBBruteHomography:
         good = []
         for m, n in matches:
             if m.distance < 0.75 * n.distance:
-                good.append([m])
+                good.append(m)
         return good
 
     @staticmethod
     def _homography(kp1, kp2, good):
-
         src_pts = np.float32([kp1[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
         dst_pts = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
 

@@ -14,7 +14,7 @@ class ORBBruteRatioTest:
     def __init__(self):
         self.db = []
         self.bf = cv2.BFMatcher_create()
-        self.orb = cv2.ORB_create()
+        self.orb = cv2.ORB_create(1000)
 
     def query(self, picture: Picture) -> List[Picture]:
         kp, des = self.orb.detectAndCompute(picture.get_image(), None)
@@ -36,7 +36,7 @@ class ORBBruteRatioTest:
         good = []
         for m, n in matches:
             if m.distance < 0.75 * n.distance:
-                good.append([m])
+                good.append(m)
         return good
 
     def train(self, images: List[Picture]) -> None:

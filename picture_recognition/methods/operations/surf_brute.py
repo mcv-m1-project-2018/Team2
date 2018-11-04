@@ -16,7 +16,7 @@ class SURFBrute:
     def __init__(self):
         self.db = []
         self.bf = cv2.BFMatcher_create(cv2.NORM_L1, crossCheck=True)
-        self.surf = cv2.xfeatures2d.SURF_create(500)
+        self.surf = cv2.xfeatures2d.SURF_create(2000)
 
     def query(self, picture: Picture) -> List[Picture]:
         kp, des = self.surf.detectAndCompute(picture.get_image(), None)

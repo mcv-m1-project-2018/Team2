@@ -14,9 +14,10 @@ class SIFTBruteRatioTest:
     def __init__(self):
         self.db = []
         self.bf = cv2.BFMatcher_create()
-        self.sift = cv2.xfeatures2d.SIFT_create()
+        self.sift = cv2.xfeatures2d.SIFT_create(500)
 
     def query(self, picture: Picture) -> List[Picture]:
+        print(picture.id)
         kp, des = self.sift.detectAndCompute(picture.get_image(), None)
 
         return (
@@ -36,11 +37,10 @@ class SIFTBruteRatioTest:
         good = []
         for m, n in matches:
             if m.distance < 0.75 * n.distance:
-                good.append([m])
+                good.append(m)
         return good
 
     def train(self, images: List[Picture]) -> None:
         for image in images:
-
             kp, des = self.sift.detectAndCompute(image.get_image(), None)
             self.db.append((image, kp, des))

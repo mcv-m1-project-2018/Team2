@@ -43,14 +43,14 @@ class ORBBruteRatioTestHomography:
         good = []
         for m, n in matches:
             if m.distance < 0.75 * n.distance:
-                good.append([m])
+                good.append(m)
         return good
 
     @staticmethod
     def _homography(kp1, kp2, good):
 
-        src_pts = np.float32([kp1[m[0].queryIdx].pt for m in good]).reshape(-1, 1, 2)
-        dst_pts = np.float32([kp2[m[0].trainIdx].pt for m in good]).reshape(-1, 1, 2)
+        src_pts = np.float32([kp1[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
+        dst_pts = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
 
         M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
         matches = mask.sum()

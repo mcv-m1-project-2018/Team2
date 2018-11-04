@@ -16,7 +16,7 @@ class ORBBrute:
     def __init__(self):
         self.db = []
         self.bf = cv2.BFMatcher_create(cv2.NORM_HAMMING, crossCheck=True)
-        self.orb = cv2.ORB_create()
+        self.orb = cv2.ORB_create(1000)
 
     def query(self, picture: Picture) -> List[Picture]:
         kp, des = self.orb.detectAndCompute(picture.get_image(), None)

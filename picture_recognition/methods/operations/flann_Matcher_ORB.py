@@ -42,7 +42,7 @@ class Flann_Matcher_ORB:
         good = []
         for m, n in matches:
             if m.distance < 0.75 * n.distance:
-                good.append([m])
+                good.append(m)
         return good
 
     def train(self, images: List[Picture]) -> None:
