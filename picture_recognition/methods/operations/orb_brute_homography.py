@@ -5,7 +5,7 @@ from functional import seq
 import numpy as np
 from model import Picture
 
-MIN_MATCH_COUNT = 6
+MIN_MATCH_COUNT = 4
 THRESHOLD = 28
 
 

@@ -84,7 +84,6 @@ def main():
 
 
 def save_results(method_names: List[str], results, output_dir: str):
-    table = []
     for pos, method_name in enumerate(method_names):
         if not os.path.isdir(output_dir + '/' + method_name):
             os.mkdir(output_dir + '/' + method_name)
@@ -93,19 +92,18 @@ def save_results(method_names: List[str], results, output_dir: str):
             seq(results[pos])
                 .map(lambda r: r[1])
                 .map(lambda r: seq(r).map(lambda s: s.get_trimmed_name()).to_list())
+                .map(replace_empty)
                 .to_list()
         )
 
         with open(output_dir + '/' + method_name + '/result.pkl', 'wb') as f:
             pickle.dump(result_values, f)
-    print(tabulate(table, headers=['Method name', 'MAPK Score', 'Correct first']))
 
 
 def show_results(query_path: str, method_names: List[str], results):
     if 'W4' in query_path:
         with open('./w4_query_devel.pkl', 'rb') as file:
             query_dict = pickle.load(file)
-            print('W4')
     else:
         with open('./query_corresp_simple_devel.pkl', 'rb') as file:
             query_dict = pickle.load(file)
