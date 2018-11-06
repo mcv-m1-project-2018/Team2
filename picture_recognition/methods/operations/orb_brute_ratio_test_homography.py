@@ -27,6 +27,7 @@ class ORBBruteRatioTestHomography:
                 .map(lambda p: (p[0], p[1], self._ratio_test(p[2])))
                 .filter(lambda p: len(p[2]) > MIN_MATCH_COUNT)
                 .map(lambda p: (p[0], self._homography(kp, p[1], p[2])))
+                .filter(lambda p: len(p[1]) > MIN_MATCH_COUNT)
                 .sorted(lambda p: p[1], reverse=True)
                 .map(lambda p: p[0])
                 .take(10)
