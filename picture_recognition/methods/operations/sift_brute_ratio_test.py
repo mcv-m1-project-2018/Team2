@@ -17,7 +17,6 @@ class SIFTBruteRatioTest:
         self.sift = cv2.xfeatures2d.SIFT_create(500)
 
     def query(self, picture: Picture) -> List[Picture]:
-        print(picture.id)
         kp, des = self.sift.detectAndCompute(picture.get_image(), None)
 
         return (

@@ -5,7 +5,7 @@ from functional import seq
 import numpy as np
 from model import Picture
 
-MIN_MATCH_COUNT = 10
+MIN_MATCH_COUNT = 6
 
 
 class ORBBruteRatioTestHomography:
@@ -43,7 +43,7 @@ class ORBBruteRatioTestHomography:
     def _ratio_test(matches):
         good = []
         for m, n in matches:
-            if m.distance < 0.75 * n.distance:
+            if m.distance < 0.9 * n.distance:
                 good.append(m)
         return good
 

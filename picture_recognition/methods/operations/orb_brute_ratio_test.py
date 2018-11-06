@@ -1,8 +1,9 @@
 from typing import List, Tuple
 
 import cv2
-from functional import seq
 import numpy as np
+from functional import seq
+
 from model import Picture
 
 
@@ -35,7 +36,7 @@ class ORBBruteRatioTest:
     def _ratio_test(matches):
         good = []
         for m, n in matches:
-            if m.distance < 0.75 * n.distance:
+            if m.distance < 0.9 * n.distance:
                 good.append(m)
         return good
 

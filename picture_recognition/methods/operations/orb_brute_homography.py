@@ -5,7 +5,7 @@ import numpy as np
 from model import Picture
 from matplotlib import pyplot as plt
 
-MIN_MATCH_COUNT = 6
+MIN_MATCH_COUNT = 4
 THRESHOLD = 28
 
 
