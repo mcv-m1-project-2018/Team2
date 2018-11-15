@@ -11,7 +11,7 @@ from tabulate import tabulate
 
 from methods import AbstractMethod, ycbcr_16_hellinger, ycbcr_32_correlation, hsv_16_hellinger, orb_brute, \
     orb_brute_ratio_test, sift_brute, sift_brute_ratio_test, orb_brute_homography, flann_matcher, brief, \
-    surf_brute, flann_matcher_orb, orb_brute_ratio_test_homography
+    surf_brute, flann_matcher_orb, orb_brute_ratio_test_homography, w5
 
 from model import Data, Picture
 
@@ -23,7 +23,7 @@ def get_result(method: AbstractMethod, query: Picture):
 def query(dataset_dir: str, query_dir: str, methods: List[AbstractMethod], threads=4):
     data = Data(dataset_dir)
     file_names = fnmatch.filter(os.listdir(query_dir), '*.jpg')
-    with ThreadPoolExecutor(max_workers=threads) as executor:
+    with ThreadPoolExecutor(max_workers=1) as executor:
         # Parallel training
         training = [executor.submit(method.train, data.pictures) for method in methods]
         seq(training).for_each(lambda t: t.result())
@@ -68,7 +68,8 @@ def main():
         'flann_matcher': flann_matcher,
         'brief': brief,
         'flann_matcher_orb': flann_matcher_orb,
-        'surf_brute': surf_brute
+        'surf_brute': surf_brute,
+        'w5': w5
     }
     method_names = args.methods.split(';')
     methods = seq(method_names).map(lambda x: method_refs.get(x, None)).to_list()
@@ -103,6 +104,9 @@ def save_results(method_names: List[str], results, output_dir: str):
 def show_results(query_path: str, method_names: List[str], results):
     if 'W4' in query_path:
         with open('./w4_query_devel.pkl', 'rb') as file:
+            query_dict = pickle.load(file)
+    elif 'w5' in query_path:
+        with open('./w5_query_devel.pkl', 'rb') as file:
             query_dict = pickle.load(file)
     else:
         with open('./query_corresp_simple_devel.pkl', 'rb') as file:

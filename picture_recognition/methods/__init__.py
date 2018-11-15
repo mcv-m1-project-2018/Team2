@@ -12,3 +12,4 @@ from .brief import instance as brief
 from .flann_matcher_orb import instance as flann_matcher_orb
 from .surf_brute import instance as surf_brute
 from .orb_brute_ratio_test_homography import instance as orb_brute_ratio_test_homography
+from .w5 import instance as w5
