@@ -54,7 +54,7 @@ def get_lines_rotation_and_crop(im: np.array):
 
         points = magic(data)
 
-        for p in data[points, :]:
+        for p in points:
             cv2.circle(imres, (int(p[0]), int(p[1])), 3, (255, 0, 0), thickness=-1)
 
     """for line in lines:
@@ -100,7 +100,7 @@ def line_intersection(line1: ((float, float), (float, float)), line2: ((float, f
 @njit()
 def magic(data):
     max_area = 0
-    points = [0, 0, 0]
+    points = [(0., 0.), (0., 0.), (0., 0.), (0., 0.)]
 
     for p0 in range(len(data)):
         for p1 in range(p0 + 1, len(data)):
@@ -108,10 +108,25 @@ def magic(data):
                 if (np.abs(data[p0, 2] - data[p1, 2]) < 5 and
                         np.abs(data[p0, 2] - data[p2, 2]) < 5):
 
+                    d01 = np.subtract(data[p1, :], data[p0, :])
+                    d12 = np.subtract(data[p2, :], data[p1, :])
+                    d20 = np.subtract(data[p0, :], data[p2, :])
+
+                    if np.linalg.norm(d01) > np.linalg.norm(d12) and np.linalg.norm(d01) > np.linalg.norm(d20):
+                        # p2 corner
+                        point4 = np.add(data[p1, :], d20)
+                    elif np.linalg.norm(d12) > np.linalg.norm(d20):
+                        # p0 corner
+                        point4 = np.add(data[p2, :], d01)
+                    else:
+                        # p1 corner
+                        point4 = np.add(data[p0, :], d12)
+
                     p = np.vstack((
-                        data[p0, :].ravel(),
-                        data[p1, :].ravel(),
-                        data[p2, :].ravel()
+                        data[p0, 0:2].ravel(),
+                        data[p1, 0:2].ravel(),
+                        data[p2, 0:2].ravel(),
+                        point4[0:2].ravel()
                     ))
 
                     area = 0.0
@@ -123,7 +138,12 @@ def magic(data):
 
                     if area > max_area:
                         max_area = area
-                        points = [p0, p1, p2]
+                        points = [
+                            (data[p0, 0], data[p0, 1]),
+                            (data[p1, 0], data[p1, 1]),
+                            (data[p2, 0], data[p2, 1]),
+                            (point4[0], point4[1])
+                        ]
 
     return points
 
