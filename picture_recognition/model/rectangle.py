@@ -34,6 +34,9 @@ class Rectangle:
         return (self.top_left[0] <= point[0] <= self.get_bottom_right()[0] and
                 self.top_left[1] <= point[1] <= self.get_bottom_right()[1])
 
+    def get_area(self):
+        return self.width * self.height
+
     def union(self, other: 'Rectangle') -> 'Rectangle':
         rec = Rectangle()
         rec.top_left = (min(self.top_left[0], other.top_left[0]), min(self.top_left[1], other.top_left[1]))
@@ -59,6 +62,9 @@ class Rectangle:
             return None
 
         return rec
+
+    def ioi(self, other: 'Rectangle') -> float:
+        return self.intersection(other).get_area() / self.union(other).get_area()
 
     def to_result(self):
         return [self.top_left[0], self.top_left[1], self.get_bottom_right()[0], self.get_bottom_right()[1]]

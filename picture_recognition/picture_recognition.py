@@ -2,45 +2,37 @@ import argparse
 import fnmatch
 import os
 import pickle
-from concurrent.futures.thread import ThreadPoolExecutor
 from typing import List
 
 import ml_metrics as metrics
+import pandas
 from functional import seq
-from tabulate import tabulate
 
 from methods import AbstractMethod, ycbcr_16_hellinger, ycbcr_32_correlation, hsv_16_hellinger, orb_brute, \
     orb_brute_ratio_test, sift_brute, sift_brute_ratio_test, orb_brute_homography, flann_matcher, brief, \
     surf_brute, flann_matcher_orb, orb_brute_ratio_test_homography, w5
-
 from model import Data, Picture
+from model.rectangle import Rectangle
 
 
 def get_result(method: AbstractMethod, query: Picture):
     return method.query(query)
 
 
-def query(dataset_dir: str, query_dir: str, methods: List[AbstractMethod], threads=4):
+def query(dataset_dir: str, query_dir: str, methods: List[AbstractMethod]):
     data = Data(dataset_dir)
     file_names = fnmatch.filter(os.listdir(query_dir), '*.jpg')
-    with ThreadPoolExecutor(max_workers=1) as executor:
-        # Parallel training
-        training = [executor.submit(method.train, data.pictures) for method in methods]
-        seq(training).for_each(lambda t: t.result())
 
-        query_pictures = seq(file_names).map(lambda query_name: Picture(query_dir, query_name)).to_list()
-        result = (
-            seq(methods)
-                .map(lambda method:
-                     [[picture, executor.submit(get_result, method, picture)] for picture in query_pictures]
-                     )
-                .to_list()
-        )
+    texts_recs = [method.train(data.pictures) for method in methods]
 
+    query_pictures = seq(file_names).map(lambda query_name: Picture(query_dir, query_name)).to_list()
     return (
-        seq(result)
-            .map(lambda r: seq(r).map(lambda f: (f[0], f[1].result())).to_list())
-            .to_list()
+        seq(methods)
+            .map(lambda method:
+                 [[picture] + get_result(method, picture) for picture in query_pictures]
+                 )
+            .to_list(),
+        texts_recs
     )
 
 
@@ -76,12 +68,12 @@ def main():
     if not all(methods):
         raise Exception('Invalid method')
 
-    results = query(args.dataset, args.query, methods, args.threads)
+    results, text_recs = query(args.dataset, args.query, methods)
 
     if args.out is not None:
         save_results(method_names, results, args.out)
     else:
-        show_results(args.query, method_names, results)
+        show_results(args.query, method_names, results, text_recs)
 
 
 def save_results(method_names: List[str], results, output_dir: str):
@@ -101,32 +93,47 @@ def save_results(method_names: List[str], results, output_dir: str):
             pickle.dump(result_values, f)
 
 
-def show_results(query_path: str, method_names: List[str], results):
+def show_results(query_path: str, method_names: List[str], matching_results, text_results):
     if 'W4' in query_path:
         with open('./w4_query_devel.pkl', 'rb') as file:
-            query_dict = pickle.load(file)
+            matching_dict = pickle.load(file)
     elif 'w5' in query_path:
         with open('./w5_query_devel.pkl', 'rb') as file:
-            query_dict = pickle.load(file)
+            matching_dict = pickle.load(file)
+        with open('./w5_text_bbox_list.pkl', 'rb') as file:
+            text_dict = pickle.load(file)
+            texts_sol = (seq(text_dict)
+                         .map(lambda p: Rectangle(p[0:2], (p[2] - p[0]) + 1, (p[3] - p[1]) + 1))
+                         .to_list())
     else:
         with open('./query_corresp_simple_devel.pkl', 'rb') as file:
-            query_dict = pickle.load(file)
+            matching_dict = pickle.load(file)
 
     table = []
     for pos, method_name in enumerate(method_names):
-
-        result_values = (
-            seq(results[pos])
-                .map(lambda r: r[1])
+        # Matching results
+        matching = (
+            seq(matching_results[pos])
+                .map(lambda r: r[1][0])
                 .map(lambda r: seq(r).map(lambda s: s.id).to_list())
                 .map(replace_empty)
                 .to_list()
         )
+        matching_solution = seq(matching_results[pos]).map(lambda r: matching_dict[r[0].id][1]).to_list()
 
-        solutions = seq(results[pos]).map(lambda r: query_dict[r[0].id][1]).to_list()
-        table.append((method_name, metrics.mapk(solutions, result_values, k=10),
-                      metrics.mapk(solutions, result_values, k=5), metrics.mapk(solutions, result_values, k=1)))
-    print(tabulate(table, headers=['Method', 'MAPK K=10', 'MAPK K=5', 'MAPK K=1']))
+        # Text results
+        text_iou = (seq(texts_sol)
+                    .zip(text_results[pos])
+                    .map(lambda pair: pair[0].ioi(pair[1]))
+                    .average())
+
+        table.append((method_name, metrics.mapk(matching_solution, matching, k=10),
+                      metrics.mapk(matching_solution, matching, k=5), metrics.mapk(matching_solution, matching, k=1),
+                      text_iou))
+
+    data = pandas.DataFrame(table, columns=['Method', 'MAPK K=10', 'MAPK K=5', 'MAPK K=1', 'Text IoU'])
+
+    print(data)
 
 
 def replace_empty(lst: List[int]) -> List[int]:

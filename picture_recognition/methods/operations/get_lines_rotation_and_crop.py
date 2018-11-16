@@ -7,11 +7,16 @@ import numba
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+from functional import seq
 from numba import njit
+
+MAX_SIDE = 500
 
 
 def get_lines_rotation_and_crop(im: np.array):
-    resized = cv2.resize(im, (500, 500))
+    scale = min(MAX_SIDE / im.shape[0], MAX_SIDE / im.shape[1])
+    resized = cv2.resize(im, (0, 0), fx=scale, fy=scale)
+
     gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
 
     gray = cv2.GaussianBlur(gray, ksize=(5, 5), sigmaX=0)
@@ -46,37 +51,28 @@ def get_lines_rotation_and_crop(im: np.array):
                 if 85 < dif < 95:
                     intersections.append([float(x), float(y), anglei % 90])
 
+    points = []
+    angle = 0
     if len(intersections) > 4:
 
         intersections = simplify_intersections(intersections)
 
         data = np.array(intersections, dtype=np.float64)
 
-        points = magic(data)
+        points, angle = magic(data)
 
         for p in points:
             cv2.circle(imres, (int(p[0]), int(p[1])), 3, (255, 0, 0), thickness=-1)
 
-    """for line in lines:
-        for x1, y1, x2, y2 in line:
-            cv2.line(i, (x1, y1), (x2, y2), (0, 255, 0), 2)"""
+    # plt.imshow(imres)
+    # plt.show()
 
-    """for line in lines:
-        for rho, theta in line:
-            a = np.cos(theta)
-            b = np.sin(theta)
-            x0 = a * rho
-            y0 = b * rho
-            x1 = int(x0 + 1000 * (-b))
-            y1 = int(y0 + 1000 * (a))
-            x2 = int(x0 - 1000 * (-b))
-            y2 = int(y0 - 1000 * (a))
+    # Undo scale
+    points = (seq(points)
+              .map(lambda point: (int(point[0] / scale), int(point[1] / scale)))
+              .to_list())
 
-            cv2.line(i, (x1, y1), (x2, y2), (0, 0, 255), 2)"""
-
-    plt.imshow(imres)
-    plt.show()
-    print(1)
+    return points, angle
 
 
 def line_intersection(line1: ((float, float), (float, float)), line2: ((float, float), (float, float))) -> (
@@ -101,6 +97,7 @@ def line_intersection(line1: ((float, float), (float, float)), line2: ((float, f
 def magic(data):
     max_area = 0
     points = [(0., 0.), (0., 0.), (0., 0.), (0., 0.)]
+    angle = 0
 
     for p0 in range(len(data)):
         for p1 in range(p0 + 1, len(data)):
@@ -144,8 +141,9 @@ def magic(data):
                             (data[p2, 0], data[p2, 1]),
                             (point4[0], point4[1])
                         ]
+                        angle = data[p0, 2]
 
-    return points
+    return points, angle
 
 
 def simplify_intersections(data: List[List[float]]) -> List[List[float]]:

@@ -1,17 +1,21 @@
 import math
-from typing import List, Tuple
+from typing import List
+
+import cv2
+import numpy as np
 from functional import seq
 
 
 class Frame:
     angle: float
-    points: List[Tuple[int, int]]
+    points: [(int, int), (int, int), (int, int), (int, int)]
 
-    def __init__(self, points):
-        self.points = self._add_points(points)
-        self.angle = self._get_angle()
+    def __init__(self, points: [(int, int), (int, int), (int, int), (int, int)], angle: float):
+        self.points = self._sort_points(points)
+        self.angle = angle
 
-    def _add_points(self, not_sorted: List[Tuple[int, int]]):
+    @staticmethod
+    def _sort_points(not_sorted: [(int, int), (int, int), (int, int), (int, int)]):
         angles = List[float]
         center_x = (seq(not_sorted)
                     .map(lambda p: not_sorted[0])
@@ -25,9 +29,8 @@ class Frame:
         points = [not_sorted[i] for i in sorted_idx]
         return points
 
-    def _get_angle(self):
-        angle = (math.atan2(self.points[0][1] - self.points[1][1], self.points[0][0] - self.points[1][0]))
-        return math.degrees(angle) % 90
+    def get_perspective_matrix(self, dst: np.array):
+        return cv2.getPerspectiveTransform(self.points, dst)
 
     def to_result(self):
         return [self.angle, self.points]
