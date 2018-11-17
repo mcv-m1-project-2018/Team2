@@ -3,13 +3,14 @@ from typing import List, Tuple
 import cv2
 from functional import seq
 import numpy as np
-from model import Picture
+from model import Picture,Rectangle
+from methods.operations.text import detect_text
 
 THRESHOLD = 28
 
 
 class BRIEF:
-    db: List[Tuple[Picture, List[cv2.KeyPoint], np.array]]
+    db: List[Tuple[Picture, List[cv2.KeyPoint], np.array,Rectangle]]
     bf: cv2.BFMatcher
     star: cv2.xfeatures2d_StarDetector
     brief: cv2.xfeatures2d_BriefDescriptorExtractor
@@ -21,7 +22,8 @@ class BRIEF:
         self.brief = cv2.xfeatures2d.BriefDescriptorExtractor_create()
 
     def query(self, picture: Picture) -> List[Picture]:
-        kp = self.star.detect(picture.get_image(), None)
+        mask,bounding_text= detect_text(picture.get_image())
+        kp = self.star.detect(picture.get_image(), mask)
         kp, des = self.brief.compute(picture.get_image(), kp)
 
         return (
@@ -43,6 +45,7 @@ class BRIEF:
 
     def train(self, images: List[Picture]) -> None:
         for image in images:
-            kp = self.star.detect(image.get_image(), None)
+            mask,bounding_text = detect_text(image.get_image())
+            kp = self.star.detect(image.get_image(), mask)
             kp, des = self.brief.compute(image.get_image(), kp)
-            self.db.append((image, kp, des))
+            self.db.append((image, kp, des,bounding_text))

@@ -4,12 +4,13 @@ import cv2
 from functional import seq
 import numpy as np
 from model import Picture
-
+from methods.operations.text import detect_text
+from model import Rectangle
 MIN_MATCH_COUNT = 6
 
 
 class ORBBruteRatioTestHomography:
-    db: List[Tuple[Picture, List[cv2.KeyPoint], np.array]]
+    db: List[Tuple[Picture, List[cv2.KeyPoint], np.array,Rectangle]]
     bf: cv2.BFMatcher
     orb: cv2.ORB
 
@@ -19,7 +20,8 @@ class ORBBruteRatioTestHomography:
         self.orb = cv2.ORB_create()
 
     def query(self, picture: Picture) -> List[Picture]:
-        kp, des = self.orb.detectAndCompute(picture.get_image(), None)
+        mask,rec=detect_text(picture.get_image())
+        kp, des = self.orb.detectAndCompute(picture.get_image(), mask)
 
         return (
             seq(self.db)
@@ -36,8 +38,9 @@ class ORBBruteRatioTestHomography:
 
     def train(self, images: List[Picture]) -> None:
         for image in images:
-            kp, des = self.orb.detectAndCompute(image.get_image(), None)
-            self.db.append((image, kp, des))
+            mask ,bounding_text = detect_text(image.get_image())
+            kp, des = self.orb.detectAndCompute(image.get_image(), mask)
+            self.db.append((image, kp, des,bounding_text))
 
     @staticmethod
     def _ratio_test(matches):

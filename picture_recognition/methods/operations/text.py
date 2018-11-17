@@ -1,6 +1,7 @@
 import imutils as imutils
 import cv2
 import numpy as np
+from model import Rectangle
 import matplotlib.pyplot as plt
 
 def detect_text(img: np.array) -> np.array:
@@ -24,6 +25,7 @@ def detect_text(img: np.array) -> np.array:
     cnts = cv2.findContours(edges1, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     cnts = cnts[0] if imutils.is_cv2() else cnts[1]
+    #ret, labels = cv2.connectedComponents(cnts)
 
     text = []
     corner_left = gray.shape
@@ -39,11 +41,21 @@ def detect_text(img: np.array) -> np.array:
             if cv2.norm((x+w, y+h)) > cv2.norm(corner_right):
                 corner_right = (x+w, y+h)
 
-        # cv2.rectangle(im, (x, y), (x + w, y + h), (255, 0, 0), 2)
+        #cv2.rectangle(im, (x, y), (x + w, y + h), (255, 0, 0), 2)
 
-    padding = 0.05 * (cv2.norm(np.subtract(corner_right, corner_left)))
+    padding =int(0.07 * (cv2.norm(np.subtract(corner_right, corner_left))))
+    sub = np.subtract(corner_right, corner_left)
+    width = sub[0]
+    height = sub[1]
 
-    cv2.rectangle(img, (int(corner_left[0] - padding), int(corner_left[1] - padding)),
-                  (int(corner_right[0] + padding), int(corner_right[1] + padding)), (0, 0, 0), -1)
+    bounding = Rectangle(corner_left, height, width)
 
-    return img
+    mask = np.ones(img.shape[:2], dtype=np.uint8)*255
+
+    #cv2.rectangle(white_image,(corner_left-padding),bounding.get_bottom_right()+padding,(0,0,0),-1)
+    corner_left = (corner_left[0] - padding, corner_left[1] - padding)
+    corner_right=(bounding.get_bottom_right()[0]+padding, bounding.get_bottom_right()[1]+padding)
+    mask=cv2.rectangle(mask, corner_left, corner_right, (0,0,0), -1)
+    #cv2.imshow('mask',mask)
+
+    return mask, bounding

@@ -3,12 +3,13 @@ from typing import List, Tuple
 import cv2
 import numpy as np
 from functional import seq
-
+from methods.operations.text import detect_text
 from model import Picture
+from model import Rectangle
 
 
 class FLANN_Matcher:
-    db: List[Tuple[Picture, List[cv2.KeyPoint], np.array]]
+    db: List[Tuple[Picture, List[cv2.KeyPoint], np.array,Rectangle]]
     bf: cv2.BFMatcher
     sift: cv2.xfeatures2d.SIFT_create
 
@@ -18,7 +19,8 @@ class FLANN_Matcher:
         self.sift = cv2.xfeatures2d.SIFT_create(600)
 
     def query(self, picture: Picture) -> List[Picture]:
-        kp, des = self.sift.detectAndCompute(picture.get_image(), None)
+        mask ,rec = detect_text(picture.get_image())
+        kp, des = self.sift.detectAndCompute(picture.get_image(), mask)
         FLANN_INDEX_KDTREE = 1
         flann_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
         flann = cv2.FlannBasedMatcher(flann_params, {})
@@ -46,5 +48,6 @@ class FLANN_Matcher:
 
     def train(self, images: List[Picture]) -> None:
         for image in images:
-            kp, des = self.sift.detectAndCompute(image.get_image(), None)
-            self.db.append((image, kp, des))
+            mask,bounding_text = detect_text(image.get_image())
+            kp, des = self.sift.detectAndCompute(image.get_image(), mask)
+            self.db.append((image, kp, des,bounding_text))

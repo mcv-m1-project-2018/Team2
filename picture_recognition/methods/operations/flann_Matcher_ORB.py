@@ -3,14 +3,15 @@ from typing import List, Tuple
 import cv2
 import numpy as np
 from functional import seq
-
+from methods.operations.text import detect_text
 from model import Picture
+from model import Rectangle
 
 THRESHOLD = 28
 
 
 class Flann_Matcher_ORB:
-    db: List[Tuple[Picture, List[cv2.KeyPoint], np.array]]
+    db: List[Tuple[Picture, List[cv2.KeyPoint], np.array,Rectangle]]
     bf: cv2.BFMatcher
     orb: cv2.ORB
 
@@ -22,7 +23,8 @@ class Flann_Matcher_ORB:
         self.orb = cv2.ORB_create()
 
     def query(self, picture: Picture) -> List[Picture]:
-        kp, des = self.orb.detectAndCompute(picture.get_image(), None)
+        mask, rec = detect_text(picture.get_image())
+        kp, des = self.orb.detectAndCompute(picture.get_image(), mask)
 
         return (
             seq(self.db)
@@ -48,5 +50,6 @@ class Flann_Matcher_ORB:
 
     def train(self, images: List[Picture]) -> None:
         for image in images:
-            kp, des = self.orb.detectAndCompute(image.get_image(), None)
-            self.db.append((image, kp, des))
+            mask,bounding_text = detect_text(image.get_image())
+            kp, des = self.orb.detectAndCompute(image.get_image(), mask)
+            self.db.append((image, kp, des,bounding_text))

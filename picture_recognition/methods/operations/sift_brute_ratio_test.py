@@ -4,10 +4,13 @@ import cv2
 from functional import seq
 import numpy as np
 from model import Picture
+from methods.operations.text import detect_text
+
+from model import Rectangle
 
 
 class SIFTBruteRatioTest:
-    db: List[Tuple[Picture, List[cv2.KeyPoint], np.array]]
+    db: List[Tuple[Picture, List[cv2.KeyPoint], np.array,Rectangle]]
     bf: cv2.BFMatcher
     sift: cv2.xfeatures2d.SIFT_create
 
@@ -17,7 +20,8 @@ class SIFTBruteRatioTest:
         self.sift = cv2.xfeatures2d.SIFT_create(500)
 
     def query(self, picture: Picture) -> List[Picture]:
-        kp, des = self.sift.detectAndCompute(picture.get_image(), None)
+        mask,rec=detect_text(picture.get_image())
+        kp, des = self.sift.detectAndCompute(picture.get_image(), mask)
 
         return (
             seq(self.db)
@@ -41,5 +45,6 @@ class SIFTBruteRatioTest:
 
     def train(self, images: List[Picture]) -> None:
         for image in images:
-            kp, des = self.sift.detectAndCompute(image.get_image(), None)
-            self.db.append((image, kp, des))
+            mask,bounding_text =detect_text(image.get_image())
+            kp, des = self.sift.detectAndCompute(image.get_image(), mask)
+            self.db.append((image, kp, des,bounding_text))

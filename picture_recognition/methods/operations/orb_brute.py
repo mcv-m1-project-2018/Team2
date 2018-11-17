@@ -4,12 +4,14 @@ import cv2
 from functional import seq
 import numpy as np
 from model import Picture, Frame
+from methods.operations.text import detect_text
+from model import Rectangle
 
 THRESHOLD = 28
 
 
 class ORBBrute:
-    db: List[Tuple[Picture, List[cv2.KeyPoint], np.array]]
+    db: List[Tuple[Picture, List[cv2.KeyPoint], np.array,Rectangle]]
     bf: cv2.BFMatcher
     orb: cv2.ORB
 
@@ -24,8 +26,8 @@ class ORBBrute:
             im = picture.get_image()
         else:
             im = picture.get_image()
-
-        kp, des = self.orb.detectAndCompute(im, None)
+        mask,rec= detect_text(im)
+        kp, des = self.orb.detectAndCompute(im, mask)
 
         return (
             seq(self.db)
@@ -47,5 +49,6 @@ class ORBBrute:
 
     def train(self, images: List[Picture]) -> None:
         for image in images:
-            kp, des = self.orb.detectAndCompute(image.get_image(), None)
-            self.db.append((image, kp, des))
+            mask,bounding_text=detect_text(image.get_image())
+            kp, des = self.orb.detectAndCompute(image.get_image(),mask=mask)
+            self.db.append((image, kp, des,bounding_text))
