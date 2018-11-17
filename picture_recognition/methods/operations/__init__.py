@@ -10,4 +10,4 @@ from .brief import BRIEF
 from .flann_Matcher_ORB import Flann_Matcher_ORB
 from .surf_brute import SURFBrute
 from .orb_brute_ratio_test_homography import ORBBruteRatioTestHomography
-from .get_lines_rotation_and_crop import get_lines_rotation_and_crop
+from .get_lines_rotation_and_crop import get_frame_with_lines

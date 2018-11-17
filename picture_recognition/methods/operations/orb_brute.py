@@ -3,7 +3,7 @@ from typing import List, Tuple
 import cv2
 from functional import seq
 import numpy as np
-from model import Picture
+from model import Picture, Frame
 
 THRESHOLD = 28
 
@@ -18,15 +18,22 @@ class ORBBrute:
         self.bf = cv2.BFMatcher_create(cv2.NORM_HAMMING, crossCheck=True)
         self.orb = cv2.ORB_create(1000)
 
-    def query(self, picture: Picture) -> List[Picture]:
-        kp, des = self.orb.detectAndCompute(picture.get_image(), None)
+    def query(self, picture: Picture, frame: Frame = None) -> List[Picture]:
+        if frame:
+            # TODO frame transform
+            im = picture.get_image()
+        else:
+            im = picture.get_image()
+
+        kp, des = self.orb.detectAndCompute(im, None)
 
         return (
             seq(self.db)
                 .map(lambda p: (p[0], self.bf.match(p[2], des)))
                 .map(lambda p: (p[0],
-                                seq(p[1]).filter(lambda d: d.distance < max(THRESHOLD,
-                                                                            seq(p[1]).map(lambda m: m.distance).min()))
+                                seq(p[1])
+                                .filter(lambda d: d.distance < max(THRESHOLD,
+                                                                   seq(p[1]).map(lambda m: m.distance).min()))
                                 .to_list()
                                 )
                      )

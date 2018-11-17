@@ -8,12 +8,14 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 from functional import seq
-from numba import njit
+from numba import njit, prange
+
+from model import Frame
 
 MAX_SIDE = 500
 
 
-def get_lines_rotation_and_crop(im: np.array):
+def get_frame_with_lines(im: np.array) -> Frame:
     scale = min(MAX_SIDE / im.shape[0], MAX_SIDE / im.shape[1])
     resized = cv2.resize(im, (0, 0), fx=scale, fy=scale)
 
@@ -64,21 +66,21 @@ def get_lines_rotation_and_crop(im: np.array):
         for p in points:
             cv2.circle(imres, (int(p[0]), int(p[1])), 3, (255, 0, 0), thickness=-1)
 
-    # plt.imshow(imres)
-    # plt.show()
+    plt.imshow(imres)
+    plt.show()
 
     # Undo scale
     points = (seq(points)
               .map(lambda point: (int(point[0] / scale), int(point[1] / scale)))
               .to_list())
 
-    return points, angle
+    return Frame(points, angle)
 
 
 def line_intersection(line1: ((float, float), (float, float)), line2: ((float, float), (float, float))) -> (
         float, float):
     xdiff = (line1[0][0] - line1[1][0], line2[0][0] - line2[1][0])
-    ydiff = (line1[0][1] - line1[1][1], line2[0][1] - line2[1][1])  # Typo was here
+    ydiff = (line1[0][1] - line1[1][1], line2[0][1] - line2[1][1])
 
     def det(a, b):
         return a[0] * b[1] - a[1] * b[0]
