@@ -16,13 +16,14 @@ class Frame:
 
     @staticmethod
     def _sort_points(not_sorted: [(int, int), (int, int), (int, int), (int, int)]):
-        angles = List[float]
+        angles: List[float] = []
         center_x = (seq(not_sorted)
-                    .map(lambda p: not_sorted[0])
+                    .map(lambda p: p[0])
                     .average())
         center_y = (seq(not_sorted)
-                    .map(lambda p: not_sorted[1])
+                    .map(lambda p: p[1])
                     .average())
+
         for t in not_sorted:
             angles.append(math.atan2(t[1] - center_y, t[0] - center_x))
         sorted_idx = sorted(range(len(angles)), key=lambda x: angles[x], reverse=True)

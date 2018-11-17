@@ -1,18 +1,17 @@
-import itertools
 import math
 from typing import List
 
-import numba
-
 import cv2
-import numpy as np
 import matplotlib.pyplot as plt
+import numba
+import numpy as np
 from functional import seq
-from numba import njit, prange
+from numba import njit
 
 from model import Frame
 
 MAX_SIDE = 500
+SHOW_OUTPUT = True
 
 
 def get_frame_with_lines(im: np.array) -> Frame:
@@ -37,7 +36,6 @@ def get_frame_with_lines(im: np.array) -> Frame:
 
     lines = cv2.HoughLinesP(gray, rho=1, theta=np.pi / 180, threshold=80, minLineLength=100, maxLineGap=10)
     # lines = cv2.HoughLines(gray, 1, np.pi / 180, 150)
-    imres = cv2.cvtColor(resized, cv2.COLOR_BGR2RGB)
 
     intersections = []
     for i in range(len(lines)):
@@ -53,6 +51,10 @@ def get_frame_with_lines(im: np.array) -> Frame:
                 if 85 < dif < 95:
                     intersections.append([float(x), float(y), anglei % 90])
 
+    imres = None
+    if SHOW_OUTPUT:
+        imres = cv2.cvtColor(resized, cv2.COLOR_BGR2RGB)
+
     points = []
     angle = 0
     if len(intersections) > 4:
@@ -61,13 +63,15 @@ def get_frame_with_lines(im: np.array) -> Frame:
 
         data = np.array(intersections, dtype=np.float64)
 
-        points, angle = magic(data)
+        points, angle = magic(data, im.shape[0] * scale, im.shape[1] * scale)
 
-        for p in points:
-            cv2.circle(imres, (int(p[0]), int(p[1])), 3, (255, 0, 0), thickness=-1)
+        if SHOW_OUTPUT:
+            for p in points:
+                cv2.circle(imres, (int(p[0]), int(p[1])), 3, (255, 0, 0), thickness=-1)
 
-    plt.imshow(imres)
-    plt.show()
+    if SHOW_OUTPUT:
+        plt.imshow(imres)
+        plt.show()
 
     # Undo scale
     points = (seq(points)
@@ -96,7 +100,15 @@ def line_intersection(line1: ((float, float), (float, float)), line2: ((float, f
 
 
 @njit()
-def magic(data):
+def magic(data: np.array, width: int, height: int):
+    """
+    For each 3 points with an angle of 90º among them we calculate a 4th one, then, we store
+    the set with the biggest area.
+    :param data: matrix with rows (x, y, angle)
+    :param width: width of the image
+    :param height: height of the image
+    :return: the 4 points with the biggest area and their angle in interval [0, 90)
+    """
     max_area = 0
     points = [(0., 0.), (0., 0.), (0., 0.), (0., 0.)]
     angle = 0
@@ -111,6 +123,7 @@ def magic(data):
                     d12 = np.subtract(data[p2, :], data[p1, :])
                     d20 = np.subtract(data[p0, :], data[p2, :])
 
+                    # Calculate fouth point
                     if np.linalg.norm(d01) > np.linalg.norm(d12) and np.linalg.norm(d01) > np.linalg.norm(d20):
                         # p2 corner
                         point4 = np.add(data[p1, :], d20)
@@ -121,6 +134,11 @@ def magic(data):
                         # p1 corner
                         point4 = np.add(data[p0, :], d12)
 
+                    # Discard point if outside of image
+                    if point4[0] < 0 or point4[1] < 0 or point4[0] > width or point4[1] > height:
+                        continue
+
+                    # Combine points in a matrix
                     p = np.vstack((
                         data[p0, 0:2].ravel(),
                         data[p1, 0:2].ravel(),
@@ -128,6 +146,7 @@ def magic(data):
                         point4[0:2].ravel()
                     ))
 
+                    # Calculate area using shoelace formula
                     area = 0.0
                     for i in range(4):
                         j = (i + 1) % 4

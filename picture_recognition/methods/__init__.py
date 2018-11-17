@@ -13,3 +13,5 @@ from .flann_matcher_orb import instance as flann_matcher_orb
 from .surf_brute import instance as surf_brute
 from .orb_brute_ratio_test_homography import instance as orb_brute_ratio_test_homography
 from .w5 import instance as w5
+from .w5_no_frame import instance as w5_no_frame
+from .w5_no_frame_no_text import instance as w5_no_frame_no_text

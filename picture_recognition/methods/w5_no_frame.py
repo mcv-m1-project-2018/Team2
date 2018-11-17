@@ -6,7 +6,7 @@ from model import Picture, Frame
 from model.rectangle import Rectangle
 
 
-class w5(AbstractMethod):
+class w5_no_frame(AbstractMethod):
 
     orb: ORBBrute
 
@@ -16,10 +16,10 @@ class w5(AbstractMethod):
     def query(self, picture: Picture) -> (List[Picture], Frame):
         frame = get_frame_with_lines(picture.get_image())
 
-        return self.orb.query(picture, frame=frame), frame
+        return self.orb.query(picture), frame
 
     def train(self, images: List[Picture]) -> List[Rectangle]:
         return self.orb.train(images)
 
 
-instance = w5()
+instance = w5_no_frame()

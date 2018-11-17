@@ -11,7 +11,8 @@ THRESHOLD = 28
 
 
 class ORBBrute:
-    db: List[Tuple[Picture, List[cv2.KeyPoint], np.array,Rectangle]]
+    db: [(Picture, List[cv2.KeyPoint], np.array)]
+
     bf: cv2.BFMatcher
     orb: cv2.ORB
 
@@ -26,7 +27,7 @@ class ORBBrute:
             im = picture.get_image()
         else:
             im = picture.get_image()
-        mask,rec= detect_text(im)
+        mask, rec = detect_text(im)
         kp, des = self.orb.detectAndCompute(im, mask)
 
         return (
@@ -47,8 +48,15 @@ class ORBBrute:
                 .to_list()
         )
 
-    def train(self, images: List[Picture]) -> None:
+    def train(self, images: List[Picture], use_mask=True) -> List[Rectangle]:
+        bounding_texts = []
         for image in images:
-            mask,bounding_text=detect_text(image.get_image())
-            kp, des = self.orb.detectAndCompute(image.get_image(),mask=mask)
-            self.db.append((image, kp, des,bounding_text))
+            mask, bounding_text = detect_text(image.get_image())
+            if use_mask:
+                kp, des = self.orb.detectAndCompute(image.get_image(), mask=mask)
+            else:
+                kp, des = self.orb.detectAndCompute(image.get_image(), None)
+
+            self.db.append((image, kp, des))
+            bounding_texts.append(bounding_text)
+        return bounding_texts

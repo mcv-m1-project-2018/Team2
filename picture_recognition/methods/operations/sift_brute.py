@@ -11,7 +11,7 @@ THRESHOLD = 27
 
 
 class SIFTBrute:
-    db: List[Tuple[Picture, List[cv2.KeyPoint], np.array,Rectangle]]
+    db: [(Picture, List[cv2.KeyPoint], np.array)]
     bf: cv2.BFMatcher
     sift: cv2.xfeatures2d.SIFT_create
 
@@ -21,7 +21,7 @@ class SIFTBrute:
         self.sift = cv2.xfeatures2d.SIFT_create(1000)
 
     def query(self, picture: Picture) -> List[Picture]:
-        mask ,rec = detect_text(picture.get_image())
+        mask, rec = detect_text(picture.get_image())
         kp, des = self.sift.detectAndCompute(picture.get_image(), mask)
 
         return (
@@ -41,8 +41,11 @@ class SIFTBrute:
                 .to_list()
         )
 
-    def train(self, images: List[Picture]) -> None:
+    def train(self, images: List[Picture]) -> List[Rectangle]:
+        bounding_texts = []
         for image in images:
-            mask,bounding_text = detect_text(image.get_image())
+            mask, bounding_text = detect_text(image.get_image())
             kp, des = self.sift.detectAndCompute(image.get_image(), mask)
-            self.db.append((image, kp, des,bounding_text))
+            self.db.append((image, kp, des))
+            bounding_texts.append(bounding_text)
+        return bounding_texts
