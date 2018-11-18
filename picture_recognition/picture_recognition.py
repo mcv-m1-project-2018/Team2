@@ -10,7 +10,7 @@ import ml_metrics as metrics
 import pandas
 from functional import seq
 
-from methods import AbstractMethod, w5, w5_no_frame, w5_no_frame_no_text
+from methods import AbstractMethod, w5, w5_no_frame, w5_no_frame_no_text, ycbcr_16_hellinger
 from model import Data, Picture
 from model.rectangle import Rectangle
 from tqdm import tqdm
@@ -55,7 +55,8 @@ def main():
     method_refs = {
         'w5': w5,
         'w5_no_frame': w5_no_frame,
-        'w5_no_frame_no_text': w5_no_frame_no_text
+        'w5_no_frame_no_text': w5_no_frame_no_text,
+        'ycbcr_16_hellinger': ycbcr_16_hellinger
     }
     method_names = args.methods.split(';')
     methods = seq(method_names).map(lambda x: method_refs.get(x, None)).to_list()
@@ -65,18 +66,19 @@ def main():
     results, text_recs = query(args.dataset, args.query, methods)
 
     if args.out is not None:
-        save_results(method_names, results, args.out)
+        save_results(method_names, results, text_recs, args.out)
     else:
         show_results(args.query, method_names, results, text_recs)
 
 
-def save_results(method_names: List[str], results, output_dir: str):
+def save_results(method_names: List[str], matching_results, text_results: List[List[Rectangle]], output_dir: str):
     for pos, method_name in enumerate(method_names):
         if not os.path.isdir(output_dir + '/' + method_name):
             os.mkdir(output_dir + '/' + method_name)
 
-        result_values = (
-            seq(results[pos])
+        # Write matching results
+        matching = (
+            seq(matching_results[pos])
                 .map(lambda r: r[1])
                 .map(lambda r: seq(r).map(lambda s: s.get_trimmed_name()).to_list())
                 .map(replace_empty)
@@ -84,7 +86,17 @@ def save_results(method_names: List[str], results, output_dir: str):
         )
 
         with open(output_dir + '/' + method_name + '/result.pkl', 'wb') as f:
-            pickle.dump(result_values, f)
+            pickle.dump(matching, f)
+
+        # Write frame results
+        frames = seq(matching_results[pos]).map(lambda r: r[2]).to_list()
+        with open(output_dir + '/' + method_name + '/frames.pkl', 'wb') as f:
+            pickle.dump(frames, f)
+
+        # Write text results
+        text = seq(text_results[pos]).map(lambda rec: rec.to_result()).to_list()
+        with open(output_dir + '/' + method_name + '/text.pkl', 'wb') as f:
+            pickle.dump(text, f)
 
 
 def show_results(query_path: str, method_names: List[str], matching_results, text_results):

@@ -1,9 +1,7 @@
 import math
-from typing import List
 
 import cv2
 import matplotlib.pyplot as plt
-import numba
 import numpy as np
 from functional import seq
 from numba import njit
@@ -18,7 +16,15 @@ def get_frame_with_lines(im: np.ndarray) -> Frame:
     scale = min(MAX_SIDE / im.shape[0], MAX_SIDE / im.shape[1])
     resized = cv2.resize(im, (0, 0), fx=scale, fy=scale)
 
+    if SHOW_OUTPUT:
+        plt.imshow(cv2.cvtColor(resized, cv2.COLOR_BGR2RGB))
+        plt.show()
+
     gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
+
+    if SHOW_OUTPUT:
+        plt.imshow(gray, 'gray')
+        plt.show()
 
     gray = cv2.GaussianBlur(gray, ksize=(5, 5), sigmaX=0)
 
@@ -34,13 +40,39 @@ def get_frame_with_lines(im: np.ndarray) -> Frame:
 
     gray = cv2.Canny(gray, threshold1=0, threshold2=50, apertureSize=3)
 
+    if SHOW_OUTPUT:
+        plt.imshow(gray, 'gray')
+        plt.show()
+
     lines = cv2.HoughLinesP(gray, rho=1, theta=np.pi / 180, threshold=80, minLineLength=100, maxLineGap=10)
 
     imres = None
     if SHOW_OUTPUT:
+        im2 = resized.copy()
+        for line in lines:
+            cv2.line(im2, (line[0][0], line[0][1]), (line[0][2], line[0][3]), (0, 0, 255), 3)
+        plt.imshow(cv2.cvtColor(im2, cv2.COLOR_BGR2RGB))
+        plt.show()
+
         imres = cv2.cvtColor(resized, cv2.COLOR_BGR2RGB)
 
     intersections = get_intersections(lines)
+    if SHOW_OUTPUT:
+        im2 = resized.copy()
+        for p in intersections:
+            cv2.circle(im2, (int(p[0]), int(p[1])), 3, (0, 0, 255), -1)
+
+        plt.imshow(cv2.cvtColor(im2, cv2.COLOR_BGR2RGB))
+        plt.show()
+
+    intersections = simplify_intersections(intersections)
+    if SHOW_OUTPUT:
+        im2 = resized.copy()
+        for p in intersections:
+            cv2.circle(im2, (int(p[0]), int(p[1])), 3, (0, 0, 255), -1)
+
+        plt.imshow(cv2.cvtColor(im2, cv2.COLOR_BGR2RGB))
+        plt.show()
 
     points = [(0., 0.), (0., 0.), (0., 0.), (0., 0.)]
     angle = 0
@@ -85,7 +117,7 @@ def get_intersections(lines: np.ndarray) -> np.array:
                 if 85 < dif < 95:
                     intersections.append([float(x), float(y), anglei % 90])
 
-    return simplify_intersections(np.array(intersections, dtype=np.float64))
+    return np.array(intersections, dtype=np.float64)
 
 
 @njit()
@@ -129,11 +161,7 @@ def magic(data: np.ndarray, width: int, height: int):
                         np.abs(data[p0, 2] - data[p2, 2]) < 5):
 
                     # Combine points in a matrix
-                    p = np.vstack((
-                        data[p0, 0:2].ravel(),
-                        data[p1, 0:2].ravel(),
-                        data[p2, 0:2].ravel()
-                    ))
+                    p = data[np.array([p0, p1, p2]), 0:2]
 
                     # Calculate area using shoelace formula
                     area = 0.0
@@ -148,7 +176,7 @@ def magic(data: np.ndarray, width: int, height: int):
                         d12 = np.subtract(data[p2, :], data[p1, :])
                         d20 = np.subtract(data[p0, :], data[p2, :])
 
-                        # Calculate fouth point
+                        # Calculate fourth point
                         if np.linalg.norm(d01) > np.linalg.norm(d12) and np.linalg.norm(d01) > np.linalg.norm(d20):
                             # p2 corner
                             point4 = np.add(data[p1, :], d20)
@@ -192,11 +220,4 @@ def simplify_intersections(data: np.ndarray) -> np.ndarray:
 
         i += 1
 
-    ret = np.zeros((mask.sum(), data.shape[1]), dtype=np.float64)
-    ret_pos = 0
-    for i in range(data.shape[0]):
-        if mask[i]:
-            ret[ret_pos] = data[i]
-            ret_pos += 1
-
-    return ret
+    return data[np.where(mask > 0)]

@@ -10,8 +10,13 @@ class Frame:
     angle: float
     points: [(int, int), (int, int), (int, int), (int, int)]
 
-    def __init__(self, points: [(int, int), (int, int), (int, int), (int, int)], angle: float):
-        self.points = self._sort_points(points)
+    def __init__(self,
+                 points: [(int, int), (int, int), (int, int), (int, int)] = None,
+                 angle: float = 0):
+        if points is not None:
+            self.points = self._sort_points(points)
+        else:
+            self.points = [(0., 0.), (0., 0.), (0., 0.), (0., 0.)]
         self.angle = angle
 
     @staticmethod

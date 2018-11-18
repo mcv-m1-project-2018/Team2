@@ -4,7 +4,7 @@ import numpy as np
 
 
 class Picture:
-    image_cached: np.array
+    image_cached: np.ndarray
     name: str
     parent_dir: str
     id: int

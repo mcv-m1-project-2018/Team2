@@ -11,7 +11,7 @@ class HistogramTypes(Enum):
     RGB = 2
 
 
-def get_histogram(im: np.array, histogram_type=HistogramTypes.HSV) -> List[np.array]:
+def get_histogram(im: np.ndarray, histogram_type=HistogramTypes.HSV) -> List[np.array]:
     hist = []
     if histogram_type == HistogramTypes.HSV:
         im = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)

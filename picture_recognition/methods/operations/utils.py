@@ -8,7 +8,7 @@ from functional import seq
 plt.rcParams.update({'font.size': 16})
 
 
-def get_histogram(img: np.array, gt: GroundTruth, mask: np.array, HVS):
+def get_histogram(img: np.ndarray, gt: GroundTruth, mask: np.ndarray, HVS):
     #  plt.subplot(121)
     # plt.imshow(cv2.cvtColor(get_cropped(gt, img), cv2.COLOR_BGR2RGB))
     # plt.subplot(122)
@@ -54,7 +54,7 @@ def print_all_histograms(sign_type_stats):
         ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.07), shadow=True, ncol=3)
 
 
-def get_filling_ratio(rectangle: Rectangle, mask: np.array):
+def get_filling_ratio(rectangle: Rectangle, mask: np.ndarray):
     # compute the area of bboxes
     bbox_area = rectangle.get_area()
     whites = count_whites(rectangle, mask)
