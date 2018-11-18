@@ -2,7 +2,9 @@ import argparse
 import fnmatch
 import os
 import pickle
+import sys
 from typing import List
+from itertools import product
 
 import ml_metrics as metrics
 import pandas
@@ -11,6 +13,7 @@ from functional import seq
 from methods import AbstractMethod, w5, w5_no_frame, w5_no_frame_no_text
 from model import Data, Picture
 from model.rectangle import Rectangle
+from tqdm import tqdm
 
 
 def get_result(method: AbstractMethod, query: Picture):
@@ -21,17 +24,22 @@ def query(dataset_dir: str, query_dir: str, methods: List[AbstractMethod]):
     data = Data(dataset_dir)
     file_names = fnmatch.filter(os.listdir(query_dir), '*.jpg')
 
+    print('Training...')
     texts_recs = [method.train(data.pictures) for method in methods]
 
+    print('Querying...')
+
     query_pictures = seq(file_names).map(lambda query_name: Picture(query_dir, query_name)).to_list()
-    return (
-        seq(methods)
-            .map(lambda method:
-                 [(picture,) + get_result(method, picture) for picture in query_pictures]
-                 )
-            .to_list(),
-        texts_recs
-    )
+
+    results = []
+    for method in methods:
+        print('\tRunning method', method.__class__.__name__)
+        mres = []
+        for picture in tqdm(query_pictures, file=sys.stdout):
+            mres.append((picture,) + get_result(method, picture))
+        results.append(mres)
+
+    return results, texts_recs
 
 
 def main():
@@ -94,7 +102,7 @@ def show_results(query_path: str, method_names: List[str], matching_results, tex
         # Matching results
         matching = (
             seq(matching_results[pos])
-                .map(lambda r: r[1][0])
+                .map(lambda r: r[1])
                 .map(lambda r: seq(r).map(lambda s: s.id).to_list())
                 .map(replace_empty)
                 .to_list()
@@ -107,8 +115,10 @@ def show_results(query_path: str, method_names: List[str], matching_results, tex
                     .map(lambda pair: pair[0].ioi(pair[1]))
                     .average())
 
-        table.append((method_name, metrics.mapk(matching_solution, matching, k=10),
-                      metrics.mapk(matching_solution, matching, k=5), metrics.mapk(matching_solution, matching, k=1),
+        table.append((method_name,
+                      metrics.mapk(matching_solution, matching, k=10),
+                      metrics.mapk(matching_solution, matching, k=5),
+                      metrics.mapk(matching_solution, matching, k=1),
                       text_iou))
 
     data = pandas.DataFrame(table, columns=['Method', 'MAPK K=10', 'MAPK K=5', 'MAPK K=1', 'Text IoU'])

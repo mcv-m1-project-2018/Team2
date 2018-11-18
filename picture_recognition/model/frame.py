@@ -30,8 +30,19 @@ class Frame:
         points = [not_sorted[i] for i in sorted_idx]
         return points
 
-    def get_perspective_matrix(self, dst: np.array):
-        return cv2.getPerspectiveTransform(self.points, dst)
+    def get_perspective_matrix(self, dst: np.ndarray):
+        return cv2.getPerspectiveTransform(np.array(self.points, dtype=np.float32), dst.astype(np.float32))
+
+    def is_valid(self) -> bool:
+        return seq(self.points).flatten().filter(lambda x: x > 0).any()
 
     def to_result(self):
         return [self.angle, self.points]
+
+    def get_area(self) -> float:
+        area = 0.0
+        for i in range(len(self.points)):
+            j = (i + 1) % len(self.points)
+            area += self.points[i][0] * self.points[j][1]
+            area -= self.points[j][0] * self.points[i][1]
+        return abs(area) / 2.0

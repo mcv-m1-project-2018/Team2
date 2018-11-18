@@ -22,13 +22,13 @@ class Rectangle:
         self.height = height
 
     def get_bottom_right(self) -> (float, float):
-        return self.top_left[0] + self.height, self.top_left[1] + self.width
+        return self.top_left[0] + self.width, self.top_left[1] + self.height
 
     def get_bottom_left(self) -> (float, float):
-        return self.top_left[0] + self.height, self.top_left[1]
+        return self.top_left[0] + self.width, self.top_left[1]
 
     def get_top_right(self) -> (float, float):
-        return self.top_left[0], self.top_left[1] + self.width
+        return self.top_left[0], self.top_left[1] + self.height
 
     def contains_point(self, point: (float, float)) -> bool:
         return (self.top_left[0] <= point[0] <= self.get_bottom_right()[0] and
@@ -40,8 +40,8 @@ class Rectangle:
     def union(self, other: 'Rectangle') -> 'Rectangle':
         rec = Rectangle()
         rec.top_left = (min(self.top_left[0], other.top_left[0]), min(self.top_left[1], other.top_left[1]))
-        bottom_right = (min(self.get_bottom_right()[0], other.get_bottom_right()[0]),
-                        min(self.get_bottom_right()[1], other.get_bottom_right()[1]))
+        bottom_right = (max(self.get_bottom_right()[0], other.get_bottom_right()[0]),
+                        max(self.get_bottom_right()[1], other.get_bottom_right()[1]))
 
         rec.width = (bottom_right[1] - self.top_left[1]) + 1
         rec.height = (bottom_right[0] - self.top_left[0]) + 1
@@ -58,8 +58,6 @@ class Rectangle:
             rec.top_left = self.top_left
             rec.height = (self.top_left[0] - other.get_bottom_right()[0]) + 1
             rec.width = (self.top_left[1] - other.get_bottom_right()[1]) + 1
-        else:
-            return None
 
         return rec
 
