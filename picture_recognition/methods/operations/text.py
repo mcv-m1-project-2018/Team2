@@ -32,7 +32,7 @@ def detect_text(img: np.array) -> np.array:
     # ret, labels = cv2.connectedComponents(cnts)
 
     text = []
-    corner_left = gray.shape
+    corner_left = Y.shape
     corner_right = (0, 0)
     for c in cnts:
         (x, y, w, h) = cv2.boundingRect(c)
@@ -61,13 +61,18 @@ def detect_text(img: np.array) -> np.array:
 
     corner_left = (corner_left[0] - padding, corner_left[1] - padding)
     corner_right = (bounding.get_bottom_right()[0] + padding, bounding.get_bottom_right()[1] + padding)
-    mask = cv2.rectangle(mask, corner_left, corner_right, (0, 0, 0))
+    mask = cv2.rectangle(mask, corner_left, corner_right, (0, 0, 0),-1)
+    sub = np.subtract(corner_right, corner_left)
+    width = sub[0]
+    height = sub[1]
+    bounding = Rectangle(corner_left, width, height)
     # cv2.imshow('mask',mask)
 
     # plt.imshow(cv2.cvtColor(im, cv2.COLOR_BGR2RGB))
     # plt.show()
 
     return mask, bounding
+
 def detect_text_gray(img: np.array) -> np.array:
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
@@ -121,7 +126,12 @@ def detect_text_gray(img: np.array) -> np.array:
 
     corner_left = (corner_left[0] - padding, corner_left[1] - padding)
     corner_right = (bounding.get_bottom_right()[0] + padding, bounding.get_bottom_right()[1] + padding)
-    mask = cv2.rectangle(mask, corner_left, corner_right, (0, 0, 0))
+    mask = cv2.rectangle(mask, corner_left, corner_right, (0, 0, 0),-1)
+
+    sub = np.subtract(corner_right, corner_left)
+    width = sub[0]
+    height = sub[1]
+    bounding = Rectangle(corner_left, width, height)
     # cv2.imshow('mask',mask)
 
     # plt.imshow(cv2.cvtColor(im, cv2.COLOR_BGR2RGB))
