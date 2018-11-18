@@ -4,7 +4,6 @@ import numpy as np
 from model import Rectangle
 import matplotlib.pyplot as plt
 
-
 def detect_text(img: np.array) -> np.array:
     im = img.copy()
     im_yuv = cv2.cvtColor(im, cv2.COLOR_BGR2YUV)
@@ -18,15 +17,15 @@ def detect_text(img: np.array) -> np.array:
     gradient = cv2.morphologyEx(Ib, cv2.MORPH_GRADIENT, kernel)
 
     re, th1 = cv2.threshold(gradient, 127, 255, cv2.THRESH_BINARY)
-    th2 = cv2.adaptiveThreshold(gradient, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
-
+    th2 = cv2.adaptiveThreshold(gradient, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 11, 2)
+    #ret2, th2 = cv2.threshold(gradient, 100, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     th3 = cv2.bitwise_and(th1, th2)
 
     edges = cv2.dilate(th3, kernel)
 
     edges1 = cv2.erode(edges, kernel)
 
-    cnts = cv2.findContours(edges1, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cnts = cv2.findContours(edges1, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
     cnts = cnts[0] if imutils.is_cv2() else cnts[1]
     # ret, labels = cv2.connectedComponents(cnts)
@@ -37,7 +36,7 @@ def detect_text(img: np.array) -> np.array:
     for c in cnts:
         (x, y, w, h) = cv2.boundingRect(c)
 
-        if (5 <= w <= 150) and (5 <= h <= 150):
+        if (5 <= w <= 300) and (6 <= h <= 500):
 
             text.append(c)
             if cv2.norm((x, y)) < cv2.norm(corner_left):
